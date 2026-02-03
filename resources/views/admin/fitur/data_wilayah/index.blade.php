@@ -6,8 +6,8 @@
 <section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Data Wilayah</h2>
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
-        <div class="flex flex-col sm:flex-row items-stretch gap-3 w-full sm:w-auto">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
+        <div class="flex flex-col sm:flex-row items-stretch gap-4 mb-3 w-full sm:w-auto">
             <div class="relative w-full sm:w-56">
                 <x-dropdown
                     label="Urutkan Jumlah Posyandu"

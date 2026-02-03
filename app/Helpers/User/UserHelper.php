@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Helpers\User;
 
 use App\Helpers\Helper;
-use App\Models\UserModel;
+use App\Models\User\UserModel;
 use Illuminate\Support\Facades\Hash;
 use Throwable;
 
@@ -29,7 +30,7 @@ class UserHelper extends Helper
     {
         $user = $this->userModel->getById($id);
         if (!$user) {
-                return [
+            return [
                 'status' => false,
                 'data' => null
             ];
@@ -46,8 +47,48 @@ class UserHelper extends Helper
         try {
             $payload['password'] = Hash::make($payload['password']);
 
-            $user = $this->userModel->store($payload);
+            $user = $this->userModel->create([
+                'username' => $payload['username'],
+                'name' => $payload['name'],
+                'password' => $payload['password'],
+                'role' => $payload['role'],
+            ]);
 
+            if ($payload['role'] === 'admin') {
+                $user->adminDetail()->create([
+                    'nik' => $payload['nik'],
+                    'no_telepon' => $payload['no_telepon'],
+                    'jenis_kelamin' => $payload['jenis_kelamin'],
+                ]);
+                $user->load('adminDetail');
+            }
+
+            if ($payload['role'] === 'nakes') {
+                $user->nakesDetail()->create([
+                    'kelurahan_id' => $payload['kelurahan_id'],
+                    'nik' => $payload['nik'],
+                    'no_telepon' => $payload['no_telepon'],
+                    'jenis_kelamin' => $payload['jenis_kelamin'],
+                ]);
+                $user->load('nakesDetail');
+            }
+
+            if ($payload['role'] === 'kader') {
+                $user->kaderDetail()->create([
+                    'posyandu_id' => $payload['posyandu_id'],
+                    'no_telepon' => $payload['no_telepon'],
+                    'jenis_kelamin' => $payload['jenis_kelamin'],
+                    'status' => $payload['status'],
+                ]);
+                $user->load('kaderDetail');
+            }
+
+            $relations = [];
+            if ($payload['role'] === 'admin') $relations[] = 'adminDetail';
+            if ($payload['role'] === 'nakes') $relations[] = 'nakesDetail';
+            if ($payload['role'] === 'kader') $relations[] = 'kaderDetail';
+
+            $user->load($relations);
             return [
                 'status' => true,
                 'data' => $user
@@ -63,18 +104,65 @@ class UserHelper extends Helper
     public function update(array $payload, string $id): array
     {
         try {
-            if (isset($payload['password']) && !empty($payload['password'])) {
-                $payload['password'] = Hash::make($payload['password']) ?: '';
-            } else {
-                unset($payload['password']);
+            $dataUser = [
+                'username' => $payload['username'],
+                'name' => $payload['name'],
+                'role' => $payload['role'],
+            ];
+
+            if (!empty($payload['password'])) {
+                $dataUser['password'] = Hash::make($payload['password']);
             }
 
-            $this->userModel->edit($payload, $id);
+            $this->userModel->edit($dataUser, $id);
 
-            $user = $this->getById($id);
+            $user = $this->userModel->find($id);
+            
+            if ($payload['role'] === 'admin') {
+                $user->adminDetail()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'nik' => $payload['nik'],
+                        'no_telepon' => $payload['no_telepon'],
+                        'jenis_kelamin' => $payload['jenis_kelamin'],
+                    ]
+                );
+            }
+
+            if ($payload['role'] === 'nakes') {
+                $user->nakesDetail()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'kelurahan_id' => $payload['kelurahan_id'],
+                        'nik' => $payload['nik'],
+                        'no_telepon' => $payload['no_telepon'],
+                        'jenis_kelamin' => $payload['jenis_kelamin'],
+                    ]
+                );
+            }
+
+            if ($payload['role'] === 'kader') {
+                $user->kaderDetail()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'posyandu_id' => $payload['posyandu_id'],
+                        'no_telepon' => $payload['no_telepon'],
+                        'jenis_kelamin' => $payload['jenis_kelamin'],
+                        'status' => $payload['status'] ?? null,
+                    ]
+                );
+            }
+
+            $relations = [];
+            if ($payload['role'] === 'admin') $relations[] = 'adminDetail';
+            if ($payload['role'] === 'nakes') $relations[] = 'nakesDetail';
+            if ($payload['role'] === 'kader') $relations[] = 'kaderDetail';
+
+            $user->load($relations);
+
             return [
                 'status' => true,
-                'data' => $user['data']
+                'data' => $user
             ];
         } catch (Throwable $th) {
             return [
@@ -87,7 +175,15 @@ class UserHelper extends Helper
     public function delete(string $id): bool
     {
         try {
-            $this->userModel->drop($id);
+            $user = $this->userModel->find($id);
+            if (!$user) return false;
+
+            if ($user->role === 'admin') {
+                $user->adminDetail()->delete();
+            }
+
+            $user->delete();
+
             return true;
         } catch (\Throwable $th) {
             return false;

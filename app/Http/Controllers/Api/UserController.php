@@ -21,7 +21,7 @@ class UserController extends Controller
     {
         $filter = [
             'name' => $request->name ?? '',
-            'email' => $request->email ?? '',
+            'username' => $request->username ?? '',
         ];
 
         $users = $this->user->getAll($filter, $request->page ?? 1, $request->per_page ?? 25, $request->sort ?? '');
@@ -51,7 +51,19 @@ class UserController extends Controller
             return response()->failed($request->validator->errors());
         }
 
-        $payload = $request->only(['email', 'name', 'password', 'role']);
+        $payload = $request->only([
+            'username',
+            'name',
+            'password',
+            'role',
+            'nik',
+            'no_telepon',
+            'jenis_kelamin',
+            'kelurahan_id',
+            'posyandu_id',
+            'status'
+        ]);
+
         $user = $this->user->create($payload);
 
         if (!$user['status']) {
@@ -67,14 +79,30 @@ class UserController extends Controller
             return response()->failed($request->validator->errors());
         }
 
-        $payload = $request->only(['email', 'name', 'password', 'id', 'role']);
+        $payload = $request->only([
+            'id',
+            'username',
+            'name',
+            'password',
+            'role',
+            'nik',
+            'no_telepon',
+            'jenis_kelamin',
+            'kelurahan_id',
+            'posyandu_id',
+            'status'
+        ]);
+
         $user = $this->user->update($payload, $payload['id']);
 
         if (!$user['status']) {
             return response()->failed($user['error']);
         }
 
-        return response()->success(new UserResource($user['data']), 'User berhasil diubah');
+        return response()->success(
+            new UserResource($user['data']),
+            'User berhasil diubah'
+        );
     }
 
     public function destroy($id)

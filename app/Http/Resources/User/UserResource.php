@@ -11,9 +11,12 @@ class UserResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
+            'nama' => $this->name,
+            'username' => $this->username,
             'role' => $this->role,
+            'adminDetail' => new AdminResource($this->whenLoaded('adminDetail')),
+            'nakesDetail' => new NakesResource($this->whenLoaded('nakesDetail')),
+            'kaderDetail' => new KaderResource($this->whenLoaded('kaderDetail')),
         ];
     }
 }
