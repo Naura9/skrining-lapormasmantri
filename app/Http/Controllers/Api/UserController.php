@@ -7,6 +7,15 @@ use App\Http\Requests\UserRequest;
 use Illuminate\Http\Request;
 use App\Helpers\User\UserHelper;
 use App\Http\Resources\User\UserResource;
+use App\Models\KelurahanModel;
+use App\Models\PosyanduModel;
+use App\Models\User\UserKaderModel;
+use App\Models\User\UserModel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class UserController extends Controller
 {
@@ -20,8 +29,12 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $filter = [
-            'name' => $request->name ?? '',
-            'username' => $request->username ?? '',
+            'name'       => $request->input('name', ''),
+            'role'       => $request->input('role', ''),
+            'kelurahan'  => $request->input('kelurahan', ''),
+            'posyandu'   => $request->input('posyandu', ''),
+            'status'   => $request->input('status', ''),
+            'no_telepon' => $request->input('no_telepon', ''),
         ];
 
         $users = $this->user->getAll($filter, $request->page ?? 1, $request->per_page ?? 25, $request->sort ?? '');
@@ -114,5 +127,128 @@ class UserController extends Controller
         }
 
         return response()->success($user, 'User berhasil dihapus');
+    }
+
+    public function import(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'file_kader' => ['required', 'mimes:xlsx', 'max:2048']
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validasi gagal',
+                'errors' => ['File wajib berformat .xlsx dan maksimal 2MB']
+            ], 422);
+        }
+
+        $reader = IOFactory::createReader('Xlsx');
+        $reader->setReadDataOnly(true);
+        $spreadsheet = $reader->load($request->file('file_kader')->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+        $data = $sheet->toArray(null, false, true, true);
+
+        $insertUser  = [];
+        $insertKader = [];
+
+        $hasEmptyField        = false;
+        $hasDuplicateUsername = false;
+        $hasInvalidKelurahan  = false;
+        $hasInvalidPosyandu   = false;
+        $hasMismatchWilayah   = false;
+
+        foreach ($data as $row => $value) {
+            if ($row == 1) continue;
+
+            if (
+                empty($value['A']) ||
+                empty($value['B']) ||
+                empty($value['C']) ||
+                empty($value['D']) ||
+                empty($value['E'])
+            ) {
+                $hasEmptyField = true;
+                continue;
+            }
+
+            if (UserModel::where('username', $value['B'])->exists()) {
+                $hasDuplicateUsername = true;
+                continue;
+            }
+
+            $kelurahan = KelurahanModel::where('nama_kelurahan', $value['D'])->first();
+            if (!$kelurahan) {
+                $hasInvalidKelurahan = true;
+                continue;
+            }
+
+            $posyandu = PosyanduModel::where('nama_posyandu', $value['E'])->first();
+            if (!$posyandu) {
+                $hasInvalidPosyandu = true;
+                continue;
+            }
+
+            if ($posyandu->kelurahan_id !== $kelurahan->id) {
+                $hasMismatchWilayah = true;
+                continue;
+            }
+
+            $userId  = Str::uuid();
+            $kaderId = Str::uuid();
+
+            $insertUser[] = [
+                'id'         => $userId,
+                'name'       => $value['A'],
+                'username'   => $value['B'],
+                'password'   => Hash::make($value['C']),
+                'role'       => 'kader',
+                'created_at' => now()
+            ];
+
+            $insertKader[] = [
+                'id'          => $kaderId,
+                'user_id'     => $userId,
+                'posyandu_id' => $posyandu->id,
+                'status'      => 'aktif',
+                'created_at'  => now()
+            ];
+        }
+
+        $errors = [];
+
+        if ($hasEmptyField) {
+            $errors[] = 'Terdapat kolom yang kosong';
+        }
+        if ($hasDuplicateUsername) {
+            $errors[] = 'Username ada yang sudah terdaftar';
+        }
+        if ($hasInvalidKelurahan) {
+            $errors[] = 'Kelurahan tidak ditemukan';
+        }
+        if ($hasInvalidPosyandu) {
+            $errors[] = 'Posyandu tidak ditemukan';
+        }
+        if ($hasMismatchWilayah) {
+            $errors[] = 'Posyandu tidak sesuai dengan kelurahan';
+        }
+
+        if (!empty($errors)) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Import gagal',
+                'errors'  => $errors
+            ], 422);
+        }
+
+        DB::transaction(function () use ($insertUser, $insertKader) {
+            UserModel::insert($insertUser);
+            UserKaderModel::insert($insertKader);
+        });
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Data kader berhasil diimport'
+        ]);
     }
 }

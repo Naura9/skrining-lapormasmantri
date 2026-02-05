@@ -117,7 +117,7 @@ class UserHelper extends Helper
             $this->userModel->edit($dataUser, $id);
 
             $user = $this->userModel->find($id);
-            
+
             if ($payload['role'] === 'admin') {
                 $user->adminDetail()->updateOrCreate(
                     ['user_id' => $user->id],
@@ -178,8 +178,18 @@ class UserHelper extends Helper
             $user = $this->userModel->find($id);
             if (!$user) return false;
 
-            if ($user->role === 'admin') {
-                $user->adminDetail()->delete();
+            switch ($user->role) {
+                case 'admin':
+                    $user->adminDetail()?->delete();
+                    break;
+
+                case 'nakes':
+                    $user->nakesDetail()?->delete();
+                    break;
+
+                case 'kader':
+                    $user->kaderDetail()?->delete();
+                    break;
             }
 
             $user->delete();

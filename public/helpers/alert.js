@@ -40,7 +40,7 @@ function showErrorToast(title, text = "") {
         <div class="text-sm sm:text-base text-gray-600 text-center mt-2">${text}</div>
       </div>
     `,
-    duration: 1000,
+    duration: 2000,
     close: false,
     gravity: "top",
     position: "center",
