@@ -86,20 +86,6 @@ class UserModel extends Model implements CrudInterface
                     });
                 }
             }
-
-            if ($filter['role'] === 'nakes') {
-                if (!empty($filter['no_telepon'])) {
-                    $user->whereHas('nakesDetail', function ($q) use ($filter) {
-                        $q->where('no_telepon', 'LIKE', '%' . $filter['no_telepon'] . '%');
-                    });
-                }
-
-                if (!empty($filter['kelurahan'])) {
-                    $user->whereHas('nakesDetail', function ($q) use ($filter) {
-                        $q->where('nama_kelurahan', 'LIKE', '%' . $filter['kelurahan'] . '%');
-                    });
-                }
-            }
         }
 
         $total = $user->count();

@@ -32,6 +32,8 @@
         $isKelolaUserActive = request()->routeIs([
         'admin.kelola_user',
         'admin.kelola_user.data_admin',
+        'admin.kelola_user.data_kader',
+        'admin.kelola_user.data_nakes',
         ]);
         @endphp
 
@@ -62,8 +64,35 @@
                     <span>Admin</span>
                 </a>
             </li>
-        </ul>
+            <li>
+                <a href="{{ route('admin.fitur.kelola_user.data_kader') }}"
+                    class="flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.kelola_user.data_kader')
+                            ? 'bg-[#61359C]/80 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
+                    <i class="fa-solid fa-user-group text-lg
+                        {{ request()->routeIs('admin.fitur.kelola_user.data_kader') ? 'opacity-100' : 'opacity-50' }}">
+                    </i>
+
+                    <span>Kader</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.fitur.kelola_user.data_nakes') }}"
+                    class="flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.kelola_user.data_nakes')
+                            ? 'bg-[#61359C]/80 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                    <i class="fa-solid fa-user-doctor text-lg
+                        {{ request()->routeIs('admin.fitur.kelola_user.data_nakes') ? 'opacity-100' : 'opacity-50' }}">
+                    </i>
+
+                    <span class="ml-2">Tenaga Kesehatan</span>
+                </a>
+            </li>
+        </ul>
 
         <a href="{{ route('admin.fitur.data_wilayah') }}"
             class="flex items-center gap-2 px-2 py-2.5 rounded-lg transition

@@ -11,6 +11,7 @@ use App\Models\KelurahanModel;
 use App\Models\PosyanduModel;
 use App\Models\User\UserKaderModel;
 use App\Models\User\UserModel;
+use App\Models\User\UserNakesModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -129,7 +130,7 @@ class UserController extends Controller
         return response()->success($user, 'User berhasil dihapus');
     }
 
-    public function import(Request $request)
+    public function import_kader(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'file_kader' => ['required', 'mimes:xlsx', 'max:2048']
@@ -157,6 +158,31 @@ class UserController extends Controller
         $hasInvalidKelurahan  = false;
         $hasInvalidPosyandu   = false;
         $hasMismatchWilayah   = false;
+
+        $expectedHeader = [
+            'A' => 'Nama',
+            'B' => 'Username',
+            'C' => 'Password',
+            'D' => 'Nama Kelurahan',
+            'E' => 'Nama Posyandu',
+            'F' => 'No Telepon',
+            'G' => 'Jenis Kelamin',
+        ];
+
+        $headerRow = $data[1] ?? [];
+
+        foreach ($expectedHeader as $col => $expectedName) {
+            if (
+                !isset($headerRow[$col]) ||
+                strtolower(trim($headerRow[$col])) !== strtolower($expectedName)
+            ) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Import gagal',
+                    'errors'  => ['Format file tidak sesuai template']
+                ], 422);
+            }
+        }
 
         foreach ($data as $row => $value) {
             if ($row == 1) continue;
@@ -249,6 +275,155 @@ class UserController extends Controller
         return response()->json([
             'status'  => true,
             'message' => 'Data kader berhasil diimport'
+        ]);
+    }
+
+    public function import_nakes(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'file_nakes' => ['required', 'mimes:xlsx', 'max:2048']
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Validasi gagal',
+                'errors'  => ['File wajib berformat .xlsx dan maksimal 2MB']
+            ], 422);
+        }
+
+        $reader = IOFactory::createReader('Xlsx');
+        $reader->setReadDataOnly(true);
+        $spreadsheet = $reader->load($request->file('file_nakes')->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+        $data = $sheet->toArray(null, false, true, true);
+
+        $insertUser  = [];
+        $insertNakes = [];
+
+        $hasEmptyField        = false;
+        $hasDuplicateUsername = false;
+        $hasInvalidKelurahan  = false;
+
+        $expectedHeader = [
+            'A' => 'Nama',
+            'B' => 'Username',
+            'C' => 'Password',
+            'D' => 'NIK',
+            'E' => 'No Telepon',
+            'F' => 'Nama Kelurahan',
+            'G' => 'Jenis Kelamin',
+        ];
+
+        $headerRow = $data[1] ?? [];
+
+        foreach ($expectedHeader as $col => $expectedName) {
+            if (
+                !isset($headerRow[$col]) ||
+                strtolower(trim($headerRow[$col])) !== strtolower($expectedName)
+            ) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Import gagal',
+                    'errors'  => ['Format file tidak sesuai template']
+                ], 422);
+            }
+        }
+
+        foreach ($data as $row => $value) {
+            if ($row == 1) continue;
+
+            if (
+                empty($value['A']) ||
+                empty($value['B']) ||
+                empty($value['C']) ||
+                empty($value['D']) ||
+                empty($value['E']) ||
+                empty($value['F']) ||
+                empty($value['G'])
+            ) {
+                $hasEmptyField = true;
+                continue;
+            }
+
+            if (UserModel::where('username', $value['B'])->exists()) {
+                $hasDuplicateUsername = true;
+                continue;
+            }
+
+            $kelurahan = KelurahanModel::where('nama_kelurahan', $value['F'])->first();
+            if (!$kelurahan) {
+                $hasInvalidKelurahan = true;
+                continue;
+            }
+
+            $nik = preg_replace('/\D/', '', $value['D']);
+            if (strlen($nik) !== 16) {
+                $hasEmptyField = true;
+                continue;
+            }
+
+            $jk = strtoupper(trim($value['G']));
+            if (in_array($jk, ['LAKI-LAKI', 'LAKI', 'L'])) {
+                $jk = 'L';
+            } elseif (in_array($jk, ['PEREMPUAN', 'P'])) {
+                $jk = 'P';
+            } else {
+                $hasEmptyField = true;
+                continue;
+            }
+
+            $userId  = Str::uuid();
+            $nakesId = Str::uuid();
+
+            $insertUser[] = [
+                'id'         => $userId,
+                'name'       => trim($value['A']),
+                'username'   => trim($value['B']),
+                'password'   => Hash::make($value['C']),
+                'role'       => 'nakes',
+                'created_at' => now()
+            ];
+
+            $insertNakes[] = [
+                'id'            => $nakesId,
+                'user_id'       => $userId,
+                'nik'           => $nik,
+                'no_telepon'    => trim($value['E']),
+                'kelurahan_id'  => $kelurahan->id,
+                'jenis_kelamin' => $jk,
+                'created_at'    => now()
+            ];
+        }
+
+        $errors = [];
+
+        if ($hasEmptyField) {
+            $errors[] = 'Terdapat kolom yang kosong';
+        }
+        if ($hasDuplicateUsername) {
+            $errors[] = 'Username ada yang sudah terdaftar';
+        }
+        if ($hasInvalidKelurahan) {
+            $errors[] = 'Kelurahan tidak ditemukan';
+        }
+
+        if (!empty($errors)) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Import gagal',
+                'errors'  => $errors
+            ], 422);
+        }
+
+        DB::transaction(function () use ($insertUser, $insertNakes) {
+            UserModel::insert($insertUser);
+            UserNakesModel::insert($insertNakes);
+        });
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Data tenaga kesehatan berhasil diimport'
         ]);
     }
 }

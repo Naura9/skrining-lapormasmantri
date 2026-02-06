@@ -1,11 +1,11 @@
-<form action="{{ route('data-kader.import_kader') }}" method="POST" enctype="multipart/form-data" id="form-import">
+<form action="{{ route('data-nakes.import_nakes') }}" method="POST" enctype="multipart/form-data" id="form-import">
     @csrf
 
     <div class="mb-3">
         <label class="block text-sm font-medium mb-1">
             Download Template
         </label>
-        <a href="{{ asset('template_data_kader.xlsx') }}"
+        <a href="{{ asset('template_data_nakes.xlsx') }}"
             download
             class="inline-flex items-center gap-2 px-3 py-2 text-sm
                   bg-green-600 text-white rounded-lg
@@ -16,15 +16,15 @@
     </div>
 
     <div>
-        <label for="file_kader" class="block text-sm font-medium mb-1">
+        <label for="file_nakes" class="block text-sm font-medium mb-1">
             Pilih File
         </label>
         <input type="file"
-            name="file_kader"
-            id="file_kader"
+            name="file_nakes"
+            id="file_nakes"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
                       focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-        <p id="error-file_kader" class="text-sm text-red-500 mt-1"></p>
+        <p id="error-file_nakes" class="text-sm text-red-500 mt-1"></p>
     </div>
 
     <div class="flex justify-end gap-3 pt-4">
@@ -50,8 +50,8 @@
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            const fileInput = document.getElementById("file_kader");
-            const errorFile = document.getElementById("error-file_kader");
+            const fileInput = document.getElementById("file_nakes");
+            const errorFile = document.getElementById("error-file_nakes");
 
             errorFile.textContent = "";
 
@@ -82,12 +82,12 @@
                 if (data.status) {
                     showSuccessToast(data.message || "Import berhasil");
 
-                    document.getElementById("importKaderModal")
+                    document.getElementById("importNakesModal")
                         .classList.add("hidden");
 
-                    fetchKader();
+                    fetchNakes();
                 } else {
-                    document.getElementById("importKaderModal")
+                    document.getElementById("importNakesModal")
                         .classList.add("hidden");
 
                     let errorText = "";
