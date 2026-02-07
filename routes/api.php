@@ -3,7 +3,7 @@
 use App\Http\Controllers\Api\AnswerController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\KategoriController;
 use App\Http\Controllers\Api\FamilyController;
 use App\Http\Controllers\Api\FamilyMemberController;
 use App\Http\Controllers\Api\KelurahanController;
@@ -37,14 +37,12 @@ use Illuminate\Support\Facades\Route;
     Route::put('/users', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
+    Route::get('/kategori', [KategoriController::class, 'index']);
+    Route::get('/kategori/{id}', [KategoriController::class, 'show']);
+    Route::post('/kategori', [KategoriController::class, 'store']);
+    Route::put('/kategori', [KategoriController::class, 'update']);
+    Route::delete('/kategori/{id}', [KategoriController::class, 'destroy']);
 
-
-
-    Route::get('/categories', [CategoryController::class, 'index']);
-    Route::get('/categories/{id}', [CategoryController::class, 'show']);
-    Route::post('/categories', [CategoryController::class, 'store']);
-    Route::put('/categories', [CategoryController::class, 'update']);
-    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
 
     Route::get('/questions', [QuestionController::class, 'index']);
     Route::get('/questions/{id}', [QuestionController::class, 'show']);

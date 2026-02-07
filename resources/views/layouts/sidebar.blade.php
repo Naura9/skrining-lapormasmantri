@@ -17,13 +17,13 @@
 
     <nav class="flex-1 overflow-y-auto px-2 py-6 space-y-2">
         <a href="{{ route('dashboard') }}"
-            class="flex items-center gap-2 px-2 py-2.5 rounded-lg transition
+            class="group flex items-center gap-2 px-2 py-2.5 rounded-lg transition
             {{ request()->routeIs('dashboard') 
-                ? 'bg-[#61359C]/80 text-white font-semibold' 
+                ? 'bg-[#61359C]/65 text-white font-semibold' 
                 : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
 
             <i class="fa-solid fa-house text-lg 
-            {{ request()->routeIs('dashboard') ? 'opacity-100' : 'opacity-50' }}">
+            {{ request()->routeIs('dashboard') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
             </i>
             <span>Dashboard</span>
         </a>
@@ -38,12 +38,12 @@
         @endphp
 
         <a href="#" id="kelolaUserMenuToggle"
-            class="flex items-center justify-between gap-1.5 px-2 py-2.5 rounded-lg transition font-semibold
-                {{ $isKelolaUserActive ? 'bg-[#61359C]/80 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+            class="group flex items-center justify-between gap-1.5 px-2 py-2.5 rounded-lg transition font-semibold
+                {{ $isKelolaUserActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
             <div class="flex items-center gap-1.5">
                 <i class="fa-solid fa-users-gear text-lg
-                    {{ $isKelolaUserActive ? 'opacity-100' : 'opacity-50' }}">
+                    {{ $isKelolaUserActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                 </i>
                 <span>Kelola User</span>
             </div>
@@ -52,13 +52,13 @@
         <ul id="kelolaUserSubMenu" class="pl-5 mt-1 space-y-1 {{ $isKelolaUserActive ? 'block' : 'hidden' }}">
             <li>
                 <a href="{{ route('admin.fitur.kelola_user.data_admin') }}"
-                    class="flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.kelola_user.data_admin')
-                            ? 'bg-[#61359C]/80 text-white'
+                            ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
                     <i class="fa-solid fa-user-shield text-lg
-                        {{ request()->routeIs('admin.fitur.kelola_user.data_admin') ? 'opacity-100' : 'opacity-50' }}">
+                        {{ request()->routeIs('admin.fitur.kelola_user.data_admin') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
                     <span>Admin</span>
@@ -66,13 +66,13 @@
             </li>
             <li>
                 <a href="{{ route('admin.fitur.kelola_user.data_kader') }}"
-                    class="flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.kelola_user.data_kader')
-                            ? 'bg-[#61359C]/80 text-white'
+                            ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
                     <i class="fa-solid fa-user-group text-lg
-                        {{ request()->routeIs('admin.fitur.kelola_user.data_kader') ? 'opacity-100' : 'opacity-50' }}">
+                        {{ request()->routeIs('admin.fitur.kelola_user.data_kader') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
                     <span>Kader</span>
@@ -80,28 +80,64 @@
             </li>
             <li>
                 <a href="{{ route('admin.fitur.kelola_user.data_nakes') }}"
-                    class="flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.kelola_user.data_nakes')
-                            ? 'bg-[#61359C]/80 text-white'
+                            ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
                     <i class="fa-solid fa-user-doctor text-lg
-                        {{ request()->routeIs('admin.fitur.kelola_user.data_nakes') ? 'opacity-100' : 'opacity-50' }}">
+                        {{ request()->routeIs('admin.fitur.kelola_user.data_nakes') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
                     <span class="ml-2">Tenaga Kesehatan</span>
                 </a>
             </li>
         </ul>
+        
+        @php
+        $isSkriningActive = request()->routeIs([
+        'admin.skrining',
+        'admin.skrining.kategori',
+        ]);
+        @endphp
+
+        <a href="#" id="skriningMenuToggle"
+            class="group flex items-center justify-between gap-1.5 px-2 py-2.5 rounded-lg transition font-semibold
+                {{ $isSkriningActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+            <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-file-pen text-lg transition
+                    {{ $isSkriningActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                </i>
+                <span class="ml-0.5">Skrining</span>
+            </div>
+        </a>
+
+        <ul id="skriningSubMenu" class="pl-5 mt-1 space-y-1 {{ $isSkriningActive ? 'block' : 'hidden' }}">
+            <li>
+                <a href="{{ route('admin.fitur.skrining.kategori') }}"
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.skrining.kategori')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                    <i class="fa-solid fa-tags text-lg
+                        {{ request()->routeIs('admin.fitur.skrining.kategori') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+
+                    <span>Kategori</span>
+                </a>
+            </li>
+        </ul>
 
         <a href="{{ route('admin.fitur.data_wilayah') }}"
-            class="flex items-center gap-2 px-2 py-2.5 rounded-lg transition
+            class="group flex items-center gap-2 px-2 py-2.5 rounded-lg transition
             {{ request()->routeIs('admin.fitur.data_wilayah') 
-                ? 'bg-[#61359C]/80 text-white font-semibold' 
+                ? 'bg-[#61359C]/65 text-white font-semibold' 
                 : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
 
             <i class="fa-solid fa-map-location-dot text-lg
-            {{ request()->routeIs('admin.fitur.data_wilayah') ? 'opacity-100' : 'opacity-50' }}">
+            {{ request()->routeIs('admin.fitur.data_wilayah') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
             </i>
             <span>Data Wilayah</span>
         </a>
@@ -123,5 +159,13 @@
     kelolaUserMenuToggle.addEventListener('click', (e) => {
         e.preventDefault();
         kelolaUserSubMenu.classList.toggle('hidden');
+    });
+
+    const skriningMenuToggle = document.getElementById('skriningMenuToggle');
+    const skriningSubMenu = document.getElementById('skriningSubMenu');
+
+    skriningMenuToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        skriningSubMenu.classList.toggle('hidden');
     });
 </script>

@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class CategoryModel extends Model implements CrudInterface
+class KategoriModel extends Model implements CrudInterface
 {
     use HasFactory;
     use Uuid;
     use SoftDeletes;
 
-    protected $table = "m_category";
+    protected $table = "m_kategori";
     protected $fillable = [
-        'category_name',
+        'nama_kategori',
+        'target_skrining'
     ];
 
     public $timestamp = true;
@@ -26,7 +27,7 @@ class CategoryModel extends Model implements CrudInterface
         $skip = ($page * $itemPerPage) - $itemPerPage;
         $user = $this->query();
 
-        if (!empty($filter['category_name'])) {
+        if (!empty($filter['nama_kategori'])) {
             $user->where('name', 'LIKE', '%' . $filter['name'] . '%');
         }
 
