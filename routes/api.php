@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\FamilyMemberController;
 use App\Http\Controllers\Api\KelurahanController;
 use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\ScreeningController;
+use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +43,12 @@ use Illuminate\Support\Facades\Route;
     Route::post('/kategori', [KategoriController::class, 'store']);
     Route::put('/kategori', [KategoriController::class, 'update']);
     Route::delete('/kategori/{id}', [KategoriController::class, 'destroy']);
+
+    Route::get('/section', [SectionController::class, 'index']);
+    Route::get('/section/{id}', [SectionController::class, 'show']);
+    Route::post('/section', [SectionController::class, 'store']);
+    Route::put('/section', [SectionController::class, 'update']);
+    Route::delete('/section/{id}', [SectionController::class, 'destroy']);
 
 
     Route::get('/questions', [QuestionController::class, 'index']);
