@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\Skrining\KategoriHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\KategoriRequest;
+use App\Http\Resources\Skrining\KategoriResource;
 use Illuminate\Http\Request;
-use App\Helpers\Kategori\KategoriHelper;
-use App\Http\Resources\Kategori\KategoriResource;
 
 class KategoriController extends Controller
 {

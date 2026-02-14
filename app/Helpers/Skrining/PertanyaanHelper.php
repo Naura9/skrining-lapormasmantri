@@ -1,33 +1,33 @@
 <?php
-namespace App\Helpers\Kategori;
+namespace App\Helpers\Skrining;
 
 use App\Helpers\Helper;
-use App\Models\KategoriModel;
+use App\Models\PertanyaanModel;
 use Throwable;
 
-class KategoriHelper extends Helper
+class PertanyaanHelper extends Helper
 {
-    private $kategoriModel;
+    private $pertanyaanModel;
 
     public function __construct()
     {
-        $this->kategoriModel = new KategoriModel();
+        $this->pertanyaanModel = new PertanyaanModel();
     }
 
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
-        $kategoris = $this->kategoriModel->getAll($filter, $page, $itemPerPage, $sort);
+        $pertanyaans = $this->pertanyaanModel->getAll($filter, $page, $itemPerPage, $sort);
 
         return [
             'status' => true,
-            'data' => $kategoris
+            'data' => $pertanyaans
         ];
     }
 
     public function getById(string $id): array
     {
-        $kategori = $this->kategoriModel->getById($id);
-        if (!$kategori) {
+        $pertanyaan = $this->pertanyaanModel->getById($id);
+        if (!$pertanyaan) {
             return [
                 'status' => false,
                 'data' => null
@@ -36,18 +36,18 @@ class KategoriHelper extends Helper
 
         return [
             'status' => true,
-            'data' => $kategori
+            'data' => $pertanyaan
         ];
     }
 
     public function create(array $payload): array
     {
         try {
-            $kategori = $this->kategoriModel->store($payload);
+            $pertanyaan = $this->pertanyaanModel->store($payload);
 
             return [
                 'status' => true,
-                'data' => $kategori
+                'data' => $pertanyaan
             ];
         } catch (Throwable $th) {
             return [
@@ -60,12 +60,12 @@ class KategoriHelper extends Helper
     public function update(array $payload, string $id): array
     {
         try {
-            $this->kategoriModel->edit($payload, $id);
+            $this->pertanyaanModel->edit($payload, $id);
 
-            $kategori = $this->getById($id);
+            $pertanyaan = $this->getById($id);
             return [
                 'status' => true,
-                'data' => $kategori['data']
+                'data' => $pertanyaan['data']
             ];
         } catch (Throwable $th) {
             return [
@@ -78,7 +78,7 @@ class KategoriHelper extends Helper
     public function delete(string $id): bool
     {
         try {
-            $this->kategoriModel->drop($id);
+            $this->pertanyaanModel->drop($id);
             return true;
         } catch (\Throwable $th) {
             return false;

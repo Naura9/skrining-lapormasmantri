@@ -93,11 +93,12 @@
                 </a>
             </li>
         </ul>
-        
+
         @php
         $isSkriningActive = request()->routeIs([
         'admin.skrining',
         'admin.skrining.kategori',
+        'admin.skrining.pertanyaan_kk',
         ]);
         @endphp
 
@@ -126,6 +127,20 @@
                     </i>
 
                     <span>Kategori</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.fitur.skrining.pertanyaan_kk') }}"
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.skrining.pertanyaan_kk')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                    <i class="fa-solid fa-people-group text-lg
+                        {{ request()->routeIs('admin.fitur.skrining.pertanyaan_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+
+                    <span>Pertanyaan KK</span>
                 </a>
             </li>
         </ul>

@@ -1,33 +1,33 @@
 <?php
-namespace App\Helpers\Section;
+namespace App\Helpers\Skrining;
 
 use App\Helpers\Helper;
-use App\Models\SectionModel;
+use App\Models\KategoriModel;
 use Throwable;
 
-class SectionHelper extends Helper
+class KategoriHelper extends Helper
 {
-    private $sectionModel;
+    private $kategoriModel;
 
     public function __construct()
     {
-        $this->sectionModel = new SectionModel();
+        $this->kategoriModel = new KategoriModel();
     }
 
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
-        $sections = $this->sectionModel->getAll($filter, $page, $itemPerPage, $sort);
+        $kategoris = $this->kategoriModel->getAll($filter, $page, $itemPerPage, $sort);
 
         return [
             'status' => true,
-            'data' => $sections
+            'data' => $kategoris
         ];
     }
 
     public function getById(string $id): array
     {
-        $section = $this->sectionModel->getById($id);
-        if (!$section) {
+        $kategori = $this->kategoriModel->getById($id);
+        if (!$kategori) {
             return [
                 'status' => false,
                 'data' => null
@@ -36,18 +36,18 @@ class SectionHelper extends Helper
 
         return [
             'status' => true,
-            'data' => $section
+            'data' => $kategori
         ];
     }
 
     public function create(array $payload): array
     {
         try {
-            $section = $this->sectionModel->store($payload);
+            $kategori = $this->kategoriModel->store($payload);
 
             return [
                 'status' => true,
-                'data' => $section
+                'data' => $kategori
             ];
         } catch (Throwable $th) {
             return [
@@ -60,12 +60,12 @@ class SectionHelper extends Helper
     public function update(array $payload, string $id): array
     {
         try {
-            $this->sectionModel->edit($payload, $id);
+            $this->kategoriModel->edit($payload, $id);
 
-            $section = $this->getById($id);
+            $kategori = $this->getById($id);
             return [
                 'status' => true,
-                'data' => $section['data']
+                'data' => $kategori['data']
             ];
         } catch (Throwable $th) {
             return [
@@ -78,7 +78,7 @@ class SectionHelper extends Helper
     public function delete(string $id): bool
     {
         try {
-            $this->sectionModel->drop($id);
+            $this->kategoriModel->drop($id);
             return true;
         } catch (\Throwable $th) {
             return false;

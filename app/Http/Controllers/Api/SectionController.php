@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\Skrining\SectionHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SectionRequest;
+use App\Http\Resources\Skrining\SectionResource;
 use Illuminate\Http\Request;
-use App\Helpers\Section\SectionHelper;
-use App\Http\Resources\Section\SectionResource;
 
 class SectionController extends Controller
 {

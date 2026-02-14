@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Kategori;
+namespace App\Http\Resources\Skrining;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
