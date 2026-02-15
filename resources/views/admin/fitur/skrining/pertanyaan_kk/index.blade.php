@@ -6,27 +6,24 @@
 <section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Pertanyaan Skrining KK</h2>
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
-        <div class="flex flex-col sm:flex-row items-stretch gap-4 mb-3 w-full sm:w-auto">
-            <button
-                id="btnTambahPertanyaanKk"
-                class="flex items-center gap-2 bg-[#61359C] text-white text-sm px-4 py-2 rounded-lg
-                   hover:bg-[#61359C]/80 transition w-full sm:w-auto justify-center">
-                <i class="fa-solid fa-plus"></i>
-                Tambah
-            </button>
-        </div>
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-3">
+        <button
+            id="btnTambahPertanyaanKk"
+            class="flex items-center gap-2 bg-[#61359C] text-white text-sm px-4 py-2 rounded-lg
+               hover:bg-[#61359C]/80 transition w-full sm:w-auto justify-center">
+            <i class="fa-solid fa-plus"></i>
+            Tambah
+        </button>
 
-        <div class="flex justify-end w-full sm:w-auto">
-            <button
-                id=""
-                class="flex items-center gap-2 bg-yellow-500 text-white text-sm px-4 py-2 rounded-lg
-                   hover:bg-yellow-600 transition w-full sm:w-auto justify-center">
-                Edit
-            </button>
-        </div>
-
+        <button
+            id="btnToggleEditMode"
+            class="flex items-center gap-2 bg-yellow-500 text-white text-sm px-4 py-2 rounded-lg
+               hover:bg-yellow-600 transition w-full sm:w-auto justify-center">
+            <i class="fa-solid fa-pen"></i>
+            <span>Edit</span>
+        </button>
     </div>
+
 
     <div class="overflow-x-auto">
         <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700">
@@ -34,6 +31,10 @@
                 <tr>
                     <th class="px-3 py-2 border border-[#00000033] w-[5%]">No</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[95%]">Pertanyaan</th>
+                    <th id="aksiHeader"
+                        class="px-3 py-2 border border-[#00000033] w-[15%] hidden">
+                        Aksi
+                    </th>
                 </tr>
             </thead>
             <tbody id="pertanyaanKkTableBody"></tbody>
@@ -60,6 +61,7 @@
     </x-slot>
 </x-modal>
 
+
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const tbody = document.getElementById("pertanyaanKkTableBody");
@@ -67,6 +69,10 @@
         const pertanyaanKkModalRef = document.getElementById("pertanyaanKkModalRef");
         const pertanyaanKkModalTitle = document.getElementById("pertanyaanKkModalTitle");
         const formEdit = document.getElementById("formEdit");
+
+        let editMode = false;
+        const btnToggleEditMode = document.getElementById("btnToggleEditMode");
+        const aksiHeader = document.getElementById("aksiHeader");
 
         async function fetchPertanyaanKk() {
             try {
@@ -121,34 +127,95 @@
 
                 if (currentSection !== item.judul_section) {
                     currentSection = item.judul_section;
-
                     no = 1;
 
                     const sectionRow = document.createElement("tr");
+
                     sectionRow.innerHTML = `
-                        <td colspan="2"
-                            class="border border-[#00000033] px-3 py-2 bg-gray-100 font-bold">
+                        <td class="bg-gray-100 border border-[#00000033] border-r-0"></td>
+                        <td class="px-3 py-3 bg-gray-100 font-bold 
+                                border border-[#00000033] border-l-0">
                             ${currentSection}
                         </td>
+
+                        ${editMode ? `
+                        <td class="border border-[#00000033] px-3 py-3 bg-gray-100 text-center">
+                            <div class="flex items-center justify-center gap-4">
+                                <div class="flex flex-col">
+                                    <button class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded-full transition">
+                                        <i class="fa-solid fa-circle-arrow-up text-xl text-gray-600"></i>
+                                    </button>
+
+                                    <button class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded-full transition">
+                                        <i class="fa-solid fa-circle-arrow-down text-xl text-gray-600"></i>
+                                    </button>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <button class="px-3 py-1 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 transition">
+                                        Edit
+                                    </button>
+
+                                    <button class="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition">
+                                        Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                        ` : ''}
                     `;
                     tbody.appendChild(sectionRow);
                 }
 
                 const tr1 = document.createElement("tr");
+
                 tr1.innerHTML = `
                     <td rowspan="2"
                         class="border border-[#00000033] text-center align-middle px-3 py-3 font-semibold">
                         ${no++}
                     </td>
+
                     <td class="border border-[#00000033] px-3 py-3 font-semibold">
                         ${item.pertanyaan}
                     </td>
+
+                    ${editMode ? `
+                        <td rowspan="2" class="border border-[#00000033] text-center align-middle px-3 py-3">
+                            <div class="flex items-center justify-center gap-4">
+                                <div class="flex flex-col gap-2">
+                                    <button 
+                                        class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition">
+                                        <i class="fa-solid fa-circle-arrow-up text-xl text-gray-600"></i>
+                                    </button>
+
+                                    <button 
+                                        class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition">
+                                        <i class="fa-solid fa-circle-arrow-down text-xl text-gray-600"></i>
+                                    </button>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <button 
+                                        class="px-3 py-1 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 transition"
+                                        onclick="openPertanyafetchPertanyaanKkModal('edit','${item.id}')">
+                                        Edit            
+                                    </button>
+                                    <button 
+                                        class="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-btn"
+                                        data-id="${item.id}">
+                                        Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                        ` : ''}
                 `;
+
                 tbody.appendChild(tr1);
 
                 let opsiHtml = '';
 
-                switch (item.jenis_pertanyaan) {
+                switch (item.jenis_jawaban) {
 
                     case 'radio':
                         opsiHtml = item.opsi_jawaban?.length ?
@@ -197,7 +264,7 @@
                         opsiHtml = `
                             <div class="flex items-center gap-2 text-gray-500">
                                 <i class="fa-solid fa-align-left"></i>
-                                Paragraf
+                                Jawaban Panjang
                             </div>
                         `;
                         break;
@@ -215,7 +282,6 @@
                         opsiHtml = '-';
                 }
 
-
                 const tr2 = document.createElement("tr");
                 tr2.innerHTML = `
                     <td class="border border-[#00000033] px-3 py-2 text-sm text-gray-600">
@@ -226,14 +292,13 @@
                 tbody.appendChild(tr2);
             });
 
-
             document.querySelectorAll(".delete-btn").forEach(btn => {
                 btn.addEventListener("click", async () => {
                     const id = btn.dataset.id;
 
                     showDeleteConfirmToast("Apakah Anda yakin ingin menghapus data ini?", async () => {
                         try {
-                            const data = await fetch(`{{ url('api/pertanyaanKk') }}/${id}`, {
+                            const data = await fetch(`{{ url('api/pertanyaan') }}/${id}`, {
                                 method: "DELETE",
                                 headers: {
                                     "X-CSRF-TOKEN": "{{ csrf_token() }}"
@@ -255,7 +320,7 @@
         formEdit.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            ['nama_pertanyaanKk', 'target_skrining'].forEach(name => {
+            ['pertanyaan', 'jenis_jawaban', 'opsi_jawaban'].forEach(name => {
                 const el = document.getElementById("error-" + name);
                 if (el) {
                     el.textContent = "";
@@ -272,7 +337,7 @@
             }
 
             try {
-                let url = "{{ url('api/pertanyaanKk') }}";
+                let url = "{{ url('api/pertanyaan') }}";
                 let method = "POST";
 
                 if (mode === "edit" && id) {
@@ -316,7 +381,7 @@
             if (mode === "edit" && id) {
                 pertanyaanKkModalTitle.textContent = "Edit Pertanyaan Skrining KK";
                 try {
-                    const data = await fetch(`{{ url('api/pertanyaanKk') }}/${id}`);
+                    const data = await fetch(`{{ url('api/pertanyaan') }}/${id}`);
                     const json = await data.json();
 
                     const item = json.data;
@@ -334,6 +399,32 @@
                 formEdit.setAttribute('data-mode', 'add');
             }
         };
+
+        btnToggleEditMode.addEventListener("click", () => {
+            editMode = !editMode;
+
+            if (editMode) {
+                btnToggleEditMode.innerHTML = `
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Simpan</span>
+                `;
+                btnToggleEditMode.classList.remove("bg-yellow-500");
+                btnToggleEditMode.classList.add("bg-green-600");
+
+                aksiHeader.classList.remove("hidden");
+            } else {
+                btnToggleEditMode.innerHTML = `
+                    <i class="fa-solid fa-pen"></i>
+                    <span>Edit</span>
+                `;
+                btnToggleEditMode.classList.remove("bg-green-600");
+                btnToggleEditMode.classList.add("bg-yellow-500");
+
+                aksiHeader.classList.add("hidden");
+            }
+
+            fetchPertanyaanKk(); // rerender
+        });
 
         window.openPertanyafetchPertanyaanKkModal = openPertanyafetchPertanyaanKkModal;
 

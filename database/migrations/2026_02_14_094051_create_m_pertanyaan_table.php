@@ -15,7 +15,7 @@ return new class extends Migration
             $table->integer('no_urut');
             $table->text('pertanyaan');
 
-            $table->string('jenis_pertanyaan', 50);
+            $table->string('jenis_jawaban', 50);
 
             $table->json('opsi_jawaban')->nullable();
 

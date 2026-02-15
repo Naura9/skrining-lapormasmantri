@@ -1,8 +1,10 @@
 <?php
+
 namespace App\Helpers\Skrining;
 
 use App\Helpers\Helper;
 use App\Models\PertanyaanModel;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class PertanyaanHelper extends Helper
@@ -42,14 +44,26 @@ class PertanyaanHelper extends Helper
 
     public function create(array $payload): array
     {
+        DB::beginTransaction();
         try {
-            $pertanyaan = $this->pertanyaanModel->store($payload);
+            $lastNoUrut = $this->pertanyaanModel
+                ->where('section_id', $payload['section_id'])
+                ->max('no_urut');
+
+            $payload['no_urut'] = $lastNoUrut ? $lastNoUrut + 1 : 1;
+
+            $pertanyaan = $this->pertanyaanModel->create($payload);
+
+            DB::commit();
 
             return [
                 'status' => true,
                 'data' => $pertanyaan
             ];
         } catch (Throwable $th) {
+
+            DB::rollBack();
+
             return [
                 'status' => false,
                 'error' => $th->getMessage()

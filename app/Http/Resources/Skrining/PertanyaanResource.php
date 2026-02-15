@@ -17,7 +17,7 @@ class PertanyaanResource extends JsonResource
             'judul_section'    => $this->section->judul_section,
             'no_urut'          => $this->no_urut,
             'pertanyaan'       => $this->pertanyaan,
-            'jenis_pertanyaan' => $this->jenis_pertanyaan,
+            'jenis_jawaban'    => $this->jenis_jawaban,
             'opsi_jawaban'     => $this->opsi_jawaban,
         ];
     }

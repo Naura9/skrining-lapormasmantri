@@ -20,7 +20,7 @@ class PertanyaanModel extends Model implements CrudInterface
         'section_id',
         'no_urut',
         'pertanyaan',
-        'jenis_pertanyaan',
+        'jenis_jawaban',
         'opsi_jawaban'
     ];
 

@@ -22,11 +22,17 @@ class SectionModel extends Model implements CrudInterface
     ];
 
     public $timestamp = true;
-    
+
     public function kategori()
     {
-        return $this->belongsTo(KategoriModel::class, 'kategori_id', 'id' );
+        return $this->belongsTo(KategoriModel::class, 'kategori_id', 'id');
     }
+
+    public function pertanyaan()
+    {
+        return $this->hasMany(PertanyaanModel::class, 'section_id', 'id');
+    }
+
 
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
@@ -38,7 +44,7 @@ class SectionModel extends Model implements CrudInterface
         }
 
         $total = $user->count();
-        $sort = $sort ?: 'created_at ASC';
+        $sort = $sort ?: 'judul_section ASC';
         $list = $user->skip($skip)->take($itemPerPage)->orderByRaw($sort)->get();
 
         return [

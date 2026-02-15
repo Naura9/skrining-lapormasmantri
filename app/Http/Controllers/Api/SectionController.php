@@ -74,12 +74,12 @@ class SectionController extends Controller
 
     public function destroy($id)
     {
-        $section = $this->section->delete($id);
+        $result = $this->section->delete($id);
 
-        if (!$section) {
-            return response()->failed(['Mohon maaf section tidak ditemukan']);
+        if (!$result['status']) {
+            return response()->failed([$result['message']]);
         }
 
-        return response()->success($section, 'Section berhasil dihapus');
+        return response()->success(null, 'Section berhasil dihapus');
     }
 }

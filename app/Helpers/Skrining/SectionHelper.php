@@ -1,8 +1,12 @@
 <?php
+
 namespace App\Helpers\Skrining;
 
 use App\Helpers\Helper;
+use App\Models\KategoriModel;
+use App\Models\PertanyaanModel;
 use App\Models\SectionModel;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class SectionHelper extends Helper
@@ -42,14 +46,29 @@ class SectionHelper extends Helper
 
     public function create(array $payload): array
     {
+        DB::beginTransaction();
+
         try {
+            $kategori = KategoriModel::findOrFail($payload['kategori_id']);
+
+            $lastNoUrut = SectionModel::whereHas('kategori', function ($q) use ($kategori) {
+                $q->where('target_skrining', $kategori->target_skrining);
+            })->max('no_urut');
+
+            $payload['no_urut'] = $lastNoUrut ? $lastNoUrut + 1 : 1;
+
             $section = $this->sectionModel->store($payload);
+
+            DB::commit();
 
             return [
                 'status' => true,
                 'data' => $section
             ];
         } catch (Throwable $th) {
+
+            DB::rollBack();
+
             return [
                 'status' => false,
                 'error' => $th->getMessage()
@@ -75,13 +94,36 @@ class SectionHelper extends Helper
         }
     }
 
-    public function delete(string $id): bool
+    public function delete(string $id): array
     {
         try {
-            $this->sectionModel->drop($id);
-            return true;
+            $section = $this->sectionModel->getById($id);
+            
+            if (!$section) {
+                return [
+                    'status' => false,
+                    'message' => 'Section tidak ditemukan'
+                ];
+            }
+
+            if ($section->pertanyaan()->exists()) {
+                return [
+                    'status' => false,
+                    'message' => 'Section tidak bisa dihapus karena sudah digunakan'
+                ];
+            }
+
+            $section->delete();
+
+            return [
+                'status' => true
+            ];
         } catch (\Throwable $th) {
-            return false;
+
+            return [
+                'status' => false,
+                'message' => $th->getMessage()
+            ];
         }
     }
 }

@@ -33,7 +33,7 @@ class SectionRequest extends FormRequest
         return [
             'kategori_id'   => 'required|uuid|exists:m_kategori,id',
             'judul_section' => 'required|string|max:150',
-            'no_urut'       => 'required|integer|min:1',
+            'no_urut'       => 'nullable|integer|min:1',
         ];
     }
 
@@ -42,7 +42,7 @@ class SectionRequest extends FormRequest
         return [
             'kategori_id'   => 'required|uuid|exists:m_kategori,id',
             'judul_section' => 'required|string|max:150',
-            'no_urut'       => 'required|integer|min:1',
+            'no_urut'       => 'nullable|integer|min:1',
         ];
     }
 
@@ -57,7 +57,6 @@ class SectionRequest extends FormRequest
             'judul_section.string'   => 'Judul section harus berupa teks.',
             'judul_section.max'      => 'Judul section maksimal 150 karakter.',
 
-            'no_urut.required' => 'Nomor urut wajib diisi.',
             'no_urut.integer'  => 'Nomor urut harus berupa angka.',
             'no_urut.min'      => 'Nomor urut minimal bernilai 1.',
         ];
