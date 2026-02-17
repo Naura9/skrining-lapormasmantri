@@ -6,7 +6,10 @@ use App\Helpers\Skrining\PertanyaanHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PertanyaanRequest;
 use App\Http\Resources\Skrining\PertanyaanResource;
+use App\Models\PertanyaanModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class PertanyaanController extends Controller
 {
@@ -81,5 +84,61 @@ class PertanyaanController extends Controller
         }
 
         return response()->success($pertanyaan, 'Pertanyaan berhasil dihapus');
+    }
+
+    public function move(Request $request, string $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $request->validate([
+                'direction' => 'required|in:up,down'
+            ]);
+
+            $direction = $request->input('direction');
+
+            $current = PertanyaanModel::findOrFail($id);
+
+            if ($direction === 'up') {
+
+                $swap = PertanyaanModel::where('section_id', $current->section_id)
+                    ->where('no_urut', '<', $current->no_urut)
+                    ->orderBy('no_urut', 'desc')
+                    ->first();
+            } else {
+
+                $swap = PertanyaanModel::where('section_id', $current->section_id)
+                    ->where('no_urut', '>', $current->no_urut)
+                    ->orderBy('no_urut', 'asc')
+                    ->first();
+            }
+
+            if (!$swap) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Sudah di posisi paling atas / bawah'
+                ]);
+            }
+
+            $temp = $current->no_urut;
+
+            $current->update(['no_urut' => $swap->no_urut]);
+            $swap->update(['no_urut' => $temp]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Urutan berhasil diperbarui'
+            ]);
+        } catch (Throwable $th) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'error' => $th->getMessage()
+            ], 500);
+        }
     }
 }

@@ -1,4 +1,4 @@
-<form id="formEdit" class="space-y-4">
+<form id="formEditPertanyaan" class="space-y-4">
     <div class="text-left">
         <label for="section_id" class="block text-sm font-semibold mb-1">
             Section
@@ -284,7 +284,6 @@
                 }
             };
 
-
             wrapper.appendChild(selectBtn);
             wrapper.appendChild(deleteBtn);
 
@@ -347,9 +346,7 @@
     };
 
     window.setFormData = async (item) => {
-
         if (item) {
-
             document.getElementById('pertanyaan').value = item.pertanyaan ?? '';
             document.getElementById('section_id').value = item.section_id ?? '';
 
@@ -364,7 +361,41 @@
                 enableFormFields();
             }
 
+            const jenisMap = {
+                radio: "Radio",
+                checkbox: "Checkbox",
+                select: "Dropdown",
+                text: "Jawaban Pendek",
+                textarea: "Jawaban Panjang",
+                date: "Date"
+            };
+
+            const jenisLabel = jenisMap[item.jenis_jawaban];
+
+            if (jenisLabel) {
+                setDropdownLabel('jenisDropdown', jenisLabel, 'Pilih Jenis Pertanyaan');
+                document.getElementById('jenis_jawaban').value = item.jenis_jawaban;
+            }
+
+            opsiTableBody.innerHTML = "";
+
+            if (["radio", "checkbox", "select"].includes(item.jenis_jawaban)) {
+
+                opsiContainer.classList.remove("hidden");
+
+                if (item.opsi_jawaban && item.opsi_jawaban.length) {
+                    item.opsi_jawaban.forEach(opt => {
+                        addOpsiRow(opt);
+                    });
+                } else {
+                    addOpsiRow();
+                }
+
+            } else {
+                opsiContainer.classList.add("hidden");
+            }
         } else {
+            formEditPertanyaan.reset();
 
             formModel.id = "";
             formModel.section_id = "";
@@ -372,7 +403,6 @@
             formModel.jenis_jawaban = "";
             formModel.opsi_jawaban = "";
 
-            formEdit.reset();
 
             disableFormFields();
 

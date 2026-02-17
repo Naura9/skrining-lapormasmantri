@@ -109,7 +109,7 @@ class SectionHelper extends Helper
             if ($section->pertanyaan()->exists()) {
                 return [
                     'status' => false,
-                    'message' => 'Section tidak bisa dihapus karena sudah digunakan'
+                    'message' => 'Section ini masih digunakan dan tidak dapat dihapus.'
                 ];
             }
 

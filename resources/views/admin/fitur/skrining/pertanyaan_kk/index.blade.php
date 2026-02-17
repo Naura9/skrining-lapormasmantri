@@ -8,7 +8,7 @@
 
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-3">
         <button
-            id="btnTambahPertanyaanKk"
+            id="btnTambahPertanyaan"
             class="flex items-center gap-2 bg-[#61359C] text-white text-sm px-4 py-2 rounded-lg
                hover:bg-[#61359C]/80 transition w-full sm:w-auto justify-center">
             <i class="fa-solid fa-plus"></i>
@@ -24,7 +24,6 @@
         </button>
     </div>
 
-
     <div class="overflow-x-auto">
         <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700">
             <thead class="bg-[#61359C] text-white text-center">
@@ -37,24 +36,43 @@
                     </th>
                 </tr>
             </thead>
-            <tbody id="pertanyaanKkTableBody"></tbody>
+            <tbody id="pertanyaanTableBody"></tbody>
         </table>
     </div>
 </section>
 
-<x-modal id="pertanyaanKkModalRef" size="md">
+<x-modal id="pertanyaanModalRef" size="md">
     <x-slot name="title">
-        <h3 id="pertanyaanKkModalTitle" class="text-lg font-bold">Tambah Pertanyaan Skrining KK</h3>
+        <h3 id="pertanyaanModalTitle" class="text-lg font-bold">Tambah Pertanyaan Skrining KK</h3>
     </x-slot>
 
     @include('admin.fitur.skrining.pertanyaan_kk.form')
 
     <x-slot name="footer">
-        <button type="button" id="pertanyaanKkCancelBtn"
+        <button type="button" id="pertanyaanCancelBtn"
             class="w-full px-6 py-2 rounded-lg bg-gray-400 text-white font-medium shadow hover:opacity-90 transition">
             Batal
         </button>
-        <button type="submit" id="pertanyaanKkSaveBtn" form="formEdit"
+        <button type="submit" id="pertanyaanSaveBtn" form="formEditPertanyaan"
+            class="w-full px-6 py-2 rounded-lg bg-[#0B6CF4] text-white font-medium shadow hover:opacity-90 transition">
+            Simpan
+        </button>
+    </x-slot>
+</x-modal>
+
+<x-modal id="sectionModalRef" size="md">
+    <x-slot name="title">
+        <h3 id="sectionModalTitle" class="text-lg font-bold">Tambah Section</h3>
+    </x-slot>
+
+    @include('admin.fitur.skrining.pertanyaan_kk.form_section')
+
+    <x-slot name="footer">
+        <button type="button" id="sectionCancelBtn"
+            class="w-full px-6 py-2 rounded-lg bg-gray-400 text-white font-medium shadow hover:opacity-90 transition">
+            Batal
+        </button>
+        <button type="submit" id="sectionSaveBtn" form="formEditSection"
             class="w-full px-6 py-2 rounded-lg bg-[#0B6CF4] text-white font-medium shadow hover:opacity-90 transition">
             Simpan
         </button>
@@ -64,17 +82,22 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const tbody = document.getElementById("pertanyaanKkTableBody");
+        const tbody = document.getElementById("pertanyaanTableBody");
 
-        const pertanyaanKkModalRef = document.getElementById("pertanyaanKkModalRef");
-        const pertanyaanKkModalTitle = document.getElementById("pertanyaanKkModalTitle");
-        const formEdit = document.getElementById("formEdit");
+        const pertanyaanModalRef = document.getElementById("pertanyaanModalRef");
+        const pertanyaanModalTitle = document.getElementById("pertanyaanModalTitle");
+        const formEditPertanyaan = document.getElementById("formEditPertanyaan");
+
+        const sectionModalRef = document.getElementById("sectionModalRef");
+        const sectionModalTitle = document.getElementById("sectionModalTitle");
+        const formEditSection = document.getElementById("formEditSection");
 
         let editMode = false;
         const btnToggleEditMode = document.getElementById("btnToggleEditMode");
         const aksiHeader = document.getElementById("aksiHeader");
+        const btnTambahPertanyaan = document.getElementById("btnTambahPertanyaan");
 
-        async function fetchPertanyaanKk() {
+        async function fetchPertanyaan() {
             try {
                 const response = await fetch(`{{ url('api/pertanyaan') }}`, {
                     headers: {
@@ -102,6 +125,184 @@
             }
         }
 
+        async function moveSection(id, direction) {
+            const allRows = [...tbody.querySelectorAll("tr")];
+
+            const currentIndex = allRows.findIndex(r =>
+                r.classList.contains("section-row") &&
+                r.dataset.sectionId === id
+            );
+
+            if (currentIndex === -1) return;
+
+            let group = [allRows[currentIndex]];
+
+            let i = currentIndex + 1;
+            while (i < allRows.length && allRows[i].dataset.parentSection === id) {
+                group.push(allRows[i]);
+                i++;
+            }
+
+            const sectionRows = allRows.filter(r => r.classList.contains("section-row"));
+            const sectionIndex = sectionRows.findIndex(r => r.dataset.sectionId === id);
+
+            const targetIndex = direction === "up" ?
+                sectionIndex - 1 :
+                sectionIndex + 1;
+
+            if (targetIndex < 0 || targetIndex >= sectionRows.length) return;
+
+            const targetSectionId = sectionRows[targetIndex].dataset.sectionId;
+
+            const targetSectionRow = allRows.find(r =>
+                r.classList.contains("section-row") &&
+                r.dataset.sectionId === targetSectionId
+            );
+
+            group.forEach(row => {
+                row.classList.add(direction === "up" ? "move-up" : "move-down");
+            });
+
+            if (direction === "up") {
+                group.forEach(row => {
+                    tbody.insertBefore(row, targetSectionRow);
+                });
+            } else {
+                let targetGroupEnd = targetSectionRow;
+                let j = allRows.indexOf(targetSectionRow) + 1;
+
+                while (j < allRows.length && allRows[j].dataset.parentSection === targetSectionId) {
+                    targetGroupEnd = allRows[j];
+                    j++;
+                }
+
+                const fragment = document.createDocumentFragment();
+
+                group.forEach(row => {
+                    fragment.appendChild(row);
+                });
+
+                tbody.insertBefore(fragment, targetGroupEnd.nextSibling);
+            }
+
+            setTimeout(() => {
+                group.forEach(row => {
+                    row.classList.remove("move-up", "move-down");
+                });
+            }, 300);
+
+            try {
+                const res = await fetch(`/api/section/${id}/move`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        direction
+                    })
+                });
+
+                const json = await res.json();
+
+                if (!res.ok || !json.status) {
+                    showErrorToast(json.message || "Tidak bisa dipindahkan");
+                    await fetchPertanyaan();
+                    return;
+                }
+
+                await fetchPertanyaan();
+
+            } catch (error) {
+                showErrorToast("Terjadi kesalahan server");
+                fetchPertanyaan();
+            }
+        }
+        window.moveSection = moveSection;
+
+        async function movePertanyaan(id, sectionId, direction) {
+            const rows = [...tbody.querySelectorAll("tr")]
+                .filter(r => r.dataset.parentSection === sectionId);
+
+            const currentMainRow = rows.find(r => r.dataset.pertanyaanId === id);
+            if (!currentMainRow) return;
+
+            const currentIndex = rows.indexOf(currentMainRow);
+
+            const currentGroup = [
+                currentMainRow,
+                rows[currentIndex + 1]
+            ];
+
+            let targetMainRow;
+
+            if (direction === "up") {
+                if (currentIndex < 2) return;
+
+                targetMainRow = rows[currentIndex - 2];
+
+                const fragment = document.createDocumentFragment();
+                currentGroup.forEach(r => fragment.appendChild(r));
+
+                tbody.insertBefore(fragment, targetMainRow);
+
+            } else {
+
+                if (currentIndex + 2 >= rows.length) return;
+
+                targetMainRow = rows[currentIndex + 2];
+
+                const targetGroupEnd = rows[currentIndex + 3];
+
+                const fragment = document.createDocumentFragment();
+                currentGroup.forEach(r => fragment.appendChild(r));
+
+                if (targetGroupEnd) {
+                    tbody.insertBefore(fragment, targetGroupEnd.nextSibling);
+                } else {
+                    tbody.appendChild(fragment);
+                }
+            }
+
+            currentGroup.forEach(row => {
+                row.classList.add(direction === "up" ? "move-up" : "move-down");
+            });
+
+            setTimeout(() => {
+                currentGroup.forEach(row => {
+                    row.classList.remove("move-up", "move-down");
+                });
+            }, 300);
+
+            try {
+                const res = await fetch(`/api/pertanyaan/${id}/move`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        direction
+                    })
+                });
+
+                const json = await res.json();
+
+                if (!res.ok || !json.status) {
+                    showErrorToast(json.message || "Tidak bisa dipindahkan");
+                    await fetchPertanyaan();
+                    return;
+                }
+
+                await fetchPertanyaan();
+
+            } catch (error) {
+                showErrorToast("Terjadi kesalahan server");
+                fetchPertanyaan();
+            }
+        }
+        window.movePertanyaan = movePertanyaan;
+
         function renderTable(list) {
             tbody.innerHTML = "";
 
@@ -120,76 +321,47 @@
                 return;
             }
 
-            let currentSection = null;
-            let no = 0;
-
-            filtered.forEach((item) => {
-
-                if (currentSection !== item.judul_section) {
-                    currentSection = item.judul_section;
-                    no = 1;
-
-                    const sectionRow = document.createElement("tr");
-
-                    sectionRow.innerHTML = `
-                        <td class="bg-gray-100 border border-[#00000033] border-r-0"></td>
-                        <td class="px-3 py-3 bg-gray-100 font-bold 
-                                border border-[#00000033] border-l-0">
-                            ${currentSection}
-                        </td>
-
-                        ${editMode ? `
-                        <td class="border border-[#00000033] px-3 py-3 bg-gray-100 text-center">
-                            <div class="flex items-center justify-center gap-4">
-                                <div class="flex flex-col">
-                                    <button class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded-full transition">
-                                        <i class="fa-solid fa-circle-arrow-up text-xl text-gray-600"></i>
-                                    </button>
-
-                                    <button class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded-full transition">
-                                        <i class="fa-solid fa-circle-arrow-down text-xl text-gray-600"></i>
-                                    </button>
-                                </div>
-
-                                <div class="flex items-center gap-2">
-                                    <button class="px-3 py-1 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 transition">
-                                        Edit
-                                    </button>
-
-                                    <button class="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition">
-                                        Hapus
-                                    </button>
-                                </div>
-                            </div>
-                        </td>
-                        ` : ''}
-                    `;
-                    tbody.appendChild(sectionRow);
+            const grouped = filtered.reduce((acc, item) => {
+                if (!acc[item.section_id]) {
+                    acc[item.section_id] = {
+                        judul_section: item.judul_section,
+                        items: []
+                    };
                 }
+                acc[item.section_id].items.push(item);
+                return acc;
+            }, {});
 
-                const tr1 = document.createElement("tr");
+            const sectionEntries = Object.entries(grouped);
 
-                tr1.innerHTML = `
-                    <td rowspan="2"
-                        class="border border-[#00000033] text-center align-middle px-3 py-3 font-semibold">
-                        ${no++}
-                    </td>
+            sectionEntries.forEach(([sectionId, section], index) => {
 
-                    <td class="border border-[#00000033] px-3 py-3 font-semibold">
-                        ${item.pertanyaan}
+                const sectionRow = document.createElement("tr");
+                sectionRow.classList.add("section-row");
+                sectionRow.dataset.sectionId = sectionId;
+
+                sectionRow.innerHTML = `
+                    <td class="bg-gray-100 border border-[#00000033] border-r-0"></td>
+                    <td class="px-3 py-3 bg-gray-100 font-bold 
+                        border border-[#00000033] border-l-0">
+                        ${section.judul_section}
                     </td>
 
                     ${editMode ? `
-                        <td rowspan="2" class="border border-[#00000033] text-center align-middle px-3 py-3">
+                        <td class="border border-[#00000033] text-center align-middle px-3 py-3">
                             <div class="flex items-center justify-center gap-4">
                                 <div class="flex flex-col gap-2">
                                     <button 
-                                        class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition">
+                                        class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition 
+                                        ${index === 0 ? 'opacity-40 cursor-not-allowed' : ''}"
+                                        ${index === 0 ? '' : `onclick="moveSection('${sectionId}','up')"`}>
                                         <i class="fa-solid fa-circle-arrow-up text-xl text-gray-600"></i>
                                     </button>
 
                                     <button 
-                                        class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition">
+                                        class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition 
+                                        ${index === sectionEntries.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}"
+                                        ${index === sectionEntries.length - 1 ? '' : `onclick="moveSection('${sectionId}','down')"`}>
                                         <i class="fa-solid fa-circle-arrow-down text-xl text-gray-600"></i>
                                     </button>
                                 </div>
@@ -197,127 +369,227 @@
                                 <div class="flex items-center gap-2">
                                     <button 
                                         class="px-3 py-1 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 transition"
-                                        onclick="openPertanyafetchPertanyaanKkModal('edit','${item.id}')">
+                                        onclick="openSectionModal('edit','${sectionId}')">
                                         Edit            
                                     </button>
+
                                     <button 
-                                        class="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-btn"
-                                        data-id="${item.id}">
+                                        class="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-section-btn"
+                                        data-id="${sectionId}">
                                         Hapus
                                     </button>
                                 </div>
+
                             </div>
                         </td>
-                        ` : ''}
+                    ` : ''}
                 `;
 
-                tbody.appendChild(tr1);
+                tbody.appendChild(sectionRow);
 
-                let opsiHtml = '';
+                let no = 1;
 
-                switch (item.jenis_jawaban) {
+                section.items
+                    .sort((a, b) => a.no_urut - b.no_urut)
+                    .forEach((item, index, arr) => {
 
-                    case 'radio':
-                        opsiHtml = item.opsi_jawaban?.length ?
-                            item.opsi_jawaban.map(opt =>
-                                `<div class="flex items-center gap-2">
-                                    <i class="fa-regular fa-circle-dot text-gray-500"></i>
-                                    <span>${opt}</span>
-                                </div>`
-                            ).join('') :
-                            '-';
-                        break;
+                        const isFirst = index === 0;
+                        const isLast = index === arr.length - 1;
 
-                    case 'checkbox':
-                        opsiHtml = item.opsi_jawaban?.length ?
-                            item.opsi_jawaban.map(opt =>
-                                `<div class="flex items-center gap-2">
-                                    <i class="fa-regular fa-square-check text-gray-500"></i>
-                                    <span>${opt}</span>
-                                </div>`
-                            ).join('') :
-                            '-';
-                        break;
+                        const tr1 = document.createElement("tr");
+                        tr1.dataset.parentSection = sectionId;
+                        tr1.dataset.pertanyaanId = item.id;
 
-                    case 'select':
-                        opsiHtml = `
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-caret-down text-gray-500"></i>
-                                <span>Dropdown:</span>
-                            </div>
-                            <div class="ml-6">
-                                ${item.opsi_jawaban?.join(', ') ?? '-'}
-                            </div>
+                        tr1.innerHTML = `
+                            <td rowspan="2"
+                                class="border border-[#00000033] text-center align-middle px-3 py-3 font-semibold">
+                                ${no++}
+                            </td>
+
+                            <td class="border border-[#00000033] px-3 py-3 font-semibold">
+                                ${item.pertanyaan}
+                            </td>
+
+                            ${editMode ? `
+                                <td rowspan="2" class="border border-[#00000033] text-center align-middle px-3 py-3">
+                                    <div class="flex items-center justify-center gap-4">
+
+                                        <div class="flex flex-col gap-2">
+                                            <button
+                                                ${isFirst ? "disabled" : ""}
+                                                class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition
+                                                    ${isFirst ? 'opacity-40 cursor-not-allowed hover:bg-transparent' : ''}"
+                                                onclick="movePertanyaan('${item.id}','${sectionId}','up')">
+                                                <i class="fa-solid fa-circle-arrow-up text-xl text-gray-600"></i>
+                                            </button>
+
+                                            <button
+                                                ${isLast ? "disabled" : ""}
+                                                class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition
+                                                    ${isLast ? 'opacity-40 cursor-not-allowed hover:bg-transparent' : ''}"
+                                                onclick="movePertanyaan('${item.id}','${sectionId}','down')">
+                                                <i class="fa-solid fa-circle-arrow-down text-xl text-gray-600"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="flex items-center gap-2">
+                                            <button 
+                                                class="px-3 py-1 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 transition"
+                                                onclick="openPertanyaanModal('edit','${item.id}')">
+                                                Edit            
+                                            </button>
+
+                                            <button 
+                                                class="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-pertanyaan-btn"
+                                                data-id="${item.id}">
+                                                Hapus
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                </td>
+                            ` : ''}
                         `;
-                        break;
 
-                    case 'text':
-                        opsiHtml = `
-                            <div class="flex items-center gap-2 text-gray-500">
-                                <i class="fa-solid fa-i-cursor"></i>
-                                Jawaban pendek
-                            </div>
+                        tbody.appendChild(tr1);
+
+                        const tr2 = document.createElement("tr");
+                        tr2.dataset.parentSection = sectionId;
+                        tr2.innerHTML = `
+                            <td class="border border-[#00000033] px-3 py-2 text-sm text-gray-600">
+                                ${renderOpsi(item)}
+                            </td>
                         `;
-                        break;
 
-                    case 'textarea':
-                        opsiHtml = `
-                            <div class="flex items-center gap-2 text-gray-500">
-                                <i class="fa-solid fa-align-left"></i>
-                                Jawaban Panjang
-                            </div>
-                        `;
-                        break;
+                        tbody.appendChild(tr2);
+                    });
 
-                    case 'date':
-                        opsiHtml = `
-                            <div class="flex items-center gap-2 text-gray-500">
-                                <i class="fa-solid fa-calendar"></i>
-                                Date
-                            </div>
-                        `;
-                        break;
+                document.querySelectorAll(".delete-section-btn").forEach(btn => {
+                    btn.addEventListener("click", async (e) => {
+                        e.stopPropagation();
 
-                    default:
-                        opsiHtml = '-';
-                }
+                        const id = btn.dataset.id;
 
-                const tr2 = document.createElement("tr");
-                tr2.innerHTML = `
-                    <td class="border border-[#00000033] px-3 py-2 text-sm text-gray-600">
-                        ${opsiHtml}
-                    </td>
-                `;
-
-                tbody.appendChild(tr2);
-            });
-
-            document.querySelectorAll(".delete-btn").forEach(btn => {
-                btn.addEventListener("click", async () => {
-                    const id = btn.dataset.id;
-
-                    showDeleteConfirmToast("Apakah Anda yakin ingin menghapus data ini?", async () => {
                         try {
-                            const data = await fetch(`{{ url('api/pertanyaan') }}/${id}`, {
+                            const res = await fetch(`{{ url('api/section') }}/${id}`, {
                                 method: "DELETE",
                                 headers: {
                                     "X-CSRF-TOKEN": "{{ csrf_token() }}"
                                 }
                             });
-                            if (!data) return;
 
-                            showSuccessToast("Data berhasil dihapus!");
-                            await fetchPertanyaanKk();
+                            const json = await res.json();
+
+                            if (!res.ok || !json.status) {
+                                showErrorToast(
+                                    "Gagal Menghapus",
+                                    json.errors ? json.errors[0] : json.message || "Terjadi kesalahan"
+                                );
+                                return;
+                            }
+
+                            showSuccessToast("Section berhasil dihapus!");
+                            await fetchPertanyaan();
+
                         } catch (error) {
-                            console.error("Gagal menghapus data:", error);
+                            console.error("Gagal menghapus section:", error);
                             showErrorToast("Terjadi kesalahan pada server!");
                         }
                     });
                 });
+
+                document.querySelectorAll(".delete-pertanyaan-btn").forEach(btn => {
+                    btn.addEventListener("click", async () => {
+                        const id = btn.dataset.id;
+
+                        showDeleteConfirmToast("Apakah Anda yakin ingin menghapus pertanyaan ini?", async () => {
+                            try {
+                                const data = await fetch(`{{ url('api/pertanyaan') }}/${id}`, {
+                                    method: "DELETE",
+                                    headers: {
+                                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                                    }
+                                });
+                                if (!data) return;
+
+                                showSuccessToast("Data berhasil dihapus!");
+                                await fetchPertanyaan();
+                            } catch (error) {
+                                console.error("Gagal menghapus data:", error);
+                                showErrorToast("Terjadi kesalahan pada server!");
+                            }
+                        });
+                    });
+                });
             });
+
+            function renderOpsi(item) {
+                switch (item.jenis_jawaban) {
+
+                    case 'radio':
+                        return item.opsi_jawaban?.length ?
+                            item.opsi_jawaban.map(opt => `
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-regular fa-circle-dot text-gray-500"></i>
+                                        <span>${opt}</span>
+                                    </div>
+                                `).join('') :
+                            '-';
+
+                    case 'checkbox':
+                        return item.opsi_jawaban?.length ?
+                            item.opsi_jawaban.map(opt => `
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-regular fa-square-check text-gray-500"></i>
+                                        <span>${opt}</span>
+                                    </div>
+                                `).join('') :
+                            '-';
+
+                    case 'select':
+                        return `
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-caret-down text-gray-500"></i>
+                                <span>Dropdown:</span>
+                            </div>
+                            <div class="ml-6">
+                                ${item.opsi_jawaban?.length 
+                                    ? item.opsi_jawaban.join(', ') 
+                                    : '-'}
+                            </div>
+                        `;
+
+                    case 'text':
+                        return `
+                            <div class="flex items-center gap-2 text-gray-500">
+                                <i class="fa-solid fa-i-cursor"></i>
+                                Jawaban pendek
+                            </div>
+                        `;
+
+                    case 'textarea':
+                        return `
+                            <div class="flex items-center gap-2 text-gray-500">
+                                <i class="fa-solid fa-align-left"></i>
+                                Jawaban Panjang
+                            </div>
+                        `;
+
+                    case 'date':
+                        return `
+                            <div class="flex items-center gap-2 text-gray-500">
+                                <i class="fa-solid fa-calendar"></i>
+                                Date
+                            </div>
+                        `;
+
+                    default:
+                        return '-';
+                }
+            }
         }
 
-        formEdit.addEventListener("submit", async (e) => {
+        formEditPertanyaan.addEventListener("submit", async (e) => {
             e.preventDefault();
 
             ['pertanyaan', 'jenis_jawaban', 'opsi_jawaban'].forEach(name => {
@@ -328,9 +600,9 @@
                 }
             });
 
-            const mode = formEdit.getAttribute("data-mode");
-            const id = formEdit.getAttribute("data-id");
-            const formData = new FormData(formEdit);
+            const mode = formEditPertanyaan.getAttribute("data-mode");
+            const id = formEditPertanyaan.getAttribute("data-id");
+            const formData = new FormData(formEditPertanyaan);
 
             if (mode === "edit" && id) {
                 formData.append("id", id);
@@ -352,9 +624,9 @@
 
                 if (!data.errors) {
                     showSuccessToast("Data berhasil disimpan!");
-                    pertanyaanKkModalRef.classList.add("hidden");
-                    pertanyaanKkModalRef.classList.remove("flex");
-                    fetchPertanyaanKk();
+                    pertanyaanModalRef.classList.add("hidden");
+                    pertanyaanModalRef.classList.remove("flex");
+                    fetchPertanyaan();
                 } else {
                     if (data.errors) {
                         Object.keys(data.errors).forEach(key => {
@@ -374,12 +646,12 @@
             }
         });
 
-        const openPertanyafetchPertanyaanKkModal = async (mode, id = null) => {
-            pertanyaanKkModalRef.classList.remove("hidden");
-            pertanyaanKkModalRef.classList.add("flex");
+        const openPertanyaanModal = async (mode, id = null) => {
+            pertanyaanModalRef.classList.remove("hidden");
+            pertanyaanModalRef.classList.add("flex");
 
             if (mode === "edit" && id) {
-                pertanyaanKkModalTitle.textContent = "Edit Pertanyaan Skrining KK";
+                pertanyaanModalTitle.textContent = "Edit Pertanyaan Skrining KK";
                 try {
                     const data = await fetch(`{{ url('api/pertanyaan') }}/${id}`);
                     const json = await data.json();
@@ -387,59 +659,192 @@
                     const item = json.data;
                     setFormData(item);
 
-                    formEdit.setAttribute('data-mode', 'edit');
-                    formEdit.setAttribute('data-id', id);
+                    formEditPertanyaan.setAttribute('data-mode', 'edit');
+                    formEditPertanyaan.setAttribute('data-id', id);
                 } catch (err) {
-                    console.error("Gagal mengambil data pertanyaanKk:", err);
+                    console.error("Gagal mengambil data pertanyaan:", err);
                 }
             } else {
-                pertanyaanKkModalTitle.textContent = "Tambah Pertanyaan Skrining KK";
+                pertanyaanModalTitle.textContent = "Tambah Pertanyaan Skrining KK";
                 setFormData(null);
-                formEdit.removeAttribute('data-id');
-                formEdit.setAttribute('data-mode', 'add');
+                formEditPertanyaan.removeAttribute('data-id');
+                formEditPertanyaan.setAttribute('data-mode', 'add');
             }
         };
 
         btnToggleEditMode.addEventListener("click", () => {
+            const wasEditMode = editMode; 
             editMode = !editMode;
 
             if (editMode) {
+
+                btnTambahPertanyaan.classList.add("invisible");
+
                 btnToggleEditMode.innerHTML = `
                     <i class="fa-solid fa-floppy-disk"></i>
                     <span>Simpan</span>
                 `;
-                btnToggleEditMode.classList.remove("bg-yellow-500");
-                btnToggleEditMode.classList.add("bg-green-600");
+
+                btnToggleEditMode.classList.remove(
+                    "bg-yellow-500",
+                    "hover:bg-yellow-600"
+                );
+
+                btnToggleEditMode.classList.add(
+                    "bg-blue-600",
+                    "hover:bg-blue-700"
+                );
 
                 aksiHeader.classList.remove("hidden");
+
             } else {
+
+                showSuccessToast("Perubahan berhasil disimpan!");
+
+                btnTambahPertanyaan.classList.remove("invisible");
+
                 btnToggleEditMode.innerHTML = `
                     <i class="fa-solid fa-pen"></i>
                     <span>Edit</span>
                 `;
-                btnToggleEditMode.classList.remove("bg-green-600");
-                btnToggleEditMode.classList.add("bg-yellow-500");
+
+                btnToggleEditMode.classList.remove(
+                    "bg-blue-600",
+                    "hover:bg-blue-700"
+                );
+
+                btnToggleEditMode.classList.add(
+                    "bg-yellow-500",
+                    "hover:bg-yellow-600"
+                );
 
                 aksiHeader.classList.add("hidden");
             }
 
-            fetchPertanyaanKk(); // rerender
+            fetchPertanyaan();
         });
 
-        window.openPertanyafetchPertanyaanKkModal = openPertanyafetchPertanyaanKkModal;
+
+
+        window.openPertanyaanModal = openPertanyaanModal;
 
         document.querySelectorAll('button').forEach(btn => {
             if (btn.textContent.includes("Tambah")) {
-                btn.addEventListener("click", () => openPertanyafetchPertanyaanKkModal("add"));
+                btn.addEventListener("click", () => openPertanyaanModal("add"));
             }
         });
 
-        document.getElementById("pertanyaanKkCancelBtn").addEventListener("click", () => {
-            pertanyaanKkModalRef.classList.add("hidden");
-            pertanyaanKkModalRef.classList.remove("flex");
+        document.getElementById("pertanyaanCancelBtn").addEventListener("click", () => {
+            pertanyaanModalRef.classList.add("hidden");
+            pertanyaanModalRef.classList.remove("flex");
         });
 
-        fetchPertanyaanKk();
+        formEditSection.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const mode = formEditSection.getAttribute("data-mode");
+            const id = formEditSection.getAttribute("data-id");
+
+            const formData = new FormData(formEditSection);
+
+            if (mode === "edit" && id) {
+                formData.append("id", id);
+            }
+
+            try {
+                let url = "{{ url('api/section') }}";
+                let method = "POST";
+
+                if (mode === "edit" && id) {
+                    formData.append("_method", "PUT");
+                }
+
+                const res = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (!data.errors) {
+                    showSuccessToast("Section berhasil diperbarui!");
+                    sectionModalRef.classList.add("hidden");
+                    sectionModalRef.classList.remove("flex");
+                    fetchPertanyaan();
+                } else {
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(key => {
+                            const el = document.getElementById("error-" + key);
+                            if (el) {
+                                el.textContent = data.errors[key][0];
+                                el.classList.remove("hidden");
+                            }
+                        });
+                    } else {
+                        showErrorToast("Gagal menyimpan data!");
+                    }
+                }
+            } catch (err) {
+                console.error("Error:", err);
+                alert("Terjadi kesalahan pada server!");
+            }
+        });
+
+        const openSectionModal = async (mode, id = null) => {
+            sectionModalRef.classList.remove("hidden");
+            sectionModalRef.classList.add("flex");
+
+            if (mode === "edit" && id) {
+
+                sectionModalTitle.textContent = "Edit Section";
+
+                try {
+                    const res = await fetch(`{{ url('api/section') }}/${id}`);
+                    const json = await res.json();
+
+                    const item = json.data;
+
+                    setFormSectionData(item);
+
+                    formEditSection.setAttribute('data-mode', 'edit');
+                    formEditSection.setAttribute('data-id', id);
+
+                } catch (err) {
+                    console.error("Gagal mengambil data section:", err);
+                }
+            }
+        };
+
+        window.openSectionModal = openSectionModal;
+
+        document.getElementById("sectionCancelBtn").addEventListener("click", () => {
+            sectionModalRef.classList.add("hidden");
+            sectionModalRef.classList.remove("flex");
+        });
+
+        fetchPertanyaan();
     });
 </script>
+
+<style>
+    .section-row {
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .move-up {
+        transform: translateY(-15px);
+    }
+
+    .move-down {
+        transform: translateY(15px);
+    }
+
+    .fade {
+        opacity: 0.5;
+    }
+
+    tbody tr {
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+</style>
+
 @endsection

@@ -38,15 +38,24 @@ class PertanyaanModel extends Model implements CrudInterface
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
         $skip = ($page * $itemPerPage) - $itemPerPage;
-        $user = $this->query();
+
+        $query = $this->query()
+            ->select('m_pertanyaan.*')
+            ->join('m_section', 'm_section.id', '=', 'm_pertanyaan.section_id')
+            ->orderBy('m_section.no_urut', 'asc')
+            ->orderBy('m_pertanyaan.no_urut', 'asc');
 
         if (!empty($filter['judul_section'])) {
-            $user->where('name', 'LIKE', '%' . $filter['name'] . '%');
+            $query->where('m_section.judul_section', 'LIKE', '%' . $filter['judul_section'] . '%');
         }
 
-        $total = $user->count();
-        $sort = $sort ?: 'created_at ASC';
-        $list = $user->skip($skip)->take($itemPerPage)->orderByRaw($sort)->get();
+        $total = $query->count();
+
+        if ($itemPerPage > 0) {
+            $query->skip($skip)->take($itemPerPage);
+        }
+
+        $list = $query->get();
 
         return [
             'total' => $total,

@@ -73,18 +73,53 @@ class PertanyaanHelper extends Helper
 
     public function update(array $payload, string $id): array
     {
-        try {
-            $this->pertanyaanModel->edit($payload, $id);
+        DB::beginTransaction();
 
-            $pertanyaan = $this->getById($id);
+        try {
+            $existing = $this->pertanyaanModel->findOrFail($id);
+
+            $oldSectionId = $existing->section_id;
+            $oldNoUrut    = $existing->no_urut;
+
+            if (isset($payload['section_id']) && $payload['section_id'] != $oldSectionId) {
+
+                $newSectionId = $payload['section_id'];
+
+                $this->pertanyaanModel
+                    ->where('section_id', $oldSectionId)
+                    ->where('no_urut', '>', $oldNoUrut)
+                    ->decrement('no_urut');
+
+                $lastNoUrut = $this->pertanyaanModel
+                    ->where('section_id', $newSectionId)
+                    ->max('no_urut');
+
+                $payload['no_urut'] = $lastNoUrut ? $lastNoUrut + 1 : 1;
+            }
+
+            if (in_array($payload['jenis_jawaban'], ['text', 'textarea', 'date'])) {
+                $payload['opsi_jawaban'] = null;
+            }
+
+            if (in_array($payload['jenis_jawaban'], ['radio', 'checkbox', 'select'])) {
+                $payload['opsi_jawaban'] = $payload['opsi_jawaban'] ?? [];
+            }
+
+            $existing->update($payload);
+
+            DB::commit();
+
             return [
                 'status' => true,
-                'data' => $pertanyaan['data']
+                'data'   => $this->getById($id)['data']
             ];
         } catch (Throwable $th) {
+
+            DB::rollBack();
+
             return [
                 'status' => false,
-                'error' => $th->getMessage()
+                'error'  => $th->getMessage()
             ];
         }
     }

@@ -57,6 +57,8 @@ use Illuminate\Support\Facades\Route;
     Route::put('/pertanyaan', [PertanyaanController::class, 'update']);
     Route::delete('/pertanyaan/{id}', [PertanyaanController::class, 'destroy']);
 
+    Route::put('/section/{id}/move', [SectionController::class, 'move']);
+    Route::put('pertanyaan/{id}/move', [PertanyaanController::class, 'move']);
 
     Route::get('/questions', [QuestionController::class, 'index']);
     Route::get('/questions/{id}', [QuestionController::class, 'show']);
