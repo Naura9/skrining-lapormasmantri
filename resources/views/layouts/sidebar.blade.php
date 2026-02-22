@@ -99,6 +99,7 @@
         'admin.skrining',
         'admin.skrining.kategori',
         'admin.skrining.pertanyaan_kk',
+        'admin.skrining.pertanyaan_nik',
         ]);
         @endphp
 
@@ -141,6 +142,20 @@
                     </i>
 
                     <span>Pertanyaan KK</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.fitur.skrining.pertanyaan_nik') }}"
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.skrining.pertanyaan_nik')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                    <i class="fa-solid fa-user text-lg
+                        {{ request()->routeIs('admin.fitur.skrining.pertanyaan_nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+
+                    <span>Pertanyaan NIK</span>
                 </a>
             </li>
         </ul>

@@ -1,5 +1,17 @@
 <form id="formEditPertanyaan" class="space-y-4">
     <div class="text-left">
+        <label class="block text-sm font-semibold mb-1">
+            Siklus
+        </label>
+        <x-dropdown
+            id="kategoriDropdown"
+            label="Pilih Siklus"
+            :options="[]"
+            width="w-full" />
+
+        <input type="hidden" name="kategori_id" id="kategori_id">
+    </div>
+    <div class="text-left">
         <label for="section_id" class="block text-sm font-semibold mb-1">
             Section
         </label>
@@ -149,7 +161,6 @@
     }
 
     function addOpsiRow(value = "") {
-
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
@@ -199,7 +210,27 @@
         renderActionButtons();
     }
 
-    let sectionData = [];
+    function disableSectionDropdown() {
+        const sectionEl = document.getElementById("sectionDropdown");
+
+        sectionEl.classList.add("pointer-events-none", "opacity-50");
+        sectionEl.classList.remove("focus:ring-2", "focus:ring-[#61359C]/50");
+
+        document.getElementById("section_id").value = "";
+        setDropdownLabel("sectionDropdown", null, "Pilih Section");
+
+        btnAddSection.classList.add("hidden");
+    }
+
+    function enableSectionDropdown() {
+        const sectionEl = document.getElementById("sectionDropdown");
+
+        sectionEl.classList.remove("pointer-events-none", "opacity-50");
+
+        btnAddSection.classList.remove("hidden");
+    }
+
+    let kategoriData = [];
 
     async function loadKategori() {
         const res = await fetch(`{{ url('api/kategori') }}`);
@@ -207,28 +238,63 @@
 
         const list = json.data.list || [];
 
-        const kategoriKk = list.find(k => k.target_skrining === 'kk');
+        kategoriData = list.filter(k => k.target_skrining === 'nik');
 
-        if (kategoriKk) {
-            kategoriKkId = kategoriKk.id;
-        }
+        renderKategoriDropdown();
+
+        disableSectionDropdown();
+        disableFormFields();
     }
 
-    async function loadSection() {
+    function renderKategoriDropdown() {
+        const dropdown = document
+            .getElementById('kategoriDropdown')
+            .querySelector('.dropdown-menu');
+
+        dropdown.innerHTML = '';
+
+        kategoriData.forEach(kat => {
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = "block w-full text-left px-4 py-2 text-sm hover:bg-gray-100";
+            btn.textContent = kat.nama_kategori;
+
+            btn.onclick = async (e) => {
+                const dropdownEl = e.target.closest('.relative');
+                dropdownEl.querySelector('.dropdown-menu').classList.add('hidden');
+
+                setDropdownLabel('kategoriDropdown', kat.nama_kategori, 'Pilih Kategori');
+                document.getElementById('kategori_id').value = kat.id;
+
+                enableSectionDropdown();
+                await loadSectionByKategori(kat.id);
+            };
+
+            dropdown.appendChild(btn);
+        });
+    }
+
+    let sectionData = [];
+
+    async function loadSectionByKategori(kategoriId, isEdit = false) {
+
         const res = await fetch(`{{ url('api/section') }}`);
         const json = await res.json();
 
         const allSection = json.data.list || [];
 
         sectionData = allSection.filter(sec =>
-            sec.target_skrining === 'kk'
+            sec.kategori_id === kategoriId
         );
 
         renderSectionDropdown();
 
         btnAddSection.classList.remove("hidden");
 
-        disableFormFields();
+        if (!isEdit) {
+            disableFormFields();
+        }
     }
 
     function renderSectionDropdown() {
@@ -237,6 +303,22 @@
             .querySelector('.dropdown-menu');
 
         dropdown.innerHTML = '';
+
+        if (!sectionData.length) {
+
+            const empty = document.createElement("div");
+            empty.className = "px-4 py-2 text-center text-sm text-gray-500 italic";
+            empty.textContent = "Tidak ada section untuk kategori ini";
+
+            dropdown.appendChild(empty);
+
+            document.getElementById("section_id").value = "";
+            setDropdownLabel("sectionDropdown", null, "Pilih Section");
+
+            disableFormFields();
+
+            return;
+        }
 
         sectionData.forEach(sec => {
             const wrapper = document.createElement('div');
@@ -247,9 +329,13 @@
             selectBtn.className = "text-sm text-left w-full";
             selectBtn.textContent = sec.judul_section;
 
-            selectBtn.onclick = () => {
+            selectBtn.onclick = (e) => {
+                const dropdownEl = e.target.closest('.relative');
+                dropdownEl.querySelector('.dropdown-menu').classList.add('hidden');
+
                 setDropdownLabel('sectionDropdown', sec.judul_section, 'Pilih Section');
                 document.getElementById('section_id').value = sec.id;
+
                 enableFormFields();
             };
 
@@ -282,7 +368,7 @@
 
                     showSuccessToast("Section berhasil dihapus!");
 
-                    await loadSection();
+                    await loadSectionByKategori();
 
                 } catch (error) {
                     showErrorToast("Error", "Terjadi kesalahan sistem");
@@ -296,7 +382,6 @@
         });
     }
 
-
     btnAddSection.addEventListener("click", () => {
         addSectionForm.classList.remove("hidden");
     });
@@ -306,9 +391,15 @@
     document.getElementById("saveSectionBtn").addEventListener("click", async () => {
 
         const judul = document.getElementById("new_judul_section").value;
+        const kategoriId = document.getElementById("kategori_id").value;
 
         if (!judul) {
             alert("Judul section wajib diisi");
+            return;
+        }
+
+        if (!kategoriId) {
+            alert("Pilih siklus terlebih dahulu");
             return;
         }
 
@@ -318,9 +409,8 @@
                 "Content-Type": "application/json",
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
-
             body: JSON.stringify({
-                kategori_id: kategoriKkId,
+                kategori_id: kategoriId,
                 judul_section: judul
             })
         });
@@ -328,11 +418,10 @@
         addSectionForm.classList.add("hidden");
         document.getElementById("new_judul_section").value = "";
 
-        await loadSection();
+        await loadSectionByKategori(kategoriId);
     });
 
     function setDropdownLabel(dropdownId, value, defaultLabel) {
-
         const dropdown = document.getElementById(dropdownId);
         if (!dropdown) return;
 
@@ -352,19 +441,36 @@
 
     window.setFormData = async (item) => {
         if (item) {
+            const res = await fetch(`{{ url('api/section') }}`);
+            const json = await res.json();
+            const allSection = json.data.list || [];
+
+            const selectedSection = allSection.find(s => s.id == item.section_id);
+
+            if (selectedSection) {
+                const kategoriId = selectedSection.kategori_id;
+                document.getElementById('kategori_id').value = kategoriId;
+
+                const kategori = kategoriData.find(k => k.id == kategoriId);
+
+                if (kategori) {
+                    setDropdownLabel('kategoriDropdown', kategori.nama_kategori, 'Pilih Siklus');
+                }
+
+                enableSectionDropdown();
+                
+                await loadSectionByKategori(kategoriId, true);
+
+                const sec = sectionData.find(s => s.id == item.section_id);
+
+                if (sec) {
+                    setDropdownLabel('sectionDropdown', sec.judul_section, 'Pilih Section');
+                    document.getElementById('section_id').value = sec.id;
+                    enableFormFields();
+                }
+            }
             document.getElementById('pertanyaan').value = item.pertanyaan ?? '';
             document.getElementById('section_id').value = item.section_id ?? '';
-
-            if (!sectionData.length) {
-                await loadSection();
-            }
-
-            const sec = sectionData.find(k => k.id == item.section_id);
-
-            if (sec) {
-                setDropdownLabel('sectionDropdown', sec.judul_section, 'Pilih Section');
-                enableFormFields();
-            }
 
             const jenisMap = {
                 radio: "Radio",
@@ -408,7 +514,6 @@
             formModel.jenis_jawaban = "";
             formModel.opsi_jawaban = "";
 
-
             disableFormFields();
 
             setDropdownLabel('sectionDropdown', null, 'Pilih Section');
@@ -418,6 +523,5 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
         await loadKategori();
-        await loadSection();
     });
 </script>

@@ -65,9 +65,9 @@ class PertanyaanRequest extends FormRequest
             'pertanyaan.required' => 'Pertanyaan wajib diisi.',
             'pertanyaan.string'   => 'Pertanyaan harus berupa teks.',
 
-            'jenis_jawaban.required' => 'Jenis pertanyaan wajib diisi.',
-            'jenis_jawaban.string'   => 'Jenis pertanyaan harus berupa teks.',
-            'jenis_jawaban.max'      => 'Jenis pertanyaan maksimal 50 karakter.',
+            'jenis_jawaban.required' => 'Jenis jawaban wajib diisi.',
+            'jenis_jawaban.string'   => 'Jenis jawaban harus berupa teks.',
+            'jenis_jawaban.max'      => 'Jenis jawaban maksimal 50 karakter.',
 
             'opsi_jawaban.array' => 'Opsi jawaban harus berupa array.',
         ];
