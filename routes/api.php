@@ -1,17 +1,20 @@
 <?php
 
+use App\Http\Controllers\Api\AnggotaKeluargaController;
 use App\Http\Controllers\Api\AnswerController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\KategoriController;
 use App\Http\Controllers\Api\FamilyController;
 use App\Http\Controllers\Api\FamilyMemberController;
+use App\Http\Controllers\Api\KeluargaController;
 use App\Http\Controllers\Api\KelurahanController;
 use App\Http\Controllers\Api\PertanyaanController;
 use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\ScreeningController;
 use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\SiteController;
+use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -56,9 +59,30 @@ use Illuminate\Support\Facades\Route;
     Route::post('/pertanyaan', [PertanyaanController::class, 'store']);
     Route::put('/pertanyaan', [PertanyaanController::class, 'update']);
     Route::delete('/pertanyaan/{id}', [PertanyaanController::class, 'destroy']);
-
+    
     Route::put('/section/{id}/move', [SectionController::class, 'move']);
     Route::put('pertanyaan/{id}/move', [PertanyaanController::class, 'move']);
+    
+    Route::get('/unit_rumah', [UnitController::class, 'index']);
+    Route::get('/unit_rumah/{id}', [UnitController::class, 'show']);
+    Route::post('/unit_rumah', [UnitController::class, 'store']);
+    Route::put('/unit_rumah', [UnitController::class, 'update']);
+    Route::delete('/unit_rumah/{id}', [UnitController::class, 'destroy']);
+    
+    Route::get('/data_keluarga', [KeluargaController::class, 'index']);
+    Route::get('/data_keluarga/{id}', [KeluargaController::class, 'show']);
+    Route::post('/data_keluarga', [KeluargaController::class, 'store']);
+    Route::put('/data_keluarga', [KeluargaController::class, 'update']);
+    Route::delete('/data_keluarga/{id}', [KeluargaController::class, 'destroy']);
+    
+    Route::get('/data_anggota', [AnggotaKeluargaController::class, 'index']);
+    Route::get('/data_anggota/{id}', [AnggotaKeluargaController::class, 'show']);
+    Route::post('/data_anggota', [AnggotaKeluargaController::class, 'store']);
+    Route::put('/data_anggota', [AnggotaKeluargaController::class, 'update']);
+    Route::delete('/data_anggota/{id}', [AnggotaKeluargaController::class, 'destroy']);
+    
+
+
 
     Route::get('/questions', [QuestionController::class, 'index']);
     Route::get('/questions/{id}', [QuestionController::class, 'show']);
