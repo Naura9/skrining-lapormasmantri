@@ -52,6 +52,21 @@
         </div>
     </div>
 
+    <div class="mt-3">
+        <div class="flex items-center gap-2">
+            <input type="checkbox"
+                id="is_required"
+                name="is_required"
+                value="1"
+                class="w-4 h-4 accent-[#61359C]">
+
+            <label for="is_required" class="text-sm text-gray-500 font-medium">
+                Centang jika pertanyaan bersifat wajib diisi.
+            </label>
+        </div>
+        </p>
+    </div>
+
     <div class="text-left w-full">
         <label for="pertanyaan" class="block text-sm font-semibold mb-1">
             Pertanyaan
@@ -61,6 +76,17 @@
                    focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
             placeholder="Masukkan pertanyaan skrining KK">
         <p class="text-red-500 text-xs mt-1 hidden" id="error-pertanyaan"></p>
+    </div>
+
+    <div class="text-left w-full">
+        <label for="keterangan" class="block text-sm font-semibold mb-1">
+            Keterangan
+        </label>
+        <textarea id="keterangan" name="keterangan" disabled
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+            placeholder="Masukkan keterangan (opsional)"></textarea>
+        <p class="text-red-500 text-xs mt-1 hidden" id="error-keterangan"></p>
     </div>
 
     <div class="text-left">
@@ -93,21 +119,37 @@
 
 <script>
     const pertanyaanInput = document.getElementById("pertanyaan");
+    const keteranganInput = document.getElementById("keterangan");
+    const isRequiredInput = document.getElementById("is_required");
     const jenisDropdownEl = document.getElementById("jenisDropdown");
     const btnAddSection = document.getElementById("btnAddSection");
     const addSectionForm = document.getElementById("addSectionForm");
 
     function disableFormFields() {
         pertanyaanInput.disabled = true;
+        keteranganInput.disabled = true;
+        isRequiredInput.disabled = true;
+
         pertanyaanInput.classList.add("opacity-50", "cursor-not-allowed");
         pertanyaanInput.classList.remove("focus:ring-2", "focus:ring-[#61359C]/50");
 
+        keteranganInput.classList.add("opacity-50", "cursor-not-allowed");
+
+        isRequiredInput.classList.add("opacity-50", "cursor-not-allowed");
+
         jenisDropdownEl.classList.add("pointer-events-none", "opacity-50");
+
+        isRequiredInput.checked = false;
     }
 
     function enableFormFields() {
         pertanyaanInput.disabled = false;
+        keteranganInput.disabled = false;
+        isRequiredInput.disabled = false;
+
         pertanyaanInput.classList.remove("opacity-50", "cursor-not-allowed");
+        keteranganInput.classList.remove("opacity-50", "cursor-not-allowed");
+        isRequiredInput.classList.remove("opacity-50", "cursor-not-allowed");
 
         jenisDropdownEl.classList.remove("pointer-events-none", "opacity-50");
     }
@@ -435,6 +477,8 @@
         id: "",
         section_id: "",
         pertanyaan: "",
+        keterangan: "",
+        is_required: "",
         jenis_jawaban: "",
         opsi_jawaban: "",
     };
@@ -458,7 +502,7 @@
                 }
 
                 enableSectionDropdown();
-                
+
                 await loadSectionByKategori(kategoriId, true);
 
                 const sec = sectionData.find(s => s.id == item.section_id);
@@ -470,6 +514,9 @@
                 }
             }
             document.getElementById('pertanyaan').value = item.pertanyaan ?? '';
+            document.getElementById('keterangan').value = item.keterangan ?? '';
+            isRequiredInput.checked = item.is_required ? true : false;
+
             document.getElementById('section_id').value = item.section_id ?? '';
 
             const jenisMap = {
@@ -511,6 +558,8 @@
             formModel.id = "";
             formModel.section_id = "";
             formModel.pertanyaan = "";
+            formModel.keterangan = "";
+            formModel.is_required = "";
             formModel.jenis_jawaban = "";
             formModel.opsi_jawaban = "";
 

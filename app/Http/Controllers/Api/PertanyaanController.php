@@ -53,7 +53,10 @@ class PertanyaanController extends Controller
             return response()->failed($request->validator->errors());
         }
 
-        $payload = $request->only(['section_id', 'no_urut', 'pertanyaan', 'jenis_jawaban', 'opsi_jawaban']);
+        $payload = $request->only(['section_id', 'no_urut', 'pertanyaan', 'keterangan', 'jenis_jawaban', 'opsi_jawaban']);
+        
+        $payload['is_required'] = $request->boolean('is_required');
+
         $pertanyaan = $this->pertanyaan->create($payload);
 
         if (!$pertanyaan['status']) {
@@ -69,7 +72,10 @@ class PertanyaanController extends Controller
             return response()->failed($request->validator->errors());
         }
 
-        $payload = $request->only(['id', 'section_id', 'no_urut', 'pertanyaan', 'jenis_jawaban', 'opsi_jawaban']);
+        $payload = $request->only(['id', 'section_id', 'no_urut', 'pertanyaan', 'keterangan', 'jenis_jawaban', 'opsi_jawaban']);
+        
+        $payload['is_required'] = $request->boolean('is_required');
+
         $pertanyaan = $this->pertanyaan->update($payload, $payload['id']);
 
         return response()->success(new PertanyaanResource($pertanyaan['data']), 'Pertanyaan berhasil diubah');

@@ -34,6 +34,8 @@ class PertanyaanRequest extends FormRequest
             'section_id'        => 'required|uuid|exists:m_section,id',
             'no_urut'           => 'nullable|integer|min:1',
             'pertanyaan'        => 'required|string',
+            'keterangan'        => 'nullable|string',
+            'is_required'       => 'nullable|boolean',
             'jenis_jawaban'     => 'required|string|max:50',
             'opsi_jawaban'      => 'nullable|array',
             'opsi_jawaban.*'    => 'nullable',
@@ -46,6 +48,8 @@ class PertanyaanRequest extends FormRequest
             'section_id'        => 'required|uuid|exists:m_section,id',
             'no_urut'           => 'nullable|integer|min:1',
             'pertanyaan'        => 'required|string',
+            'keterangan'        => 'nullable|string',
+            'is_required'       => 'nullable|boolean',
             'jenis_jawaban'     => 'required|string|max:50',
             'opsi_jawaban'      => 'nullable|array',
             'opsi_jawaban.*'    => 'nullable',
@@ -65,7 +69,11 @@ class PertanyaanRequest extends FormRequest
             'pertanyaan.required' => 'Pertanyaan wajib diisi.',
             'pertanyaan.string'   => 'Pertanyaan harus berupa teks.',
 
-            'jenis_jawaban.required' => 'Jenis jawaban wajib diisi.',
+            'keterangan.string' => 'Keterangan harus berupa teks.',
+            
+            'is_required.boolean' => 'Status wajib tidak valid.',
+
+            'jenis_jawaban.required' => 'Jenis jawaban wajib dipilih.',
             'jenis_jawaban.string'   => 'Jenis jawaban harus berupa teks.',
             'jenis_jawaban.max'      => 'Jenis jawaban maksimal 50 karakter.',
 

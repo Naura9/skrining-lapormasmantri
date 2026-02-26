@@ -500,8 +500,20 @@
                                 ${no++}
                             </td>
 
-                            <td class="border border-[#00000033] px-3 py-3 font-semibold">
-                                ${item.pertanyaan}
+                            <td class="border border-[#00000033] px-3 py-3">
+                                <div class="font-semibold">
+                                    ${item.pertanyaan}
+                                    ${
+                                        item.is_required
+                                        ? `<span class="text-red-500 ml-1">*</span>`
+                                        : ''
+                                    }
+                                </div>
+                                ${
+                                    item.keterangan 
+                                    ? `<div class="text-xs text-gray-500 mt-1 leading-snug whitespace-pre-line">${item.keterangan}</div>`
+                                    : ''
+                                }
                             </td>
 
                             ${editMode ? `

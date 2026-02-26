@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'login')->name('login');
 Route::view('/dashboard', 'dashboard')->name('dashboard');
 
+//admin
 Route::view('/data-admin', 'admin.fitur.kelola_user.data_admin.index')->name('admin.fitur.kelola_user.data_admin');
 Route::view('/data-kader', 'admin.fitur.kelola_user.data_kader.index')->name('admin.fitur.kelola_user.data_kader');
 Route::view('/data-nakes', 'admin.fitur.kelola_user.data_nakes.index')->name('admin.fitur.kelola_user.data_nakes');
@@ -17,4 +18,8 @@ Route::view('/pertanyaan-kk', 'admin.fitur.skrining.pertanyaan_kk.index')->name(
 Route::view('/pertanyaan-nik', 'admin.fitur.skrining.pertanyaan_nik.index')->name('admin.fitur.skrining.pertanyaan_nik');
 
 Route::view('/data-wilayah', 'admin.fitur.data_wilayah.index')->name('admin.fitur.data_wilayah');
+
+
+//kader
+Route::view('/skrining-kk', 'kader.fitur.skrining.skrining_kk.index')->name('kader.fitur.skrining.skrining_kk');
 
