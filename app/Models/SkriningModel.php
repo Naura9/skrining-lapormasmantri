@@ -8,47 +8,38 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ScreeningModel extends Model implements CrudInterface
+class SkriningModel extends Model implements CrudInterface
 {
     use HasFactory;
     use Uuid;
     use SoftDeletes;
 
-    protected $table = "t_screening";
+    protected $table = "t_skrining";
     protected $fillable = [
-        'family_id',
+        'keluarga_id',
         'user_id',
-        'screening_date',
+        'tanggal_skrining'
     ];
 
     public $timestamp = true;
 
-    public function family()
+    public function jawaban()
     {
-        return $this->belongsTo(FamilyModel::class, 'family_id');
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(UserModel::class, 'user_id');
+        return $this->hasMany(JawabanModel::class, 'skrining_id', 'id');
     }
 
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
         $skip = ($page * $itemPerPage) - $itemPerPage;
-        $screening = $this->query();
+        $skrining = $this->query();
 
-        if (!empty($filter['screening_date'])) {
-            $screening->where('screening_date', 'LIKE', '%' . $filter['screening_date'] . '%');
+        if (!empty($filter['keluarga_id'])) {
+            $skrining->where('keluarga_id', $filter['keluarga_id']);
         }
 
-        if (!empty($filter['user_id'])) {
-            $screening->where('user_id', 'LIKE', '%' . $filter['user_id'] . '%');
-        }
-
-        $total = $screening->count();
+        $total = $skrining->count();
         $sort = $sort ?: 'created_at ASC';
-        $list = $screening->skip($skip)->take($itemPerPage)->orderByRaw($sort)->get();
+        $list = $skrining->skip($skip)->take($itemPerPage)->orderByRaw($sort)->get();
 
         return [
             'total' => $total,

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Jawaban;
+namespace App\Http\Resources\Warga;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 

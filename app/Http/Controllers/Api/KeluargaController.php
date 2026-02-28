@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers\Jawaban\KeluargaHelper;
+use App\Helpers\Warga\KeluargaHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\KeluargaRequest;
-use App\Http\Resources\Jawaban\KeluargaResource;
+use App\Http\Resources\Warga\KeluargaResource;
 use Illuminate\Http\Request;
 
 class KeluargaController extends Controller
@@ -50,7 +50,17 @@ class KeluargaController extends Controller
             return response()->failed($request->validator->errors());
         }
 
-        $payload = $request->only(['unit_rumah_id', 'no_kk', 'kepala_keluarga']);
+        $payload = $request->only([
+            'unit_rumah_id',
+            'no_kk',
+            'is_luar_wilayah',
+            'alamat_ktp',
+            'rt_ktp',
+            'rw_ktp',
+            'no_telepon',
+            'nik_kepala_keluarga',
+            'nama_kepala_keluarga'
+        ]);
         $keluarga = $this->keluarga->create($payload);
 
         if (!$keluarga['status']) {
@@ -66,7 +76,18 @@ class KeluargaController extends Controller
             return response()->failed($request->validator->errors());
         }
 
-        $payload = $request->only(['id', 'unit_rumah_id', 'no_kk', 'kepala_keluarga']);
+        $payload = $request->only([
+            'id',
+            'unit_rumah_id',
+            'no_kk',
+            'is_luar_wilayah',
+            'alamat_ktp',
+            'rt_ktp',
+            'rw_ktp',
+            'no_telepon',
+            'nik_kepala_keluarga',
+            'nama_kepala_keluarga'
+        ]);
         $keluarga = $this->keluarga->update($payload, $payload['id']);
 
         return response()->success(new KeluargaResource($keluarga['data']), 'Data keluarga berhasil diubah');

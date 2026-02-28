@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\KategoriController;
 use App\Http\Controllers\Api\FamilyController;
 use App\Http\Controllers\Api\FamilyMemberController;
+use App\Http\Controllers\Api\IdentitasKeluargaController;
 use App\Http\Controllers\Api\KeluargaController;
 use App\Http\Controllers\Api\KelurahanController;
 use App\Http\Controllers\Api\PertanyaanController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\ScreeningController;
 use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\SiteController;
+use App\Http\Controllers\Api\SkriningController;
 use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -80,6 +82,18 @@ use Illuminate\Support\Facades\Route;
     Route::post('/data_anggota', [AnggotaKeluargaController::class, 'store']);
     Route::put('/data_anggota', [AnggotaKeluargaController::class, 'update']);
     Route::delete('/data_anggota/{id}', [AnggotaKeluargaController::class, 'destroy']);
+    
+    Route::get('/identitas_keluarga', [IdentitasKeluargaController::class, 'index']);
+    Route::get('/identitas_keluarga/{id}', [IdentitasKeluargaController::class, 'show']);
+    Route::post('/identitas_keluarga', [IdentitasKeluargaController::class, 'store']);
+    Route::put('/identitas_keluarga', [IdentitasKeluargaController::class, 'update']);
+    Route::delete('/identitas_keluarga/{id}', [IdentitasKeluargaController::class, 'destroy']);
+    
+    Route::get('/skrining', [SkriningController::class, 'index']);
+    Route::get('/skrining/{id}', [SkriningController::class, 'show']);
+    Route::post('/skrining', [SkriningController::class, 'store']);
+    Route::put('/skrining', [SkriningController::class, 'update']);
+    Route::delete('/skrining/{id}', [SkriningController::class, 'destroy']);
     
 
 

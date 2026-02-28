@@ -34,6 +34,11 @@ class UnitModel extends Model implements CrudInterface
     {
         return $this->belongsTo(PosyanduModel::class, 'posyandu_id', 'id');
     }
+
+    public function keluarga()
+    {
+        return $this->hasMany(KeluargaModel::class, 'unit_rumah_id', 'id');
+    }
     
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
@@ -56,7 +61,7 @@ class UnitModel extends Model implements CrudInterface
 
     public function getById(string $id)
     {
-        return $this->where('id', $id)->first(); 
+        return $this->where('id', $id)->first();
     }
 
     public function store(array $payload)

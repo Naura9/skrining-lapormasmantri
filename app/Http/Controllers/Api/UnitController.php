@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers\Jawaban\UnitHelper;
+use App\Helpers\Warga\UnitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UnitRequest;
-use App\Http\Resources\Jawaban\UnitResource;
+use App\Http\Resources\Warga\UnitResource;
 use Illuminate\Http\Request;
 
 class UnitController extends Controller

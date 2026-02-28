@@ -171,6 +171,45 @@
             </i>
             <span>Data Wilayah</span>
         </a>
+
+
+        @php
+        $isKaderSkriningActive = request()->routeIs([
+        'kader.skrining',
+        'kader.skrining.skrining_kk',
+        'kader.skrining.skrining_nik',
+        ]);
+        @endphp
+
+        <a href="#" id="kaderSkriningMenuToggle"
+            class="group flex items-center justify-between gap-1.5 px-2 py-2.5 rounded-lg transition font-semibold
+                {{ $isKaderSkriningActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+            <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-file-pen text-lg transition
+                    {{ $isKaderSkriningActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                </i>
+                <span class="ml-0.5">Skrining</span>
+            </div>
+        </a>
+
+        <ul id="kaderSkriningSubMenu" class="pl-5 mt-1 space-y-1 {{ $isKaderSkriningActive ? 'block' : 'hidden' }}">
+            <li>
+                <a href="{{ route('kader.fitur.skrining.skrining_kk') }}"
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('kader.fitur.skrining.skrining_kk')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                    <i class="fa-solid fa-people-group text-lg
+                        {{ request()->routeIs('kader.fitur.skrining.skrining_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+
+                    <span>Skrining KK</span>
+                </a>
+            </li>
+            
+        </ul>
     </nav>
 
 </aside>
@@ -197,5 +236,13 @@
     skriningMenuToggle.addEventListener('click', (e) => {
         e.preventDefault();
         skriningSubMenu.classList.toggle('hidden');
+    });
+
+    const kaderSkriningMenuToggle = document.getElementById('kaderSkriningMenuToggle');
+    const kaderSkriningSubMenu = document.getElementById('kaderSkriningSubMenu');
+
+    kaderSkriningMenuToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        kaderSkriningSubMenu.classList.toggle('hidden');
     });
 </script>

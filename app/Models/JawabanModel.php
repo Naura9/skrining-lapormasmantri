@@ -8,53 +8,49 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class KeluargaModel extends Model implements CrudInterface
+class JawabanModel extends Model implements CrudInterface
 {
     use HasFactory;
     use Uuid;
     use SoftDeletes;
 
-    protected $table = "m_keluarga";
+    protected $table = "t_jawaban";
     protected $fillable = [
-        'unit_rumah_id',
-        'no_kk',
-        'is_luar_wilayah',
-        'alamat_ktp',
-        'rt_ktp',
-        'rw_ktp',
-        'no_telepon'
+        'skrining_id',
+        'pertanyaan_id',
+        'anggota_keluarga_id',
+        'value_jawaban'
     ];
 
     public $timestamp = true;
 
-    public function unitRumah()
+    public function skrining()
     {
-        return $this->belongsTo(UnitModel::class, 'unit_rumah_id', 'id');
+        return $this->belongsTo(SkriningModel::class, 'skrining_id', 'id');
+    }
+
+    public function pertanyaan()
+    {
+        return $this->belongsTo(PertanyaanModel::class, 'pertanyaan_id', 'id');
     }
 
     public function anggota()
     {
-        return $this->hasMany(AnggotaKeluargaModel::class, 'keluarga_id', 'id');
-    }
-
-    public function kepalaKeluarga()
-    {
-        return $this->hasOne(AnggotaKeluargaModel::class, 'keluarga_id', 'id')
-            ->where('hubungan_keluarga', 'kepala_keluarga');
+        return $this->belongsTo(AnggotaKeluargaModel::class, 'anggota_keluarga_id', 'id');
     }
 
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
         $skip = ($page * $itemPerPage) - $itemPerPage;
-        $user = $this->query();
+        $jawaban = $this->query();
 
-        if (!empty($filter['nama_kategori'])) {
-            $user->where('name', 'LIKE', '%' . $filter['name'] . '%');
+        if (!empty($filter['skrining_id'])) {
+            $jawaban->where('skrining_id', $filter['skrining_id']);
         }
 
-        $total = $user->count();
+        $total = $jawaban->count();
         $sort = $sort ?: 'created_at ASC';
-        $list = $user->skip($skip)->take($itemPerPage)->orderByRaw($sort)->get();
+        $list = $jawaban->skip($skip)->take($itemPerPage)->orderByRaw($sort)->get();
 
         return [
             'total' => $total,

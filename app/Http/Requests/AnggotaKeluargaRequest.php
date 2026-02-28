@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Http\Resources\Jawaban\KeluargaResource;
+use App\Http\Resources\Warga\KeluargaResource;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;

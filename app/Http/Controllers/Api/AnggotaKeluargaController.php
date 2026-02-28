@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers\Jawaban\AnggotaKeluargaHelper;
+use App\Helpers\Warga\AnggotaKeluargaHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AnggotaKeluargaRequest;
-use App\Http\Resources\Jawaban\AnggotaKeluargaResource;
+use App\Http\Resources\Warga\AnggotaKeluargaResource;
 use Illuminate\Http\Request;
 
 class AnggotaKeluargaController extends Controller

@@ -235,33 +235,24 @@
     };
 
     window.setFormData = async (item) => {
-        // =====================
-        // MODE TAMBAH (RESET)
-        // =====================
         if (!item) {
             formEdit.reset();
 
-            // reset hidden input
             document.getElementById('jenis_kelamin').value = '';
             document.getElementById('status').value = '';
             document.getElementById('kelurahan_id').value = '';
             document.getElementById('posyandu_id').value = '';
 
-            // reset dropdown label
             setDropdownLabel('jenisKelaminDropdown', null, 'Pilih Jenis Kelamin');
             setDropdownLabel('statusDropdown', null, 'Pilih Status');
             setDropdownLabel('kelurahanDropdown', null, 'Pilih Kelurahan');
             setDropdownLabel('posyanduDropdown', null, 'Pilih Posyandu');
 
-            // disable posyandu
             setDropdownDisabled('posyanduDropdown', true);
 
             return;
         }
 
-        // =====================
-        // MODE EDIT
-        // =====================
         const d = item.kaderDetail ?? {};
 
         formEdit.querySelector('[name="name"]').value = item.nama ?? '';
@@ -269,7 +260,6 @@
         formEdit.querySelector('[name="password"]').value = '';
         formEdit.querySelector('[name="no_telepon"]').value = d.no_telepon ?? '';
 
-        // Jenis Kelamin
         setDropdownLabel(
             'jenisKelaminDropdown',
             d.jenis_kelamin === 'L' ? 'Laki-laki' :
@@ -278,7 +268,6 @@
         );
         document.getElementById('jenis_kelamin').value = d.jenis_kelamin ?? '';
 
-        // Status
         setDropdownLabel(
             'statusDropdown',
             d.status === 'aktif' ? 'Aktif' :

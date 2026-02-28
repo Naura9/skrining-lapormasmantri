@@ -1,8 +1,11 @@
 <?php
+
 namespace App\Helpers\Jawaban;
 
 use App\Helpers\Helper;
+use App\Models\AnggotaKeluargaModel;
 use App\Models\KeluargaModel;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class KeluargaHelper extends Helper
@@ -42,14 +45,32 @@ class KeluargaHelper extends Helper
 
     public function create(array $payload): array
     {
+        DB::beginTransaction();
+
         try {
+            $nik = $payload['nik_kepala_keluarga'];
+            $nama = $payload['nama_kepala_keluarga'];
+
+            unset($payload['nik_kepala_keluarga'], $payload['nama_kepala_keluarga']);
+
             $keluarga = $this->keluargaModel->store($payload);
+
+            AnggotaKeluargaModel::create([
+                'keluarga_id' => $keluarga->id,
+                'nama' => $nama,
+                'nik' => $nik,
+                'hubungan_keluarga' => 'kepala_keluarga'
+            ]);
+
+            DB::commit();
 
             return [
                 'status' => true,
-                'data' => $keluarga
+                'data' => $keluarga->fresh('kepalaKeluarga')
             ];
         } catch (Throwable $th) {
+            DB::rollBack();
+
             return [
                 'status' => false,
                 'error' => $th->getMessage()
@@ -59,15 +80,44 @@ class KeluargaHelper extends Helper
 
     public function update(array $payload, string $id): array
     {
+        DB::beginTransaction();
+
         try {
+
+            $nik = $payload['nik_kepala_keluarga'];
+            $nama = $payload['nama_kepala_keluarga'];
+
+            unset($payload['nik_kepala_keluarga'], $payload['nama_kepala_keluarga']);
+
             $this->keluargaModel->edit($payload, $id);
 
-            $keluarga = $this->getById($id);
+            $kepala = AnggotaKeluargaModel::where('keluarga_id', $id)
+                ->where('hubungan_keluarga', 'kepala_keluarga')
+                ->first();
+
+            if ($kepala) {
+                $kepala->update([
+                    'nama' => $nama,
+                    'nik' => $nik
+                ]);
+            } else {
+                AnggotaKeluargaModel::create([
+                    'keluarga_id' => $id,
+                    'nama' => $nama,
+                    'nik' => $nik,
+                    'hubungan_keluarga' => 'kepala_keluarga'
+                ]);
+            }
+
+            DB::commit();
+
             return [
                 'status' => true,
-                'data' => $keluarga['data']
+                'data' => $this->getById($id)['data']
             ];
         } catch (Throwable $th) {
+            DB::rollBack();
+
             return [
                 'status' => false,
                 'error' => $th->getMessage()
