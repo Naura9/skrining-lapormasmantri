@@ -50,6 +50,11 @@ class IdentitasKeluargaController extends Controller
             return response()->failed($request->validator->errors());
         }
 
+        if ($request->has('validate_only')) {
+    return response()->json([
+        'message' => 'Validasi berhasil'
+    ]);
+}
         $result = $this->helper->create($request->validated());
 
         if (!$result['status']) {
@@ -89,5 +94,19 @@ class IdentitasKeluargaController extends Controller
         }
 
         return response()->success(true, 'Identitas berhasil dihapus');
+    }
+
+    public function validateOnly(IdentitasKeluargaRequest $request)
+    {
+        if (isset($request->validator) && $request->validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors'  => $request->validator->errors()
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'Valid'
+        ]);
     }
 }

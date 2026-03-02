@@ -11,13 +11,13 @@
             <button id="tabIdentitas"
                 class="tab-btn relative flex-1 text-center py-2 text-sm font-bold text-[#61359C]">
                 Data Identitas Keluarga
-                <span class="absolute left-0 bottom-0 w-full h-[4px] bg-[#61359C]/50"></span>
+                <span class="absolute left-0 bottom-0 w-full h-[4px] bg-[#61359C]/30 rounded-t"></span>
             </button>
 
             <button id="tabPertanyaan"
                 class="tab-btn relative flex-1 text-center py-2 text-sm font-bold text-gray-400">
                 Pertanyaan Skrining
-                <span class="absolute left-0 bottom-0 w-full h-[4px] bg-transparent"></span>
+                <span class="absolute left-0 bottom-0 w-full h-[4px] bg-transparent rounded-t"></span>
             </button>
         </div>
     </div>
@@ -27,6 +27,19 @@
             <div class="bg-white border border-[#61359C] rounded-2xl p-6 mb-4">
                 <div id="kkContainer" class="space-y-8">
                     <div class="bg-white mb-4">
+                        <div class="text-left">
+                            <label for="user_id" class="block text-sm font-semibold mb-1">
+                                Petugas
+                            </label>
+                            <x-dropdown
+                                id="userDropdown"
+                                label="Pilih Petugas"
+                                :options="[]"
+                                width="w-full sm:w-56"
+                                data-dropdown="filter" />
+                            <p class="text-red-500 text-xs mt-1 hidden" id="error-user_id"></p>
+                            <input type="hidden" name="user_id" id="user_id">
+                        </div>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div class="text-left">
                                 <label for="kelurahan_id" class="block text-sm font-semibold mb-1">
@@ -59,20 +72,29 @@
                                 <label class="block text-sm font-semibold mb-1">Alamat Domisili</label>
                                 <textarea name="alamat"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                </textarea>
+                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"></textarea>
                                 <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="alamat"></p>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold mb-1">RT Domisili</label>
-                                <input type="text" name="rt"
+                                <input type="text"
+                                    name="rt"
+                                    inputmode="numeric"
+                                    pattern="[0-9]*"
+                                    maxlength="3"
+                                    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
                                         focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
                                 <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="rt"></p>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold mb-1">RW Domisili</label>
-                                <input type="text" name="rw"
+                                <input type="text"
+                                    name="rw"
+                                    inputmode="numeric"
+                                    pattern="[0-9]*"
+                                    maxlength="3"
+                                    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
                                         focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
                                 <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="rw"></p>
@@ -84,8 +106,7 @@
                     <div class="kk-item border border-gray-300 rounded-xl p-6 relative bg-white">
                         <div class="mb-4">
                             <div class="flex items-start gap-2">
-                                <input type="checkbox" id="kkLuarWilayah"
-                                    class="mt-1 w-4 h-4 accent-[#61359C]">
+                                <input type="checkbox" class="kk-luar-wilayah mt-1 w-4 h-4 accent-[#61359C]">
                                 <div>
                                     <span class="font-semibold text-sm">
                                         KK Luar Wilayah
@@ -100,63 +121,79 @@
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-semibold mb-1">Nomor Kartu Keluarga</label>
-                                <input type="text" name="no_kk"
+                                <input type="text"
+                                    name="no_kk"
+                                    inputmode="numeric"
+                                    maxlength="16"
+                                    pattern="[0-9]{16}"
+                                    oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,16)"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="no_kk"></p>
+                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                <p class="text-red-500 text-xs mt-1 hidden error-no_kk"></p>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold mb-1">NIK Kepala Keluarga</label>
-                                <input type="text" name="nik_kepala_keluarga"
+                                <input type="text"
+                                    name="nik_kepala_keluarga"
+                                    inputmode="numeric"
+                                    maxlength="16"
+                                    pattern="[0-9]{16}"
+                                    oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,16)"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="nik_kepala_keluarga"></p>
+                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                <p class="text-red-500 text-xs mt-1 hidden error-nik_kepala_keluarga"></p>
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-semibold mb-1">Nama Kepala Keluarga</label>
                                 <input type="text" name="nama_kepala_keluarga"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
                                         focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="nama_kepala_keluarga"></p>
+                                <p class="text-red-500 text-xs mt-1 hidden error-nama_kepala_keluarga"></p>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold mb-1">No Telepon</label>
-                                <input type="text" name="no_telepon"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="no_telepon"></p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold mb-1">Jumlah Anggota Keluarga</label>
-                                <input type="number" name="jumlah_anggota"
+                                <input type="text"
+                                    name="no_telepon"
+                                    inputmode="numeric"
+                                    pattern="[0-9]*"
+                                    maxlength="20"
+                                    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
                                             focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="jumlah_anggota"></p>
+                                <p class="text-red-500 text-xs mt-1 hidden error-no_telepon"></p>
                             </div>
+
                         </div>
-                        <div id="luarWilayahField" class="hidden mt-6">
+                        <div class="luar-wilayah-field hidden mt-6">
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div class="md:col-span-2">
-                                    <label class="block text-sm font-semibold mb-1">Alamat KTP</label>
+                                    <label class="block text-sm font-semibold mb-1">Alamat (KTP)</label>
                                     <textarea name="alamat_ktp"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                            </textarea>
-                                    <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="alamat_ktp"></p>
+                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"></textarea>
+                                    <p class="text-red-500 text-xs mt-1 hidden error-alamat_ktp"></p>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">RT</label>
-                                    <input type="text" name="rt_ktp"
+                                    <label class="block text-sm font-semibold mb-1">RT (KTP)</label>
+                                    <input type="text"
+                                        name="rt_ktp"
+                                        inputmode="numeric"
+                                        maxlength="3"
+                                        oninput="this.value=this.value.replace(/[^0-9]/g,'')"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                    <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="rt_ktp"></p>
+                                                focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                    <p class="text-red-500 text-xs mt-1 hidden error-rt_ktp"></p>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">RW</label>
-                                    <input type="text" name="rw_ktp"
+                                    <label class="block text-sm font-semibold mb-1">RW (KTP)</label>
+                                    <input type="text"
+                                        name="rw_ktp"
+                                        inputmode="numeric"
+                                        maxlength="3"
+                                        oninput="this.value=this.value.replace(/[^0-9]/g,'')"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                    <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="rw_ktp"></p>
+                                                focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                    <p class="text-red-500 text-xs mt-1 hidden error-rw_ktp"></p>
                                 </div>
                             </div>
                         </div>
@@ -187,14 +224,6 @@
             </div>
             <div class="flex justify-end gap-2 mt-4">
                 <button type="button"
-                    id="btnKirimIdentitas"
-                    class="border border-[#61359C] text-[#61359C]
-               px-3 py-1.5 text-sm font-semibold rounded-lg
-               hover:bg-[#61359C] hover:text-white transition">
-                    Kirim
-                </button>
-
-                <button type="button"
                     id="btnNextTab"
                     class="bg-[#61359C] text-white px-3 py-1.5 text-sm font-semibold rounded-lg hover:bg-[#512c82] transition">
                     Selanjutnya
@@ -216,11 +245,11 @@
                 </button>
 
                 <button type="button"
-                    id="btnSimpan"
+                    id="btnKirim"
                     class="bg-[#61359C] text-white
                        text-sm font-semibold px-4 py-1.5 rounded-lg
                        hover:bg-[#512c82] transition">
-                    Simpan
+                    Kirim
                 </button>
             </div>
         </div>
@@ -236,7 +265,6 @@
         const contentPertanyaan = document.getElementById('contentPertanyaan');
 
         function setActiveTab(activeTab) {
-
             const tabs = [tabIdentitas, tabPertanyaan];
 
             tabs.forEach(tab => {
@@ -245,7 +273,7 @@
                 tab.classList.remove('text-[#61359C]');
                 tab.classList.add('text-gray-400');
 
-                underline.classList.remove('bg-[#61359C]/50');
+                underline.classList.remove('bg-[#61359C]/30');
                 underline.classList.add('bg-transparent');
             });
 
@@ -255,7 +283,7 @@
             activeTab.classList.add('text-[#61359C]');
 
             activeUnderline.classList.remove('bg-transparent');
-            activeUnderline.classList.add('bg-[#61359C]/50');
+            activeUnderline.classList.add('bg-[#61359C]/30');
         }
 
         tabIdentitas.addEventListener('click', () => {
@@ -264,26 +292,35 @@
             setActiveTab(tabIdentitas);
         });
 
-        tabPertanyaan.addEventListener('click', () => {
+        tabPertanyaan.addEventListener('click', async () => {
+            const valid = await validateIdentitas();
+            if (!valid) return;
+
             contentIdentitas.classList.add('hidden');
             contentPertanyaan.classList.remove('hidden');
-
             setActiveTab(tabPertanyaan);
-            fetchPertanyaan();
-        });
 
-        const checkbox = document.getElementById('kkLuarWilayah');
-        const luarWilayahField = document.getElementById('luarWilayahField');
-
-        checkbox.addEventListener('change', function() {
-            if (this.checked) {
-                luarWilayahField.classList.remove('hidden');
-            } else {
-                luarWilayahField.classList.add('hidden');
+            if (!document.getElementById('pertanyaanContainer').hasChildNodes()) {
+                fetchPertanyaan();
             }
         });
 
         const kkContainer = document.getElementById('kkContainer');
+
+        kkContainer.addEventListener('change', function(e) {
+            if (e.target.classList.contains('kk-luar-wilayah')) {
+
+                const kkItem = e.target.closest('.kk-item');
+                const luarField = kkItem.querySelector('.luar-wilayah-field');
+
+                if (e.target.checked) {
+                    luarField.classList.remove('hidden');
+                } else {
+                    luarField.classList.add('hidden');
+                }
+            }
+        });
+
         const btnAddKK = document.getElementById('btnAddKK');
         const btnNextTab = document.getElementById('btnNextTab');
 
@@ -311,7 +348,7 @@
                 }
             });
 
-            const luarWilayah = clone.querySelector('#luarWilayahField');
+            const luarWilayah = clone.querySelector('.luar-wilayah-field');
             if (luarWilayah) luarWilayah.classList.add('hidden');
 
             kkContainer.appendChild(clone);
@@ -325,14 +362,10 @@
             }
         });
 
-        btnNextTab.addEventListener('click', () => {
-            tabPertanyaan.click();
-        });
-
         updateRemoveButtons();
 
         const btnBackTab = document.getElementById('btnBackTab');
-        const btnSimpan = document.getElementById('btnSimpan');
+        const btnKirim = document.getElementById('btnKirim');
 
         btnBackTab.addEventListener('click', () => {
             tabIdentitas.click();
@@ -430,106 +463,50 @@
             }
         }
 
-        const btnKirimIdentitas = document.getElementById('btnKirimIdentitas');
+        let userData = [];
 
-        btnKirimIdentitas.addEventListener('click', async () => {
-
-            document.querySelectorAll('[id^="error-"]').forEach(el => {
-                el.textContent = "";
-                el.classList.add("hidden");
-            });
-
-            document.querySelectorAll('.error-field').forEach(el => {
-                el.textContent = "";
-                el.classList.add("hidden");
-            });
-
-            const payload = {
-                kelurahan_id: document.getElementById('kelurahan_id').value,
-                posyandu_id: document.getElementById('posyandu_id').value,
-                alamat: document.querySelector('[name="alamat"]').value,
-                rt: document.querySelector('[name="rt"]').value,
-                rw: document.querySelector('[name="rw"]').value,
-                keluarga: []
-            };
-
-            document.querySelectorAll('.kk-item').forEach(item => {
-
-                payload.keluarga.push({
-                    is_luar_wilayah: item.querySelector('[type="checkbox"]').checked ? 1 : 0,
-                    no_kk: item.querySelector('[name="no_kk"]').value,
-                    no_telepon: item.querySelector('[name="no_telepon"]').value,
-                    jumlah_anggota: item.querySelector('[name="jumlah_anggota"]').value,
-                    alamat_ktp: item.querySelector('[name="alamat_ktp"]')?.value ?? null,
-                    rt_ktp: item.querySelector('[name="rt_ktp"]')?.value ?? null,
-                    rw_ktp: item.querySelector('[name="rw_ktp"]')?.value ?? null,
-                    nik_kepala_keluarga: item.querySelector('[name="nik_kepala_keluarga"]').value,
-                    nama_kepala_keluarga: item.querySelector('[name="nama_kepala_keluarga"]').value
-                });
-            });
-
+        async function loadUsers() {
             try {
-                const response = await fetch(`/api/identitas_keluarga`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    },
-                    body: JSON.stringify(payload)
-                });
+                const res = await fetch(`{{ url('api/users') }}`);
+                const json = await res.json();
 
-                const result = await response.json();
-
-                if (response.ok) {
-
-                    alert("Identitas berhasil disimpan");
-                    document.getElementById('tabPertanyaan').click();
-
-                } else {
-
-                    if (typeof result.errors === "object") {
-                        Object.keys(result.errors).forEach(key => {
-
-                            const message = result.errors[key][0];
-
-                            if (!key.startsWith('keluarga.')) {
-                                const el = document.getElementById("error-" + key);
-                                if (el) {
-                                    el.textContent = message;
-                                    el.classList.remove("hidden");
-                                }
-                                return;
-                            }
-
-                            const parts = key.split('.');
-                            const index = parts[1];
-                            const field = parts[2];
-
-                            const kkItems = document.querySelectorAll('.kk-item');
-                            const currentItem = kkItems[index];
-
-                            if (!currentItem) return;
-
-                            const errorEl = currentItem.querySelector(`[data-error="${field}"]`);
-
-                            if (errorEl) {
-                                errorEl.textContent = message;
-                                errorEl.classList.remove("hidden");
-                            }
-
-                        });
-                    } else {
-                        alert(result.errors);
-                    }
-
-                }
-
+                userData = json.data.list || [];
+                renderUserDropdown();
             } catch (error) {
-                console.error(error);
-                alert("Terjadi kesalahan server");
+                console.error('Gagal load users:', error);
+            }
+        }
+
+        function renderUserDropdown() {
+            const dropdown = document
+                .getElementById('userDropdown')
+                .querySelector('.dropdown-menu');
+
+            dropdown.innerHTML = '';
+
+            if (!userData.length) {
+                dropdown.innerHTML = `
+                    <div class="px-4 py-2 text-sm text-gray-400 text-center">
+                        Tidak ada data petugas
+                    </div>
+                `;
+                return;
             }
 
-        });
+            userData.forEach(user => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
+                btn.textContent = user.nama;
+
+                btn.onclick = () => {
+                    setDropdownLabel('userDropdown', user.nama, 'Pilih Petugas');
+                    document.getElementById('user_id').value = user.id;
+                };
+
+                dropdown.appendChild(btn);
+            });
+        }
 
         //tab pertanyaan
         async function fetchPertanyaan() {
@@ -598,6 +575,8 @@
                     .forEach((item, index) => {
 
                         const pertanyaanItem = document.createElement('div');
+                        pertanyaanItem.setAttribute('data-pertanyaan-id', item.id);
+                        pertanyaanItem.setAttribute('data-required', item.is_required ? 1 : 0);
                         pertanyaanItem.className = `
                             border border-gray-200
                             rounded-xl
@@ -621,6 +600,7 @@
                             }
                             <div class="mt-3 space-y-2 text-sm text-gray-700">
                                 ${renderInputJawaban(item)}
+                                <p class="text-red-500 text-xs mt-2 hidden error-pertanyaan"></p>
                             </div>
                         `;
                         container.appendChild(pertanyaanItem);
@@ -674,9 +654,7 @@
         }
 
         function renderCustomDropdown(item) {
-
             const options = item.opsi_jawaban || [];
-
             return `
                 <div class="relative block text-left w-full custom-dropdown">
                     <button type="button"
@@ -711,8 +689,344 @@
             `;
         }
 
+
+        async function validateIdentitas() {
+            resetErrorsTextOnly();
+
+            const identitasPayload = {
+                kelurahan_id: document.getElementById('kelurahan_id').value.trim(),
+                posyandu_id: document.getElementById('posyandu_id').value.trim(),
+                alamat: document.querySelector('[name="alamat"]').value.trim(),
+                rt: document.querySelector('[name="rt"]').value.trim(),
+                rw: document.querySelector('[name="rw"]').value.trim(),
+                keluarga: []
+            };
+
+            document.querySelectorAll('.kk-item').forEach(item => {
+                const isLuarWilayah =
+                    item.querySelector('.kk-luar-wilayah').checked ? 1 : 0;
+
+                identitasPayload.keluarga.push({
+                    is_luar_wilayah: isLuarWilayah,
+                    no_kk: item.querySelector('[name="no_kk"]').value.trim(),
+                    no_telepon: item.querySelector('[name="no_telepon"]').value.trim(),
+                    alamat_ktp: isLuarWilayah ?
+                        item.querySelector('[name="alamat_ktp"]').value.trim() : null,
+                    rt_ktp: isLuarWilayah ?
+                        item.querySelector('[name="rt_ktp"]').value.trim() : null,
+                    rw_ktp: isLuarWilayah ?
+                        item.querySelector('[name="rw_ktp"]').value.trim() : null,
+                    nik_kepala_keluarga: item.querySelector('[name="nik_kepala_keluarga"]').value.trim(),
+                    nama_kepala_keluarga: item.querySelector('[name="nama_kepala_keluarga"]').value.trim()
+                });
+            });
+
+            const response = await fetch(`/api/identitas_keluarga?validate_only=1`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify(identitasPayload)
+            });
+
+            const result = await response.json();
+
+            if (response.status === 422) {
+                showErrors(result.errors);
+                return false;
+            }
+
+            return true;
+        }
+
+        function showErrors(errors) {
+            Object.keys(errors).forEach(key => {
+
+                if (key.startsWith("keluarga.")) {
+                    const parts = key.split(".");
+                    const index = parts[1];
+                    const field = parts[2];
+
+                    const kkItem = document.querySelectorAll('.kk-item')[index];
+                    const errorEl = kkItem?.querySelector(`.error-${field}`);
+
+                    if (errorEl) {
+                        errorEl.textContent = errors[key][0];
+                        errorEl.classList.remove("hidden");
+                    }
+                } else {
+                    const errorEl =
+                        document.getElementById("error-" + key) ||
+                        document.querySelector(`[data-error="${key}"]`);
+
+                    if (errorEl) {
+                        errorEl.textContent = errors[key][0];
+                        errorEl.classList.remove("hidden");
+                    }
+                }
+            });
+        }
+
+        btnNextTab.addEventListener('click', async () => {
+            const valid = await validateIdentitas();
+
+            if (!valid) return;
+
+            contentIdentitas.classList.add('hidden');
+            contentPertanyaan.classList.remove('hidden');
+            setActiveTab(tabPertanyaan);
+
+            if (!document.getElementById('pertanyaanContainer').hasChildNodes()) {
+                fetchPertanyaan();
+            }
+        });
+
+        function resetErrorsTextOnly() {
+            document.querySelectorAll('[id^="error-"], [class*="error-"], [data-error]')
+                .forEach(el => {
+                    el.textContent = "";
+                    el.classList.add("hidden");
+                });
+        }
+
+        btnKirim.addEventListener('click', async () => {
+            resetErrorsTextOnly();
+
+            function scrollToFirstError() {
+                const firstError = document.querySelector(
+                    '#contentIdentitas .text-red-500:not(.hidden), #contentPertanyaan .text-red-500:not(.hidden)'
+                );
+
+                if (!firstError) return;
+
+                if (firstError.closest('#contentIdentitas')) {
+                    tabIdentitas.click();
+                } else if (firstError.closest('#contentPertanyaan')) {
+                    tabPertanyaan.click();
+                }
+
+                const fieldWrapper = firstError.closest('div');
+                const input = fieldWrapper?.querySelector('input, textarea, button');
+
+                firstError.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+                setTimeout(() => {
+                    input?.focus();
+                }, 400);
+            }
+
+            let pertanyaanError = false;
+            const jawaban = [];
+
+            document.querySelectorAll('#pertanyaanContainer > div[data-pertanyaan-id]')
+                .forEach(wrapper => {
+
+                    const isRequired = wrapper.dataset.required === "1";
+                    const pertanyaanId = wrapper.getAttribute('data-pertanyaan-id');
+                    let value = null;
+
+                    const radio = wrapper.querySelector('input[type="radio"]:checked');
+                    if (radio) {
+                        value = radio.nextElementSibling?.innerText ?? null;
+                    }
+
+                    const checkboxes = wrapper.querySelectorAll('input[type="checkbox"]:checked');
+                    if (checkboxes.length) {
+                        value = Array.from(checkboxes)
+                            .map(cb => cb.nextElementSibling?.innerText ?? '')
+                            .join(', ');
+                    }
+
+                    const textInput = wrapper.querySelector('input[type="text"]');
+                    if (textInput && textInput.value.trim()) {
+                        value = textInput.value.trim();
+                    }
+
+                    const textarea = wrapper.querySelector('textarea');
+                    if (textarea && textarea.value.trim()) {
+                        value = textarea.value.trim();
+                    }
+
+                    const dateInput = wrapper.querySelector('input[type="date"]');
+                    if (dateInput && dateInput.value) {
+                        value = dateInput.value;
+                    }
+
+                    const dropdownSelected = wrapper.querySelector('.dropdown-selected');
+                    if (dropdownSelected && dropdownSelected.innerText !== 'Pilih Opsi') {
+                        value = dropdownSelected.innerText;
+                    }
+
+                    if (isRequired && !value) {
+                        pertanyaanError = true;
+
+                        wrapper.classList.add('border-red-500');
+                        wrapper.classList.remove('border-gray-200');
+
+                        const input = wrapper.querySelector('input, textarea, button, .dropdown-selected');
+                        if (input) input.focus();
+                    } else {
+                        wrapper.classList.remove('border-red-500');
+                        wrapper.classList.add('border-gray-200');
+                    }
+
+                    if (value !== null) {
+                        jawaban.push({
+                            pertanyaan_id: pertanyaanId,
+                            anggota_keluarga_id: null,
+                            value_jawaban: value
+                        });
+                    }
+                });
+
+            let hasError = pertanyaanError;
+
+            document.querySelectorAll('#contentIdentitas .text-red-500:not(.hidden)').forEach(el => {
+                hasError = true;
+            });
+
+            if (hasError) {
+                scrollToFirstError();
+                return;
+            }
+            try {
+                const identitasPayload = {
+                    kelurahan_id: document.getElementById('kelurahan_id').value,
+                    posyandu_id: document.getElementById('posyandu_id').value,
+                    alamat: document.querySelector('[name="alamat"]').value,
+                    rt: document.querySelector('[name="rt"]').value,
+                    rw: document.querySelector('[name="rw"]').value,
+                    keluarga: []
+                };
+
+                document.querySelectorAll('.kk-item').forEach(item => {
+                    const isLuarWilayah =
+                        item.querySelector('.kk-luar-wilayah').checked ? 1 : 0;
+
+                    identitasPayload.keluarga.push({
+                        is_luar_wilayah: isLuarWilayah,
+                        no_kk: item.querySelector('[name="no_kk"]').value,
+                        no_telepon: item.querySelector('[name="no_telepon"]').value,
+                        alamat_ktp: isLuarWilayah ?
+                            item.querySelector('[name="alamat_ktp"]').value.trim() : null,
+
+                        rt_ktp: isLuarWilayah ?
+                            item.querySelector('[name="rt_ktp"]').value.trim() : null,
+
+                        rw_ktp: isLuarWilayah ?
+                            item.querySelector('[name="rw_ktp"]').value.trim() : null,
+                        nik_kepala_keluarga: item.querySelector('[name="nik_kepala_keluarga"]').value,
+                        nama_kepala_keluarga: item.querySelector('[name="nama_kepala_keluarga"]').value
+                    });
+                });
+
+                const identitasResponse = await fetch(`/api/identitas_keluarga`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify(identitasPayload)
+                });
+
+                const identitasResult = await identitasResponse.json();
+
+                if (identitasResponse.status === 422) {
+                    const errors = identitasResult.errors;
+
+                    Object.keys(errors).forEach(key => {
+                        if (key.startsWith("keluarga.")) {
+
+                            const parts = key.split(".");
+                            const index = parts[1];
+                            const field = parts[2];
+
+                            const kkItem = document.querySelectorAll('.kk-item')[index];
+                            const errorEl = kkItem?.querySelector(`.error-${field}`);
+
+                            if (errorEl) {
+                                errorEl.textContent = errors[key][0];
+                                errorEl.classList.remove("hidden");
+                            }
+
+                        } else {
+
+                            const errorEl =
+                                document.getElementById("error-" + key) ||
+                                document.querySelector(`[data-error="${key}"]`);
+
+                            if (errorEl) {
+                                errorEl.textContent = errors[key][0];
+                                errorEl.classList.remove("hidden");
+                            }
+                        }
+                    });
+                    scrollToFirstError();
+                    return;
+                }
+
+                if (!identitasResponse.ok) {
+                    showErrorToast("Terjadi kesalaha serve");
+                    return;
+                }
+
+                const keluargaId = identitasResult.data?.keluarga?.[0]?.id;
+                if (!keluargaId) {
+                    showErrorToast("Keluarga ID tidak ditemukan");
+                    return;
+                }
+
+                const userId = document.getElementById('user_id').value;
+
+                if (!userId) {
+                    showErrorToast("Petugas belum dipilih");
+                    return;
+                }
+
+                const skriningPayload = {
+                    keluarga_id: keluargaId,
+                    user_id: userId,
+                    tanggal_skrining: new Date().toISOString().split('T')[0],
+                    jawaban: jawaban
+                };
+
+                const skriningResponse = await fetch(`/api/skrining`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify(skriningPayload)
+                });
+
+                const skriningResult = await skriningResponse.json();
+
+                if (skriningResponse.ok) {
+                    showSuccessToast("Skrining KK berhasil terkirim!");
+                    window.location.reload();
+                } else {
+                    showErrorToast("Gagal menyimpan skrining");
+                }
+
+            } catch (error) {
+                console.error(error);
+                showErrorToast("Terjadi kesalahan server");
+            }
+        });
+
         loadKelurahan();
+        loadUsers();
         setDropdownDisabled('posyanduDropdown', true);
     });
 </script>
+<style>
+    .border-error {
+        border-color: #f87171 !important;
+        /* merah */
+    }
+</style>
 @endsection
