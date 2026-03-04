@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AnggotaKeluargaController;
+use App\Http\Controllers\Api\IdentitasAnggotaController;
 use App\Http\Controllers\Api\KategoriController;
 use App\Http\Controllers\Api\IdentitasKeluargaController;
 use App\Http\Controllers\Api\KeluargaController;
@@ -80,6 +81,12 @@ Route::get('/identitas_keluarga/{id}', [IdentitasKeluargaController::class, 'sho
 Route::post('/identitas_keluarga', [IdentitasKeluargaController::class, 'store']);
 Route::put('/identitas_keluarga', [IdentitasKeluargaController::class, 'update']);
 Route::delete('/identitas_keluarga/{id}', [IdentitasKeluargaController::class, 'destroy']);
+
+Route::get('/identitas_anggota', [IdentitasAnggotaController::class, 'index']);
+Route::get('/identitas_anggota/{id}', [IdentitasAnggotaController::class, 'show']);
+Route::post('/identitas_anggota', [IdentitasAnggotaController::class, 'store']);
+Route::put('/identitas_anggota', [IdentitasAnggotaController::class, 'update']);
+Route::delete('/identitas_anggota/{id}', [IdentitasAnggotaController::class, 'destroy']);
 
 Route::get('/skrining', [SkriningController::class, 'index']);
 Route::get('/skrining/{id}', [SkriningController::class, 'show']);

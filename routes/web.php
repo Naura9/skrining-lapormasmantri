@@ -21,5 +21,6 @@ Route::view('/data-wilayah', 'admin.fitur.data_wilayah.index')->name('admin.fitu
 
 
 //kader
-Route::view('/skrining-kk', 'kader.fitur.skrining.skrining_kk.index')->name('kader.fitur.skrining.skrining_kk');
+Route::view('/skrining-kk', 'kader.fitur.skrining.skrining_kk')->name('kader.fitur.skrining_kk');
+Route::view('/skrining-nik', 'kader.fitur.skrining.skrining_nik')->name('kader.fitur.skrining_nik');
 

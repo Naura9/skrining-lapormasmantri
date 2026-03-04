@@ -24,9 +24,15 @@ class PertanyaanController extends Controller
     {
         $filter = [
             'judul_pertanyaan' => $request->judul_pertanyaan ?? '',
+            'kategori_id' => $request->kategori_id ?? null,
         ];
 
-        $pertanyaans = $this->pertanyaan->getAll($filter, $request->page ?? 1, $request->per_page ?? 25, $request->sort ?? '');
+        $pertanyaans = $this->pertanyaan->getAll(
+            $filter,
+            $request->page ?? 1,
+            $request->per_page ?? 25,
+            $request->sort ?? ''
+        );
 
         return response()->success([
             'list' => PertanyaanResource::collection($pertanyaans['data']['data']),
@@ -54,7 +60,7 @@ class PertanyaanController extends Controller
         }
 
         $payload = $request->only(['section_id', 'no_urut', 'pertanyaan', 'keterangan', 'jenis_jawaban', 'opsi_jawaban']);
-        
+
         $payload['is_required'] = $request->boolean('is_required');
 
         $pertanyaan = $this->pertanyaan->create($payload);
@@ -73,7 +79,7 @@ class PertanyaanController extends Controller
         }
 
         $payload = $request->only(['id', 'section_id', 'no_urut', 'pertanyaan', 'keterangan', 'jenis_jawaban', 'opsi_jawaban']);
-        
+
         $payload['is_required'] = $request->boolean('is_required');
 
         $pertanyaan = $this->pertanyaan->update($payload, $payload['id']);

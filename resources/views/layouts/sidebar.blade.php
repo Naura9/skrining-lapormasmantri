@@ -176,8 +176,8 @@
         @php
         $isKaderSkriningActive = request()->routeIs([
         'kader.skrining',
-        'kader.skrining.skrining_kk',
-        'kader.skrining.skrining_nik',
+        'kader.skrining_kk',
+        'kader.skrining_nik',
         ]);
         @endphp
 
@@ -195,17 +195,31 @@
 
         <ul id="kaderSkriningSubMenu" class="pl-5 mt-1 space-y-1 {{ $isKaderSkriningActive ? 'block' : 'hidden' }}">
             <li>
-                <a href="{{ route('kader.fitur.skrining.skrining_kk') }}"
+                <a href="{{ route('kader.fitur.skrining_kk') }}"
                     class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
-                        {{ request()->routeIs('kader.fitur.skrining.skrining_kk')
+                        {{ request()->routeIs('kader.fitur.skrining_kk')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
                     <i class="fa-solid fa-people-group text-lg
-                        {{ request()->routeIs('kader.fitur.skrining.skrining_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        {{ request()->routeIs('kader.fitur.skrining_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
                     <span>Skrining KK</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('kader.fitur.skrining_nik') }}"
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('kader.fitur.skrining_nik')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                    <i class="fa-solid fa-user text-lg
+                        {{ request()->routeIs('kader.fitur.skrining_nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+
+                    <span>Skrining NIK</span>
                 </a>
             </li>
             

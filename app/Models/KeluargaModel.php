@@ -40,7 +40,7 @@ class KeluargaModel extends Model implements CrudInterface
     public function kepalaKeluarga()
     {
         return $this->hasOne(AnggotaKeluargaModel::class, 'keluarga_id', 'id')
-            ->where('hubungan_keluarga', 'kepala_keluarga');
+            ->where('hubungan_keluarga', 'Kepala Keluarga');
     }
 
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')

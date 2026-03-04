@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers\Jawaban;
+namespace App\Helpers\Warga;
 
 use App\Helpers\Helper;
 use App\Models\AnggotaKeluargaModel;
@@ -105,7 +105,7 @@ class KeluargaHelper extends Helper
                     'keluarga_id' => $id,
                     'nama' => $nama,
                     'nik' => $nik,
-                    'hubungan_keluarga' => 'kepala_keluarga'
+                    'hubungan_keluarga' => 'Kepala Keluarga'
                 ]);
             }
 

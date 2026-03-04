@@ -3,30 +3,30 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Helpers\Warga\IdentitasKeluargaHelper;
-use App\Http\Requests\IdentitasKeluargaRequest;
-use App\Http\Resources\Warga\IdentitasKeluargaResource;
+use App\Helpers\Warga\IdentitasAnggotaHelper;
+use App\Http\Requests\IdentitasAnggotaRequest;
+use App\Http\Resources\Warga\IdentitasAnggotaResource;
 use Illuminate\Http\Request;
 
-class IdentitasKeluargaController extends Controller
+class IdentitasAnggotaController extends Controller
 {
     private $helper;
 
     public function __construct()
     {
-        $this->helper = new IdentitasKeluargaHelper();
+        $this->helper = new IdentitasAnggotaHelper();
     }
 
     public function index(Request $request)
     {
         $data = $this->helper->getAll([
-            'kelurahan_id' => $request->kelurahan_id
+            'no_kk' => $request->no_kk
         ], $request->page ?? 1);
 
         return response()->success([
-            'list' => IdentitasKeluargaResource::collection($data['data']),
+            'list' => IdentitasAnggotaResource::collection($data['data']),
             'meta' => [
-                'total' => $data['data']['total'],
+                'total' => $data['data']->total(),
             ],
         ]);
     }
@@ -40,11 +40,11 @@ class IdentitasKeluargaController extends Controller
         }
 
         return response()->success(
-            new IdentitasKeluargaResource($data['data'])
+            new IdentitasAnggotaResource($data['data'])
         );
     }
 
-    public function store(IdentitasKeluargaRequest $request)
+    public function store(IdentitasAnggotaRequest $request)
     {
         if (isset($request->validator) && $request->validator->fails()) {
             return response()->failed($request->validator->errors());
@@ -55,20 +55,20 @@ class IdentitasKeluargaController extends Controller
                 'message' => 'Validasi berhasil'
             ]);
         }
-
+        
         $result = $this->helper->create($request->validated());
 
         if (!$result['status']) {
-            return response()->failed($result['error']);
+            return response()->failed([$result['error']]);
         }
 
         return response()->success(
-            new IdentitasKeluargaResource($result['data']),
-            'Identitas berhasil ditambahkan'
+            $result['data'],
+            'Anggota keluarga berhasil ditambahkan'
         );
     }
 
-    public function update(IdentitasKeluargaRequest $request, $id)
+    public function update(IdentitasAnggotaRequest $request, $id)
     {
         if (isset($request->validator) && $request->validator->fails()) {
             return response()->failed($request->validator->errors());
@@ -81,7 +81,7 @@ class IdentitasKeluargaController extends Controller
         }
 
         return response()->success(
-            new IdentitasKeluargaResource($result['data']),
+            new IdentitasAnggotaResource($result['data']),
             'Identitas berhasil diubah'
         );
     }
@@ -97,7 +97,7 @@ class IdentitasKeluargaController extends Controller
         return response()->success(true, 'Identitas berhasil dihapus');
     }
 
-    public function validateOnly(IdentitasKeluargaRequest $request)
+    public function validateOnly(IdentitasAnggotaRequest $request)
     {
         if (isset($request->validator) && $request->validator->fails()) {
             return response()->json([

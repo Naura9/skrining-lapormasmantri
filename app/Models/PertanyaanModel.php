@@ -51,6 +51,12 @@ class PertanyaanModel extends Model implements CrudInterface
             $query->where('m_section.judul_section', 'LIKE', '%' . $filter['judul_section'] . '%');
         }
 
+        if (!empty($filter['kategori_id'])) {
+            $query->whereHas('section', function ($q) use ($filter) {
+                $q->where('kategori_id', $filter['kategori_id']);
+            });
+        }
+
         $total = $query->count();
 
         if ($itemPerPage > 0) {

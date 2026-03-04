@@ -21,9 +21,9 @@
         </svg>
     </button>
 
-    <div class="dropdown-menu hidden absolute z-10 mt-2 w-full bg-white shadow-lg rounded-2xl py-2 border border-gray-100">
+    <div class="dropdown-menu hidden absolute z-10 mt-2 w-full bg-white shadow-lg rounded-2xl p-2 border border-gray-100">
         @if($searchable)
-        <input type="text" placeholder="Cari..." class="w-full px-3 py-2 mb-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#61359C]/50" onkeyup="filterDropdown(this)">
+        <input type="text" placeholder="Cari..." class="w-full px-3 py-2 mb-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#61359C]/50" onkeyup="filterDropdown(this)">
         @endif
 
         @foreach ($options as $option)

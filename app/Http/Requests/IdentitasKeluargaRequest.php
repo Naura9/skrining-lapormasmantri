@@ -95,7 +95,7 @@ class IdentitasKeluargaRequest extends FormRequest
             'posyandu_id.required' => 'Posyandu wajib dipilih.',
             'posyandu_id.exists'   => 'Posyandu tidak ditemukan.',
 
-            'alamat.required' => 'Alamat domisili wajib diisi.',
+            'alamat.required' => 'aAlamat domisili wajib diisi.',
             'rt.required' => 'RT domisili wajib diisi.',
             'rw.required' => 'RW domisili wajib diisi.',
 

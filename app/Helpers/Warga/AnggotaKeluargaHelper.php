@@ -1,5 +1,5 @@
 <?php
-namespace App\Helpers\Jawaban;
+namespace App\Helpers\Warga;
 
 use App\Helpers\Helper;
 use App\Models\AnggotaKeluargaModel;
