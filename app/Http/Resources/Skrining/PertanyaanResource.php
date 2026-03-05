@@ -21,6 +21,7 @@ class PertanyaanResource extends JsonResource
             'is_required'      => $this->is_required,
             'jenis_jawaban'    => $this->jenis_jawaban,
             'opsi_jawaban'     => $this->opsi_jawaban,
+            'opsi_lain'         => $this->opsi_lain,
         ];
     }
 }

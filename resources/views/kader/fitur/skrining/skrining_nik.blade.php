@@ -92,8 +92,10 @@
                             :options="[
                                     'Kepala Keluarga', 'Istri',
                                     'Anak', 'Menantu', 'Cucu',
-                                    'Orang Tua', 'Famili Lain', 'Pembantu / Asisten', 'Lainnya'
+                                    'Orang Tua', 'Famili Lain', 'Pembantu / Asisten'
                                     ]"
+                            allowOther="true"
+                            otherPlaceholder="Ketik hubungan keluarga..."
                             width="w-full"
                             data-dropdown="filter" />
                         <p class="text-red-500 text-xs mt-1 hidden" id="error-hubungan_keluarga"></p>
@@ -184,7 +186,6 @@
                     </div>
 
                     <div class="grid md:grid-cols-2 gap-4">
-
                         <div>
                             <label class="block text-sm font-semibold mb-1">
                                 Pekerjaan
@@ -193,11 +194,13 @@
                                 id="pekerjaanDropdown"
                                 label="Pilih Pekerjaan"
                                 :options="[ 
-                                'Tidak Bekerja', 'Pelajar / Mahasiswa', 
-                                'PNS / TNI / POLRI / BUMN / BUMD', 'Pegawai Swasta',
-                                'Wiraswasta', 'Petani / Nelayan', 'Pedagang',
-                                'Pengusaha', 'Ibu Rumah Tangga' 
+                                    'Tidak Bekerja', 'Pelajar / Mahasiswa', 
+                                    'PNS / TNI / POLRI / BUMN / BUMD', 'Pegawai Swasta',
+                                    'Wiraswasta', 'Petani / Nelayan', 'Pedagang',
+                                    'Pengusaha', 'Ibu Rumah Tangga' 
                                 ]"
+                                allowOther="true"
+                                otherPlaceholder="Ketik pekerjaan..."
                                 width="w-full"
                                 data-dropdown="filter" />
                             <p class="text-red-500 text-xs mt-1 hidden" id="error-pekerjaan"></p>
@@ -657,22 +660,9 @@
         function renderInputJawaban(item) {
             switch (item.jenis_jawaban) {
                 case 'radio':
-                    return item.opsi_jawaban?.map(opt => `
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="radio"
-                                name="pertanyaan_${item.id}"
-                                class="w-4 h-4 accent-[#61359C]">
-                            <span>${opt}</span>
-                        </label>
-                    `).join('') || '-';
+                    return renderRadio(item);
                 case 'checkbox':
-                    return item.opsi_jawaban?.map(opt => `
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox"
-                                class="w-4 h-4 accent-[#61359C]">
-                            <span>${opt}</span>
-                        </label>
-                    `).join('') || '-';
+                    return renderCheckbox(item);
                 case 'select':
                     return renderCustomDropdown(item);
                 case 'text':
@@ -698,41 +688,188 @@
             }
         }
 
+        function renderRadio(item) {
+            const name = `pertanyaan_${item.id}`;
+            let html = '';
+
+            (item.opsi_jawaban || []).forEach(opt => {
+                html += `
+                <label class="flex items-center gap-2">
+                    <input type="radio"
+                        name="${name}"
+                        value="${opt}"
+                        class="radio-option accent-[#61359C]"
+                        data-pertanyaan-id="${item.id}">
+                    <span>${opt}</span>
+                </label>
+                `;
+            });
+
+            if (item.opsi_lain) {
+                html += `
+                    <label class="flex items-center gap-2">
+                        <input type="radio"
+                            name="${name}"
+                            value="lainnya"
+                            class="radio-other accent-[#61359C]"
+                            data-pertanyaan-id="${item.id}">
+                        <span>Lainnya</span>
+                    </label>
+
+                    <input type="text"
+                        class="other-input hidden border border-gray-300 rounded-lg px-3 py-1.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+                        placeholder="Ketik lainnya...">
+                `;
+            }
+
+            return `<div class="space-y-2">${html}</div>`;
+        }
+
+        document.addEventListener("change", function(e) {
+            if (e.target.classList.contains("radio-other")) {
+
+                const wrapper = e.target.closest("div");
+                const otherInput = wrapper.querySelector(".other-input");
+
+                if (otherInput) {
+                    otherInput.classList.remove("hidden");
+                    otherInput.focus();
+                }
+            }
+
+            if (e.target.classList.contains("radio-option")) {
+
+                const wrapper = e.target.closest("div");
+                const otherInput = wrapper.querySelector(".other-input");
+
+                if (otherInput) {
+                    otherInput.classList.add("hidden");
+                    otherInput.value = "";
+                }
+            }
+        });
+
+        function renderCheckbox(item) {
+            const name = `pertanyaan_${item.id}[]`;
+            let html = '';
+
+            (item.opsi_jawaban || []).forEach(opt => {
+                html += `
+                    <label class="flex items-start gap-2">
+                        <input type="checkbox"
+                            name="${name}"
+                            value="${opt}"
+                            class="checkbox-option accent-[#61359C] mt-1"
+                            data-pertanyaan-id="${item.id}">
+                        <span>${opt}</span>
+                    </label>
+                `;
+            });
+
+            if (item.opsi_lain) {
+                html += `
+                    <label class="flex items-start gap-2">
+                        <input type="checkbox"
+                            name="pertanyaan_${item.id}[]"
+                            value="lainnya"
+                            class="checkbox-other accent-[#61359C] mt-1"
+                            data-pertanyaan-id="${item.id}">
+                        <span>Lainnya</span>
+                    </label>
+
+                    <input type="text"
+                        class="other-input hidden border border-gray-300 rounded-lg px-3 py-1.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+                        placeholder="Ketik lainnya...">
+                    `;
+            }
+            return `<div class="space-y-2">${html}</div>`;
+        }
+
+        document.addEventListener("change", function(e) {
+            if (e.target.classList.contains("checkbox-other")) {
+
+                const wrapper = e.target.closest('.space-y-2') || e.target.closest('div');
+                const otherInput = wrapper.querySelector(".other-input");
+
+                if (!otherInput) return;
+
+                if (e.target.checked) {
+                    otherInput.classList.remove("hidden");
+                    otherInput.focus();
+                } else {
+                    otherInput.classList.add("hidden");
+                    otherInput.value = "";
+                }
+            }
+        });
+
         function renderCustomDropdown(item) {
             const options = item.opsi_jawaban || [];
-            return `
-                <div class="relative block text-left w-full custom-dropdown">
+
+            let htmlOptions = options.map(opt => `
+                <button type="button"
+                    class="dropdown-item block w-full text-center px-4 py-1 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    onclick="selectDropdownOption(this, '${opt}')">
+                    ${opt}
+                </button>
+            `).join('');
+
+            if (item.opsi_lain) {
+                htmlOptions += `
                     <button type="button"
-                        class="relative flex items-center justify-between w-full 
-                        border border-[#00000033] text-sm rounded-lg px-4 py-2 
-                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50 bg-white"
+                        class="dropdown-item block w-full text-center px-4 py-1 text-sm text-gray-700 hover:bg-gray-100 transition"
+                        onclick="selectDropdownOther(this)">
+                        Lainnya
+                    </button>
+
+                    <div class="dropdown-other-wrapper hidden mt-2 pt-3 border-t border-gray-200 px-3 pb-2">
+                        <div class="text-xs text-gray-500 mb-1">
+                            Lainnya
+                        </div>
+
+                        <input type="text"
+                            class="dropdown-other w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm
+                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+                            placeholder="Ketik lainnya...">
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="relative block text-left w-full">
+                    <button type="button"
+                        class="relative flex items-center justify-between w-full border border-[#00000033] text-sm rounded-lg px-4 py-2 bg-white"
                         onclick="toggleDropdown(this)">
-                        
+
                         <span class="dropdown-selected text-left w-full truncate text-gray-500">
                             Pilih Opsi
                         </span>
 
-                        <svg class="w-4 h-4 absolute right-3 transition-transform duration-200"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        <svg class="w-4 h-4 absolute right-3" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
 
-                    <div class="dropdown-menu hidden absolute z-10 mt-2 w-full bg-white shadow-lg rounded-2xl py-2 border border-gray-100">
-
-                        ${options.map(opt => `
-                            <button type="button"
-                                class="dropdown-item block w-full text-center px-4 py-1 text-sm text-gray-700 hover:bg-gray-100 transition"
-                                onclick="selectDropdownOption(this, '${opt}')">
-                                ${opt}
-                            </button>
-                        `).join('')}
-
+                    <div class="dropdown-menu hidden absolute z-10 mt-2 w-full bg-white shadow-lg rounded-2xl p-2 border border-gray-100">
+                        ${htmlOptions}
                     </div>
                 </div>
             `;
         }
+
+        document.querySelectorAll('.other-input').forEach(input => {
+            if (input.value) {
+                payload.push({
+                    pertanyaan_id: input.closest('[data-pertanyaan-id]').dataset.pertanyaanId,
+                    jawaban: input.value
+                });
+            }
+        });
+
 
         function getDropdownValue(id) {
             const wrapper = document.getElementById(id);
@@ -919,20 +1056,31 @@
                         value = radio.nextElementSibling?.innerText ?? null;
                     }
 
-                    const checkboxes = wrapper.querySelectorAll('input[type="checkbox"]:checked');
-                    if (checkboxes.length) {
-                        value = Array.from(checkboxes)
-                            .map(cb => cb.nextElementSibling?.innerText ?? '')
-                            .join(', ');
-                    }
+                    const checkboxes = wrapper.querySelectorAll('input[type="checkbox"]');
+                    let values = [];
+
+                    checkboxes.forEach(cb => {
+                        if (cb.checked) {
+                            if (cb.classList.contains('checkbox-option')) {
+                                values.push(cb.nextElementSibling?.innerText ?? '');
+                            }
+                            if (cb.classList.contains('checkbox-other')) {
+                                const otherInput = wrapper.querySelector('.other-input');
+                                if (otherInput && otherInput.value.trim()) {
+                                    values.push(otherInput.value.trim());
+                                }
+                            }
+                        }
+                    });
 
                     const textInput = wrapper.querySelector('input[type="text"]');
-                    if (textInput && textInput.value.trim()) {
-                        value = textInput.value.trim();
-                    }
-
                     const textarea = wrapper.querySelector('textarea');
-                    if (textarea && textarea.value.trim()) {
+
+                    if (values.length) {
+                        value = values.join(', ');
+                    } else if (textInput && textInput.value.trim()) {
+                        value = textInput.value.trim();
+                    } else if (textarea && textarea.value.trim()) {
                         value = textarea.value.trim();
                     }
 

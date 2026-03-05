@@ -5,7 +5,11 @@
 'width' => 'w-full',
 'color' => 'bg-white',
 'textColor' => 'text-gray-500',
-'searchable' => false
+'searchable' => false,
+
+'allowOther' => false,
+'otherLabel' => 'Lainnya',
+'otherPlaceholder' => 'Ketik lainnya...'
 ])
 
 <div {{ $attributes->merge(['class' => "relative block text-left $width"]) }} x-ignore>
@@ -33,6 +37,27 @@
             {{ $option }}
         </button>
         @endforeach
+
+        @if($allowOther)
+        <button type="button"
+            class="dropdown-item block w-full text-center px-4 py-1 text-sm text-gray-700 hover:bg-gray-100 transition"
+            onclick="selectDropdownOther(this)">
+            {{ $otherLabel }}
+        </button>
+        @endif
+
+        @if($allowOther)
+        <div class="dropdown-other-wrapper hidden mt-2 pt-3 border-t border-gray-200 px-3 pb-2">
+            <div class="text-xs text-gray-500 mb-1">
+                {{ $otherLabel }}
+            </div>
+
+            <input type="text"
+                class="dropdown-other w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm
+        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+                placeholder="{{ $otherPlaceholder }}">
+        </div>
+        @endif
     </div>
 
 </div>
@@ -50,7 +75,14 @@
     function selectDropdownOption(optionEl, value) {
         const dropdown = optionEl.closest('.relative');
         const selectedSpan = dropdown.querySelector('.dropdown-selected');
+        const otherWrapper = dropdown.querySelector('.dropdown-other-wrapper');
+
         selectedSpan.textContent = value;
+
+        if (otherWrapper) {
+            otherWrapper.classList.add('hidden');
+        }
+
         dropdown.querySelector('.dropdown-menu').classList.add('hidden');
 
         const event = new CustomEvent('dropdown-changed', {
@@ -58,6 +90,7 @@
                 value
             }
         });
+
         dropdown.dispatchEvent(event);
     }
 
@@ -73,6 +106,27 @@
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.relative')) {
             document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
+        }
+    });
+
+    function selectDropdownOther(optionEl) {
+        const dropdown = optionEl.closest('.relative');
+        const wrapper = dropdown.querySelector('.dropdown-other-wrapper');
+        const selectedSpan = dropdown.querySelector('.dropdown-selected');
+
+        wrapper.classList.remove('hidden');
+
+        selectedSpan.textContent = 'Lainnya';
+    }
+
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('dropdown-other')) {
+            const dropdown = e.target.closest('.relative');
+            const selected = dropdown.querySelector('.dropdown-selected');
+
+            if (e.target.value.trim() !== '') {
+                selected.textContent = e.target.value;
+            }
         }
     });
 </script>

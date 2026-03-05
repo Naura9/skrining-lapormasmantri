@@ -52,6 +52,11 @@ class PertanyaanHelper extends Helper
 
             $payload['no_urut'] = $lastNoUrut ? $lastNoUrut + 1 : 1;
 
+            if (in_array($payload['jenis_jawaban'], ['text', 'textarea', 'date'])) {
+                $payload['opsi_jawaban'] = null;
+                $payload['opsi_lain'] = 0;
+            }
+
             $pertanyaan = $this->pertanyaanModel->create($payload);
 
             DB::commit();
@@ -105,6 +110,11 @@ class PertanyaanHelper extends Helper
                 $payload['opsi_jawaban'] = $payload['opsi_jawaban'] ?? [];
             }
 
+            if (in_array($payload['jenis_jawaban'], ['text', 'textarea', 'date'])) {
+                $payload['opsi_jawaban'] = null;
+                $payload['opsi_lain'] = 0;
+            }
+            
             $existing->update($payload);
 
             DB::commit();

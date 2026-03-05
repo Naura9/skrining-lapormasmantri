@@ -38,7 +38,7 @@
         </label>
         <input type="text"
             id="new_judul_section"
-            class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
             placeholder="Masukkan judul section">
 
         <input type="hidden" id="new_target_skrining" value="kk">
@@ -114,6 +114,19 @@
                 <tbody id="opsiTableBody"></tbody>
             </table>
         </div>
+        <div id="allowOtherContainer" class="hidden mt-2">
+            <div class="flex items-center gap-2">
+                <input type="hidden" name="opsi_lain" value="0">
+                <input type="checkbox"
+                    id="opsi_lain"
+                    name="opsi_lain"
+                    value="1"
+                    class="w-4 h-4 accent-[#61359C]">
+                <label for="opsi_lain" class="text-sm text-gray-600">
+                    Tambahkan opsi "Lainnya"
+                </label>
+            </div>
+        </div>
     </div>
 </form>
 
@@ -121,6 +134,7 @@
     const pertanyaanInput = document.getElementById("pertanyaan");
     const keteranganInput = document.getElementById("keterangan");
     const isRequiredInput = document.getElementById("is_required");
+    const opsiLainInput = document.getElementById("opsi_lain");
     const jenisDropdownEl = document.getElementById("jenisDropdown");
     const btnAddSection = document.getElementById("btnAddSection");
     const addSectionForm = document.getElementById("addSectionForm");
@@ -189,11 +203,21 @@
 
             jenisInput.value = value;
 
+            const allowOtherContainer = document.getElementById("allowOtherContainer");
+
             if (value === "text" || value === "textarea" || value === "date") {
                 opsiContainer.classList.add("hidden");
+                allowOtherContainer.classList.add("hidden");
+
                 opsiTableBody.innerHTML = "";
             } else {
                 opsiContainer.classList.remove("hidden");
+
+                if (["radio", "checkbox"].includes(value)) {
+                    allowOtherContainer.classList.remove("hidden");
+                } else {
+                    allowOtherContainer.classList.add("hidden");
+                }
 
                 if (opsiTableBody.children.length === 0) {
                     addOpsiRow();
@@ -296,7 +320,6 @@
         dropdown.innerHTML = '';
 
         kategoriData.forEach(kat => {
-
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = "block w-full text-left px-4 py-2 text-sm hover:bg-gray-100";
@@ -384,12 +407,9 @@
             const deleteBtn = document.createElement('button');
             deleteBtn.type = 'button';
             deleteBtn.className = "text-red-500 hover:text-red-700 ml-2";
-
             deleteBtn.innerHTML = `<i class="fa-regular fa-trash-can text-sm"></i>`;
-
             deleteBtn.onclick = async (e) => {
                 e.stopPropagation();
-
                 try {
                     const res = await fetch(`{{ url('api/section') }}/${sec.id}`, {
                         method: "DELETE",
@@ -481,6 +501,7 @@
         is_required: "",
         jenis_jawaban: "",
         opsi_jawaban: "",
+        opsi_lain: ""
     };
 
     window.setFormData = async (item) => {
@@ -516,7 +537,7 @@
             document.getElementById('pertanyaan').value = item.pertanyaan ?? '';
             document.getElementById('keterangan').value = item.keterangan ?? '';
             isRequiredInput.checked = item.is_required ? true : false;
-
+            opsiLainInput.checked = item.opsi_lain ? true : false;
             document.getElementById('section_id').value = item.section_id ?? '';
 
             const jenisMap = {
@@ -537,9 +558,16 @@
 
             opsiTableBody.innerHTML = "";
 
-            if (["radio", "checkbox", "select"].includes(item.jenis_jawaban)) {
+            const allowOtherContainer = document.getElementById("allowOtherContainer");
 
+            if (["radio", "checkbox", "select"].includes(item.jenis_jawaban)) {
                 opsiContainer.classList.remove("hidden");
+
+                if (["radio", "checkbox"].includes(item.jenis_jawaban)) {
+                    allowOtherContainer.classList.remove("hidden");
+                } else {
+                    allowOtherContainer.classList.add("hidden");
+                }
 
                 if (item.opsi_jawaban && item.opsi_jawaban.length) {
                     item.opsi_jawaban.forEach(opt => {
@@ -548,9 +576,9 @@
                 } else {
                     addOpsiRow();
                 }
-
             } else {
                 opsiContainer.classList.add("hidden");
+                allowOtherContainer.classList.add("hidden");
             }
         } else {
             formEditPertanyaan.reset();
@@ -562,6 +590,7 @@
             formModel.is_required = "";
             formModel.jenis_jawaban = "";
             formModel.opsi_jawaban = "";
+            formModel.opsi_lain = "";
 
             disableFormFields();
 

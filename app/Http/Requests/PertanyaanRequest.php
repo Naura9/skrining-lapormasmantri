@@ -39,6 +39,7 @@ class PertanyaanRequest extends FormRequest
             'jenis_jawaban'     => 'required|string|max:50',
             'opsi_jawaban'      => 'nullable|array',
             'opsi_jawaban.*'    => 'nullable',
+            'opsi_lain'         => 'nullable|boolean'
         ];
     }
 
@@ -53,6 +54,7 @@ class PertanyaanRequest extends FormRequest
             'jenis_jawaban'     => 'required|string|max:50',
             'opsi_jawaban'      => 'nullable|array',
             'opsi_jawaban.*'    => 'nullable',
+            'opsi_lain'       => 'nullable|boolean'
         ];
     }
 
@@ -78,6 +80,8 @@ class PertanyaanRequest extends FormRequest
             'jenis_jawaban.max'      => 'Jenis jawaban maksimal 50 karakter.',
 
             'opsi_jawaban.array' => 'Opsi jawaban harus berupa array.',
+
+            'opsi_lain.boolean' => 'Status opsi lainnya tidak valid.',
         ];
     }
 }

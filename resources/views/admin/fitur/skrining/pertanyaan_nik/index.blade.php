@@ -631,37 +631,63 @@
 
             function renderOpsi(item) {
                 switch (item.jenis_jawaban) {
-
                     case 'radio':
-                        return item.opsi_jawaban?.length ?
-                            item.opsi_jawaban.map(opt => `
-                                    <div class="flex items-center gap-2">
-                                        <i class="fa-regular fa-circle-dot text-gray-500"></i>
-                                        <span>${opt}</span>
-                                    </div>
-                                `).join('') :
-                            '-';
+                        if (!item.opsi_jawaban?.length && !item.opsi_lain) return '-';
+
+                        let radioOptions = item.opsi_jawaban?.map(opt => `
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-circle-dot text-gray-500"></i>
+                                <span>${opt}</span>
+                            </div>
+                        `).join('') || '';
+
+                        if (item.opsi_lain) {
+                            radioOptions += `
+                                <div class="flex items-end gap-2">
+                                    <i class="fa-regular fa-circle-dot text-gray-500"></i>
+                                    <span>Lainnya :</span>
+                                    <span class="border-b border-gray-400 w-32 inline-block"></span>
+                                </div>
+                            `;
+                        }
+                        return radioOptions;
 
                     case 'checkbox':
-                        return item.opsi_jawaban?.length ?
-                            item.opsi_jawaban.map(opt => `
-                                    <div class="flex items-center gap-2">
-                                        <i class="fa-regular fa-square-check text-gray-500"></i>
-                                        <span>${opt}</span>
-                                    </div>
-                                `).join('') :
-                            '-';
+                        if (!item.opsi_jawaban?.length && !item.opsi_lain) return '-';
+
+                        let checkboxOptions = item.opsi_jawaban?.map(opt => `
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-square-check text-gray-500"></i>
+                                <span>${opt}</span>
+                            </div>
+                        `).join('') || '';
+
+                        if (item.opsi_lain) {
+                            checkboxOptions += `
+                                <div class="flex items-end gap-2">
+                                    <i class="fa-regular fa-square-check text-gray-500"></i>
+                                    <span>Lainnya :</span>
+                                    <span class="border-b border-gray-400 w-32 inline-block"></span>
+                                </div>
+                            `;
+                        }
+                        return checkboxOptions;
 
                     case 'select':
+                        let opsi = item.opsi_jawaban?.length ?
+                            item.opsi_jawaban.join(', ') :
+                            '-';
+
+                        if (item.opsi_lain) {
+                            opsi += ', Lainnya';
+                        }
                         return `
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-caret-down text-gray-500"></i>
                                 <span>Dropdown:</span>
                             </div>
                             <div class="ml-6">
-                                ${item.opsi_jawaban?.length 
-                                    ? item.opsi_jawaban.join(', ') 
-                                    : '-'}
+                                ${opsi}
                             </div>
                         `;
 
@@ -829,8 +855,6 @@
 
             fetchPertanyaan();
         });
-
-
 
         window.openPertanyaanModal = openPertanyaanModal;
 

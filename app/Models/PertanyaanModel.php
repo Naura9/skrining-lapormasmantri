@@ -23,13 +23,15 @@ class PertanyaanModel extends Model implements CrudInterface
         'keterangan',
         'is_required',
         'jenis_jawaban',
-        'opsi_jawaban'
+        'opsi_jawaban',
+        'opsi_lain'
     ];
 
     public $timestamp = true;
 
     protected $casts = [
         'opsi_jawaban' => 'array',
+        'opsi_lain' => 'boolean'
     ];
 
     public function section()

@@ -26,7 +26,7 @@
             </label>
             <input type="text"
                 id="new_judul_section"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
                 placeholder="Masukkan judul section">
 
             <input type="hidden" id="new_target_skrining" value="kk">
@@ -49,7 +49,7 @@
                     class="w-4 h-4 accent-[#61359C]">
 
                 <label for="is_required" class="text-sm text-gray-500 font-medium">
-                    Centang jika pertanyaan bersifat wajib diisi. 
+                    Centang jika pertanyaan bersifat wajib diisi.
                 </label>
             </div>
             </p>
@@ -103,13 +103,28 @@
                     <tbody id="opsiTableBody"></tbody>
                 </table>
             </div>
+            <div id="allowOtherContainer" class="hidden mt-2">
+                <div class="flex items-center gap-2">
+                    <input type="hidden" name="opsi_lain" value="0">
+                    <input type="checkbox"
+                        id="opsi_lain"
+                        name="opsi_lain"
+                        value="1"
+                        class="w-4 h-4 accent-[#61359C]">
+                    <label for="opsi_lain" class="text-sm text-gray-600">
+                        Tambahkan opsi "Lainnya"
+                    </label>
+                </div>
+            </div>
         </div>
+
     </form>
 
     <script>
         const pertanyaanInput = document.getElementById("pertanyaan");
         const keteranganInput = document.getElementById("keterangan");
         const isRequiredInput = document.getElementById("is_required");
+        const opsiLainInput = document.getElementById("opsi_lain");
         const jenisDropdownEl = document.getElementById("jenisDropdown");
         const btnAddSection = document.getElementById("btnAddSection");
         const addSectionForm = document.getElementById("addSectionForm");
@@ -182,11 +197,21 @@
 
                 jenisInput.value = value;
 
+                const allowOtherContainer = document.getElementById("allowOtherContainer");
+
                 if (value === "text" || value === "textarea" || value === "date") {
                     opsiContainer.classList.add("hidden");
+                    allowOtherContainer.classList.add("hidden");
+
                     opsiTableBody.innerHTML = "";
                 } else {
                     opsiContainer.classList.remove("hidden");
+
+                    if (["radio", "checkbox"].includes(value)) {
+                        allowOtherContainer.classList.remove("hidden");
+                    } else {
+                        allowOtherContainer.classList.add("hidden");
+                    }
 
                     if (opsiTableBody.children.length === 0) {
                         addOpsiRow();
@@ -196,14 +221,13 @@
         }
 
         function addOpsiRow(value = "") {
-
             const tr = document.createElement("tr");
 
             tr.innerHTML = `
                 <td class="border border-[#00000033] px-3 py-2">
                     <input type="text" name="opsi_jawaban[]"
                         value="${value}"
-                        class="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                        class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
                         placeholder="Masukkan opsi">
                 </td>
 
@@ -358,7 +382,7 @@
             const judul = document.getElementById("new_judul_section").value;
 
             if (!judul) {
-                alert("Judul section wajib diisi");
+                showErrorToast("Judul section wajib diisi");
                 return;
             }
 
@@ -400,6 +424,7 @@
             is_required: "",
             jenis_jawaban: "",
             opsi_jawaban: "",
+            opsi_lain: ""
         };
 
         window.setFormData = async (item) => {
@@ -407,7 +432,7 @@
                 document.getElementById('pertanyaan').value = item.pertanyaan ?? '';
                 document.getElementById('keterangan').value = item.keterangan ?? '';
                 isRequiredInput.checked = item.is_required ? true : false;
-
+                opsiLainInput.checked = item.opsi_lain ? true : false;
                 document.getElementById('section_id').value = item.section_id ?? '';
 
                 if (!sectionData.length) {
@@ -439,9 +464,16 @@
 
                 opsiTableBody.innerHTML = "";
 
-                if (["radio", "checkbox", "select"].includes(item.jenis_jawaban)) {
+                const allowOtherContainer = document.getElementById("allowOtherContainer");
 
+                if (["radio", "checkbox", "select"].includes(item.jenis_jawaban)) {
                     opsiContainer.classList.remove("hidden");
+
+                    if (["radio", "checkbox"].includes(item.jenis_jawaban)) {
+                        allowOtherContainer.classList.remove("hidden");
+                    } else {
+                        allowOtherContainer.classList.add("hidden");
+                    }
 
                     if (item.opsi_jawaban && item.opsi_jawaban.length) {
                         item.opsi_jawaban.forEach(opt => {
@@ -450,9 +482,9 @@
                     } else {
                         addOpsiRow();
                     }
-
                 } else {
                     opsiContainer.classList.add("hidden");
+                    allowOtherContainer.classList.add("hidden");
                 }
             } else {
                 formEditPertanyaan.reset();
@@ -464,6 +496,7 @@
                 formModel.is_required = "";
                 formModel.jenis_jawaban = "";
                 formModel.opsi_jawaban = "";
+                formModel.opsi_lain = "";
 
                 disableFormFields();
 

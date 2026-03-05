@@ -62,6 +62,7 @@ class PertanyaanController extends Controller
         $payload = $request->only(['section_id', 'no_urut', 'pertanyaan', 'keterangan', 'jenis_jawaban', 'opsi_jawaban']);
 
         $payload['is_required'] = $request->boolean('is_required');
+        $payload['opsi_lain'] = $request->boolean('opsi_lain');
 
         $pertanyaan = $this->pertanyaan->create($payload);
 
@@ -81,6 +82,7 @@ class PertanyaanController extends Controller
         $payload = $request->only(['id', 'section_id', 'no_urut', 'pertanyaan', 'keterangan', 'jenis_jawaban', 'opsi_jawaban']);
 
         $payload['is_required'] = $request->boolean('is_required');
+        $payload['opsi_lain'] = $request->boolean('opsi_lain');
 
         $pertanyaan = $this->pertanyaan->update($payload, $payload['id']);
 
