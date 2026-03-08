@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\SkriningController;
 use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\MonitoringController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -94,6 +95,9 @@ Route::post('/skrining', [SkriningController::class, 'store']);
 Route::put('/skrining', [SkriningController::class, 'update']);
 Route::delete('/skrining/{id}', [SkriningController::class, 'destroy']);
 
+Route::get('/monitoring_kader', [MonitoringController::class, 'monitoringKader']);
+Route::get('/monitoring_nik_per_kk', [MonitoringController::class, 'monitoringNikPerKk']);
+Route::get('/monitoring_nik_per_siklus', [MonitoringController::class, 'monitoringNikPerSiklus']);
 Route::get('/', function () {
     return response()->failed(['Endpoint yang anda minta tidak tersedia']);
 });

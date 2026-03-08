@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Traits\Uuid;
+use App\Models\User\UserModel;
 use App\Repository\CrudInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,6 +27,16 @@ class SkriningModel extends Model implements CrudInterface
     public function jawaban()
     {
         return $this->hasMany(JawabanModel::class, 'skrining_id', 'id');
+    }
+
+    public function keluarga()
+    {
+        return $this->belongsTo(KeluargaModel::class, 'keluarga_id', 'id');
+    }
+
+    public function kader()
+    {
+        return $this->belongsTo(UserModel::class, 'user_id', 'id');
     }
 
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')

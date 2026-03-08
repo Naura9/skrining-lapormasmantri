@@ -33,7 +33,6 @@ class SectionModel extends Model implements CrudInterface
         return $this->hasMany(PertanyaanModel::class, 'section_id', 'id');
     }
 
-
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
         $skip = ($page * $itemPerPage) - $itemPerPage;
