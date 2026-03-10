@@ -309,6 +309,21 @@
 
             dropdown.innerHTML = '';
 
+            if (!sectionData.length) {
+                const empty = document.createElement("div");
+                empty.className = "px-4 py-2 text-center text-sm text-gray-500 italic";
+                empty.textContent = "Tidak ada section";
+
+                dropdown.appendChild(empty);
+
+                document.getElementById("section_id").value = "";
+                setDropdownLabel("sectionDropdown", null, "Pilih Section");
+
+                disableFormFields();
+
+                return;
+            }
+
             sectionData.forEach(sec => {
                 const wrapper = document.createElement('div');
                 wrapper.className = "flex items-center justify-between px-4 py-1 hover:bg-gray-100";

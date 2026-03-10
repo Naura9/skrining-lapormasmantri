@@ -96,8 +96,10 @@ Route::put('/skrining', [SkriningController::class, 'update']);
 Route::delete('/skrining/{id}', [SkriningController::class, 'destroy']);
 
 Route::get('/monitoring_kader', [MonitoringController::class, 'monitoringKader']);
-Route::get('/monitoring_nik_per_kk', [MonitoringController::class, 'monitoringNikPerKk']);
-Route::get('/monitoring_nik_per_siklus', [MonitoringController::class, 'monitoringNikPerSiklus']);
+Route::get('/monitoring/nik-per-kk', [MonitoringController::class, 'monitoringNikPerKk']);
+Route::get('/monitoring/nik-per-siklus', [MonitoringController::class, 'monitoringNikPerSiklus']);
+Route::get('/monitoring/hasil-skrining', [MonitoringController::class, 'monitoringHasilSkrining']);
+
 Route::get('/', function () {
     return response()->failed(['Endpoint yang anda minta tidak tersedia']);
 });

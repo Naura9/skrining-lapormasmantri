@@ -991,7 +991,7 @@
                     } else if (textarea && textarea.value.trim()) {
                         value = textarea.value.trim();
                     }
-                    
+
                     const dateInput = wrapper.querySelector('input[type="date"]');
                     if (dateInput && dateInput.value) {
                         value = dateInput.value;
@@ -1115,9 +1115,9 @@
                     return;
                 }
 
-                const keluargaId = identitasResult.data?.keluarga?.[0]?.id;
-                if (!keluargaId) {
-                    showErrorToast("Keluarga ID tidak ditemukan");
+                const keluargaList = identitasResult.data?.keluarga || [];
+                if (keluargaList.length === 0) {
+                    showErrorToast("Data keluarga tidak ditemukan");
                     return;
                 }
 
@@ -1128,30 +1128,32 @@
                     return;
                 }
 
-                const skriningPayload = {
-                    keluarga_id: keluargaId,
-                    user_id: userId,
-                    tanggal_skrining: new Date().toISOString().split('T')[0],
-                    jawaban: jawaban
-                };
+                for (const keluarga of keluargaList) {
 
-                const skriningResponse = await fetch(`/api/skrining`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    },
-                    body: JSON.stringify(skriningPayload)
-                });
+                    const skriningPayload = {
+                        keluarga_id: keluarga.id,
+                        user_id: userId,
+                        tanggal_skrining: new Date().toISOString().split('T')[0],
+                        jawaban: jawaban
+                    };
 
-                const skriningResult = await skriningResponse.json();
+                    const skriningResponse = await fetch(`/api/skrining`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        },
+                        body: JSON.stringify(skriningPayload)
+                    });
 
-                if (skriningResponse.ok) {
-                    showSuccessToast("Skrining KK berhasil terkirim!");
-                    window.location.reload();
-                } else {
-                    showErrorToast("Gagal menyimpan skrining");
+                    if (!skriningResponse.ok) {
+                        showErrorToast("Gagal menyimpan skrining");
+                        return;
+                    }
                 }
+
+                showSuccessToast("Skrining KK berhasil terkirim!");
+                window.location.reload();
 
             } catch (error) {
                 console.error(error);

@@ -93,11 +93,11 @@ class PertanyaanController extends Controller
     {
         $pertanyaan = $this->pertanyaan->delete($id);
 
-        if (!$pertanyaan) {
-            return response()->failed(['Mohon maaf pertanyaan tidak ditemukan']);
+        if (!$pertanyaan['status']) {
+            return response()->failed([$pertanyaan['error']]);
         }
 
-        return response()->success($pertanyaan, 'Pertanyaan berhasil dihapus');
+        return response()->success(true, 'Pertanyaan berhasil dihapus');
     }
 
     public function move(Request $request, string $id)

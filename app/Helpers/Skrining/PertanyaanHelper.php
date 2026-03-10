@@ -3,6 +3,7 @@
 namespace App\Helpers\Skrining;
 
 use App\Helpers\Helper;
+use App\Models\JawabanModel;
 use App\Models\PertanyaanModel;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -114,7 +115,7 @@ class PertanyaanHelper extends Helper
                 $payload['opsi_jawaban'] = null;
                 $payload['opsi_lain'] = 0;
             }
-            
+
             $existing->update($payload);
 
             DB::commit();
@@ -134,13 +135,29 @@ class PertanyaanHelper extends Helper
         }
     }
 
-    public function delete(string $id): bool
+    public function delete(string $id): array
     {
         try {
+            $digunakan = JawabanModel::where('pertanyaan_id', $id)->exists();
+
+            if ($digunakan) {
+                return [
+                    'status' => false,
+                    'error' => 'Pertanyaan tidak dapat dihapus karena sudah digunakan dalam skrining'
+                ];
+            }
+
             $this->pertanyaanModel->drop($id);
-            return true;
+
+            return [
+                'status' => true
+            ];
         } catch (\Throwable $th) {
-            return false;
+
+            return [
+                'status' => false,
+                'error' => $th->getMessage()
+            ];
         }
     }
 }

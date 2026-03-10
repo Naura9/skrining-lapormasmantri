@@ -51,4 +51,17 @@ class MonitoringController extends Controller
 
         return response()->json($result);
     }
+
+    public function monitoringHasilSkrining(Request $request)
+    {
+        $filter = $request->only([
+            'kelurahan_id',
+            'posyandu_id',
+            'siklus_id'
+        ]);
+
+        $result = $this->monitoringHelper->monitoringHasilSkrining($filter);
+
+        return response()->json($result);
+    }
 }

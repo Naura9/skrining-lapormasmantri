@@ -370,10 +370,9 @@
         dropdown.innerHTML = '';
 
         if (!sectionData.length) {
-
             const empty = document.createElement("div");
             empty.className = "px-4 py-2 text-center text-sm text-gray-500 italic";
-            empty.textContent = "Tidak ada section untuk kategori ini";
+            empty.textContent = "Tidak ada section untuk siklus ini";
 
             dropdown.appendChild(empty);
 

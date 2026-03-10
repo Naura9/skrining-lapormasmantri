@@ -475,64 +475,6 @@
 
                         tbody.appendChild(tr2);
                     });
-
-                document.querySelectorAll(".delete-section-btn").forEach(btn => {
-                    btn.addEventListener("click", async (e) => {
-                        e.stopPropagation();
-
-                        const id = btn.dataset.id;
-
-                        try {
-                            const res = await fetch(`{{ url('api/section') }}/${id}`, {
-                                method: "DELETE",
-                                headers: {
-                                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                }
-                            });
-
-                            const json = await res.json();
-
-                            if (!res.ok || !json.status) {
-                                showErrorToast(
-                                    "Gagal Menghapus",
-                                    json.errors ? json.errors[0] : json.message || "Terjadi kesalahan"
-                                );
-                                return;
-                            }
-
-                            showSuccessToast("Section berhasil dihapus!");
-                            await fetchPertanyaan();
-
-                        } catch (error) {
-                            console.error("Gagal menghapus section:", error);
-                            showErrorToast("Terjadi kesalahan pada server!");
-                        }
-                    });
-                });
-
-                document.querySelectorAll(".delete-pertanyaan-btn").forEach(btn => {
-                    btn.addEventListener("click", async () => {
-                        const id = btn.dataset.id;
-
-                        showDeleteConfirmToast("Apakah Anda yakin ingin menghapus pertanyaan ini?", async () => {
-                            try {
-                                const data = await fetch(`{{ url('api/pertanyaan') }}/${id}`, {
-                                    method: "DELETE",
-                                    headers: {
-                                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                    }
-                                });
-                                if (!data) return;
-
-                                showSuccessToast("Data berhasil dihapus!");
-                                await fetchPertanyaan();
-                            } catch (error) {
-                                console.error("Gagal menghapus data:", error);
-                                showErrorToast("Terjadi kesalahan pada server!");
-                            }
-                        });
-                    });
-                });
             });
 
             function renderOpsi(item) {
@@ -626,6 +568,64 @@
                 }
             }
         }
+
+        tbody.addEventListener("click", async (e) => {
+            const pertanyaanBtn = e.target.closest(".delete-pertanyaan-btn");
+            const sectionBtn = e.target.closest(".delete-section-btn");
+
+            if (pertanyaanBtn) {
+                const id = pertanyaanBtn.dataset.id;
+
+                showDeleteConfirmToast("Apakah Anda yakin ingin menghapus pertanyaan ini?", async () => {
+                    try {
+                        const response = await fetch(`/api/pertanyaan/${id}`, {
+                            method: "DELETE",
+                            headers: {
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                            }
+                        });
+
+                        const result = await response.json();
+
+                        if (!response.ok || result.status === false) {
+                            showErrorToast(result.message ?? "Pertanyaan tidak dapat dihapus");
+                            return;
+                        }
+
+                        showSuccessToast("Data berhasil dihapus!");
+                        fetchPertanyaan();
+
+                    } catch (error) {
+                        showErrorToast("Terjadi kesalahan pada server!");
+                    }
+                });
+            }
+
+            if (sectionBtn) {
+                const id = sectionBtn.dataset.id;
+                try {
+                    const res = await fetch(`/api/section/${id}`, {
+                        method: "DELETE",
+                        headers: {
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        }
+                    });
+
+                    const json = await res.json();
+
+                    if (!res.ok || !json.status) {
+                        showErrorToast(json.message || "Gagal menghapus section");
+                        return;
+                    }
+
+                    showSuccessToast("Section berhasil dihapus!");
+                    fetchPertanyaan();
+
+                } catch (error) {
+                    showErrorToast("Terjadi kesalahan server!");
+                }
+            }
+        });
 
         formEditPertanyaan.addEventListener("submit", async (e) => {
             e.preventDefault();
