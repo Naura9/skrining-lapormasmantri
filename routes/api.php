@@ -95,7 +95,7 @@ Route::post('/skrining', [SkriningController::class, 'store']);
 Route::put('/skrining', [SkriningController::class, 'update']);
 Route::delete('/skrining/{id}', [SkriningController::class, 'destroy']);
 
-Route::get('/monitoring_kader', [MonitoringController::class, 'monitoringKader']);
+Route::get('/monitoring/kader', [MonitoringController::class, 'monitoringKader']);
 Route::get('/monitoring/nik-per-kk', [MonitoringController::class, 'monitoringNikPerKk']);
 Route::get('/monitoring/nik-per-siklus', [MonitoringController::class, 'monitoringNikPerSiklus']);
 Route::get('/monitoring/hasil-skrining', [MonitoringController::class, 'monitoringHasilSkrining']);

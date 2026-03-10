@@ -17,11 +17,28 @@ class MonitoringHelper extends Helper
         $this->skriningModel = new SkriningModel();
     }
 
-    public function monitoringKader()
+    public function monitoringKader(array $filter = [])
     {
         $query = $this->userModel
             ->with(['kaderDetail.posyandu.kelurahan'])
             ->where('role', 'kader');
+
+        if (!empty($filter['search'])) {
+            $search = $filter['search'];
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        if (!empty($filter['kelurahan_id'])) {
+            $query->whereHas('kaderDetail.posyandu.kelurahan', function ($q) use ($filter) {
+                $q->where('id', $filter['kelurahan_id']);
+            });
+        }
+
+        if (!empty($filter['posyandu_id'])) {
+            $query->whereHas('kaderDetail.posyandu', function ($q) use ($filter) {
+                $q->where('id', $filter['posyandu_id']);
+            });
+        }
 
         $kaders = $query->get();
 
@@ -53,16 +70,27 @@ class MonitoringHelper extends Helper
                     ->unique()
                     ->values();
 
-                $anggota = $skr->keluarga->anggota->map(function ($agt) use ($kategori, &$totalNik) {
+                $anggota = $skr->keluarga->anggota->map(function ($agt) use ($items, &$totalNik) {
+
+                    $skriningNik = $items
+                        ->flatMap(fn($s) => $s->jawaban)
+                        ->firstWhere('anggota_keluarga_id', $agt->id);
+
+                    $sudahSkrining = $skriningNik ? true : false;
+
+                    if (!$sudahSkrining) {
+                        return null;
+                    }
 
                     $totalNik++;
 
                     return [
-                        'nik' => $agt->nik ?? null,
-                        'nama' => $agt->nama ?? null,
-                        'siklus' => $kategori->implode(', ')
+                        'nik' => $agt->nik,
+                        'nama' => $agt->nama,
+                        'siklus' => optional($skriningNik->pertanyaan->section->kategori)->nama_kategori,
+                        'sudah_skrining' => true
                     ];
-                });
+                })->filter()->values();
 
                 return [
                     'no_kk' => $skr->keluarga->no_kk,
@@ -80,7 +108,7 @@ class MonitoringHelper extends Helper
                 'posyandu' => optional($kader->kaderDetail->posyandu)->nama_posyandu,
 
                 'jumlah_skrining_kk' => $skrining->count(),
-                'jumlah_nik' => $totalNik,
+                'jumlah_skrining_nik' => $totalNik,
 
                 'detail' => $keluarga
             ];
@@ -130,22 +158,17 @@ class MonitoringHelper extends Helper
                 $keluarga = $skr->keluarga;
 
                 $anggota = $keluarga->anggota->map(function ($agt) use ($items) {
+                    $skriningNik = $items->flatMap(fn($s) => $s->jawaban)
+                        ->firstWhere('anggota_keluarga_id', $agt->id);
 
-                    $kategori = $items
-                        ->flatMap(function ($s) use ($agt) {
-                            return $s->jawaban
-                                ->where('anggota_keluarga_id', $agt->id)
-                                ->filter(function ($jawaban) {
-                                    return optional($jawaban->pertanyaan->section->kategori)->target_skrining === 'nik';
-                                })
-                                ->pluck('pertanyaan.section.kategori.nama_kategori');
-                        })
-                        ->filter()
-                        ->unique()
-                        ->values();
+                    if (!$skriningNik) {
+                        return null; 
+                    }
+
+                    $kategori = optional($skriningNik->pertanyaan->section->kategori)->nama_kategori ?? '-';
 
                     return [
-                        'siklus' => $kategori->implode(', '),
+                        'siklus' => $kategori,
                         'no_nik' => $agt->nik,
                         'nama_lengkap' => $agt->nama,
                         'tempat_lahir' => $agt->tempat_lahir,
@@ -154,9 +177,10 @@ class MonitoringHelper extends Helper
                         'pekerjaan' => $agt->pekerjaan,
                         'pendidikan_terakhir' => $agt->pendidikan_terakhir,
                         'hubungan_keluarga' => $agt->hubungan_keluarga,
-                        'status_perkawinan' => $agt->status_perkawinan
+                        'status_perkawinan' => $agt->status_perkawinan,
+                        'sudah_skrining' => true
                     ];
-                });
+                })->filter()->values();
 
                 $alamat = $keluarga->is_luar_wilayah
                     ? $keluarga->alamat_ktp
@@ -173,7 +197,7 @@ class MonitoringHelper extends Helper
                 return [
                     'no_kk' => $keluarga->no_kk,
                     'kepala_keluarga' => optional($keluarga->kepalaKeluarga)->nama,
-                    'jumlah_nik' => $keluarga->anggota->count(),
+                    'jumlah_nik' => $anggota->count(), 
                     'alamat' => $alamat,
                     'rt' => $rt,
                     'rw' => $rw,
@@ -236,7 +260,6 @@ class MonitoringHelper extends Helper
                 'pos.nama_posyandu',
                 'kat.nama_kategori'
             )
-            ->orderByDesc('jumlah_nik')
             ->get();
 
         $data = $result
@@ -244,7 +267,6 @@ class MonitoringHelper extends Helper
                 return $item->nama_kelurahan . '|' . $item->nama_posyandu;
             })
             ->map(function ($items) {
-
                 $first = $items->first();
 
                 return [
@@ -259,6 +281,18 @@ class MonitoringHelper extends Helper
                 ];
             })
             ->values();
+
+        if (!empty($filter['sort'])) {
+            if ($filter['sort'] === 'Terbanyak → Terkecil') {
+                $data = $data->sortByDesc(function ($item) {
+                    return collect($item['siklus'])->sum('jumlah_nik');
+                })->values();
+            } elseif ($filter['sort'] === 'Terkecil → Terbanyak') {
+                $data = $data->sortBy(function ($item) {
+                    return collect($item['siklus'])->sum('jumlah_nik');
+                })->values();
+            }
+        }
 
         return [
             'status' => true,

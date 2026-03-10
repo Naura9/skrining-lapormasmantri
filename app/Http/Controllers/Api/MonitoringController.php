@@ -18,6 +18,7 @@ class MonitoringController extends Controller
     public function monitoringKader(Request $request)
     {
         $filter = $request->only([
+            'search',
             'kelurahan_id',
             'posyandu_id'
         ]);
@@ -44,7 +45,8 @@ class MonitoringController extends Controller
         $filter = $request->only([
             'siklus_id',
             'kelurahan_id',
-            'posyandu_id'
+            'posyandu_id',
+            'sort'
         ]);
 
         $result = $this->monitoringHelper->monitoringNikPerSiklus($filter);

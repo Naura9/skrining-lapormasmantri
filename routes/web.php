@@ -19,6 +19,10 @@ Route::view('/pertanyaan-nik', 'admin.fitur.skrining.pertanyaan_nik.index')->nam
 
 Route::view('/data-wilayah', 'admin.fitur.data_wilayah.index')->name('admin.fitur.data_wilayah');
 
+Route::view('/monitoring-kader', 'admin.fitur.monitoring.kader')->name('admin.fitur.monitoring.kader');
+Route::view('/monitoring-nik-per-siklus', 'admin.fitur.monitoring.nik_per_siklus')->name('admin.fitur.monitoring.nik_per_siklus');
+Route::view('/monitoring-nik-per-kk', 'admin.fitur.monitoring.nik_per_kk')->name('admin.fitur.monitoring.nik_per_kk');
+
 
 //kader
 Route::view('/skrining-kk', 'kader.fitur.skrining.skrining_kk')->name('kader.fitur.skrining_kk');

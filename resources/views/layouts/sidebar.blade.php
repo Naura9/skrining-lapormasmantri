@@ -222,8 +222,69 @@
                     <span>Skrining NIK</span>
                 </a>
             </li>
-            
         </ul>
+
+        <a href="{{ route('admin.fitur.monitoring.kader') }}"
+            class="group flex items-center gap-2 px-2 py-2.5 rounded-lg transition
+            {{ request()->routeIs('admin.fitur.monitoring.kader') 
+                ? 'bg-[#61359C]/65 text-white font-semibold' 
+                : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
+
+            <i class="fa-solid fa-user-group text-lg
+            {{ request()->routeIs('admin.fitur.monitoring.kader') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+            </i>
+            <span>Monitoring Kader</span>
+        </a>
+
+        @php
+        $isMonitoringActive = request()->routeIs([
+        'admin.monitoring',
+        'admin.monitoring.nik_per_siklus',
+        'admin.monitoring.nik_per_kk',
+        ]);
+        @endphp
+
+        <a href="#" id="monitoringMenuToggle"
+            class="group flex items-center justify-between gap-1.5 px-2 py-2.5 rounded-lg transition font-semibold
+                {{ $isMonitoringActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+            <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-simple text-lg transition
+                    {{ $isMonitoringActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                </i>
+                <span class="ml-0.5">Monitoring</span>
+            </div>
+        </a>
+
+        <ul id="monitoringSubMenu" class="pl-5 mt-1 space-y-1 {{ $isMonitoringActive ? 'block' : 'hidden' }}">
+            <li>
+                <a href="{{ route('admin.fitur.monitoring.nik_per_kk') }}"
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                {{ request()->routeIs('admin.fitur.monitoring.nik_per_kk')
+                ? 'bg-[#61359C]/65 text-white'
+                : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                    <i class="fa-solid fa-people-group text-lg
+                {{ request()->routeIs('admin.fitur.monitoring.nik_per_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+                    <span>NIK Per KK</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.fitur.monitoring.nik_per_siklus') }}"
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                {{ request()->routeIs('admin.fitur.monitoring.nik_per_siklus')
+                    ? 'bg-[#61359C]/65 text-white'
+                    : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                    <i class="fa-solid fa-circle-notch text-lg
+                {{ request()->routeIs('admin.fitur.monitoring.nik_per_siklus') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+                    <span>NIK Per Siklus</span>
+                </a>
+            </li>
+        </ul>
+
     </nav>
 
 </aside>
@@ -258,5 +319,13 @@
     kaderSkriningMenuToggle.addEventListener('click', (e) => {
         e.preventDefault();
         kaderSkriningSubMenu.classList.toggle('hidden');
+    });
+
+    const monitoringMenuToggle = document.getElementById('monitoringMenuToggle');
+    const monitoringSubMenu = document.getElementById('monitoringSubMenu');
+
+    monitoringMenuToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        monitoringSubMenu.classList.toggle('hidden');
     });
 </script>
