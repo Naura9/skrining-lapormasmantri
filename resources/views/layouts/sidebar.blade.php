@@ -100,6 +100,7 @@
         'admin.skrining.kategori',
         'admin.skrining.pertanyaan_kk',
         'admin.skrining.pertanyaan_nik',
+        'admin.monitoring.hasil_skrining',
         ]);
         @endphp
 
@@ -156,6 +157,20 @@
                     </i>
 
                     <span>Pertanyaan NIK</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.fitur.monitoring.hasil_skrining') }}"
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.monitoring.hasil_skrining')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                    <i class="fa-solid fa-user text-lg
+                        {{ request()->routeIs('admin.fitur.monitoring.hasil_skrining') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+
+                    <span>Hasil Skrining</span>
                 </a>
             </li>
         </ul>
@@ -284,7 +299,6 @@
                 </a>
             </li>
         </ul>
-
     </nav>
 
 </aside>

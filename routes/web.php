@@ -22,6 +22,7 @@ Route::view('/data-wilayah', 'admin.fitur.data_wilayah.index')->name('admin.fitu
 Route::view('/monitoring-kader', 'admin.fitur.monitoring.kader')->name('admin.fitur.monitoring.kader');
 Route::view('/monitoring-nik-per-siklus', 'admin.fitur.monitoring.nik_per_siklus')->name('admin.fitur.monitoring.nik_per_siklus');
 Route::view('/monitoring-nik-per-kk', 'admin.fitur.monitoring.nik_per_kk')->name('admin.fitur.monitoring.nik_per_kk');
+Route::view('/hasil-skrining', 'admin.fitur.monitoring.hasil_skrining')->name('admin.fitur.monitoring.hasil_skrining');
 
 
 //kader

@@ -162,7 +162,7 @@ class MonitoringHelper extends Helper
                         ->firstWhere('anggota_keluarga_id', $agt->id);
 
                     if (!$skriningNik) {
-                        return null; 
+                        return null;
                     }
 
                     $kategori = optional($skriningNik->pertanyaan->section->kategori)->nama_kategori ?? '-';
@@ -197,7 +197,7 @@ class MonitoringHelper extends Helper
                 return [
                     'no_kk' => $keluarga->no_kk,
                     'kepala_keluarga' => optional($keluarga->kepalaKeluarga)->nama,
-                    'jumlah_nik' => $anggota->count(), 
+                    'jumlah_nik' => $anggota->count(),
                     'alamat' => $alamat,
                     'rt' => $rt,
                     'rw' => $rw,
@@ -335,7 +335,6 @@ class MonitoringHelper extends Helper
         $data = $skrining
             ->groupBy('user_id')
             ->map(function ($kaderItems) {
-
                 $kader = optional($kaderItems->first()->kader)->name;
 
                 $unitGroup = $kaderItems->groupBy(function ($item) {
@@ -343,78 +342,134 @@ class MonitoringHelper extends Helper
                 });
 
                 $unitList = $unitGroup->map(function ($unitItems) {
-
                     $unit = optional($unitItems->first()->keluarga->unitRumah);
+
+                    $tanggalKK = null;
+
+                    foreach ($unitItems as $skr) {
+                        foreach ($skr->jawaban as $jawaban) {
+                            $target = optional($jawaban->pertanyaan->section->kategori)->target_skrining;
+
+                            if ($target === 'kk') {
+                                $tanggalKK = $skr->tanggal_skrining;
+                                break 2;
+                            }
+                        }
+                    }
 
                     $keluargaGroup = $unitItems->groupBy('keluarga_id');
 
                     $keluarga = $keluargaGroup->map(function ($kkItems) {
-
-                        $skriningList = $kkItems->map(function ($skr) {
-
-                            $sections = $skr->jawaban
-                                ->groupBy(function ($jawaban) {
-                                    return optional($jawaban->pertanyaan->section)->judul_section;
-                                })
-                                ->map(function ($items, $sectionName) {
-
-                                    $kategori = optional($items->first()->pertanyaan->section->kategori);
-
-                                    $target = $kategori->target_skrining;
-                                    $siklus = $kategori->nama_kategori ?? null;
-
-                                    $pertanyaan = $items->map(function ($jawaban) use ($target) {
-
-                                        $data = [
-                                            'pertanyaan' => optional($jawaban->pertanyaan)->pertanyaan,
-                                            'jawaban' => $jawaban->value_jawaban
-                                        ];
-
-                                        if ($target === 'nik') {
-                                            $data['nik'] = optional($jawaban->anggota)->nik;
-                                            $data['nama_anggota'] = optional($jawaban->anggota)->nama;
-                                        }
-
-                                        return $data;
-                                    });
+                        $skriningList = $kkItems
+                            ->flatMap(function ($skr) {
+                                return $skr->jawaban->map(function ($jawaban) use ($skr) {
+                                    $kategori = optional($jawaban->pertanyaan->section->kategori);
 
                                     return [
-                                        'siklus' => $siklus,
-                                        'judul_section' => $sectionName,
-                                        'target_skrining' => $target,
-                                        'pertanyaan' => $pertanyaan->values()
+                                        'siklus' => $kategori->nama_kategori,
+                                        'target' => $kategori->target_skrining,
+                                        'jawaban' => $jawaban,
+                                        'skrining' => $skr
                                     ];
-                                })->values();
+                                });
+                            })
+                            ->groupBy(function ($item) {
+                                return $item['siklus'] . '|' . $item['target'];
+                            })
+                            ->map(function ($groupItems) {
+                                $siklusName = $groupItems->first()['siklus'];
+                                $target = $groupItems->first()['target'];
 
-                            return [
-                                'tanggal_skrining' => $skr->tanggal_skrining,
-                                'section' => $sections
-                            ];
-                        });
+                                if ($target === 'nik') {
+                                    $anggotaGroup = collect($groupItems)
+                                        ->groupBy(function ($item) {
+                                            return optional($item['jawaban']->anggota)->id;
+                                        })
+                                        ->map(function ($items) {
+
+                                            $first = $items->first();
+                                            $agt = $first['jawaban']->anggota;
+                                            $tanggal = optional($first['skrining'])->tanggal_skrining;
+
+                                            return [
+                                                'id' => $agt->id,
+                                                'nama' => $agt->nama,
+                                                'tanggal_skrining_nik' => $tanggal,
+                                                'pertanyaan' => collect($items)->map(function ($i) {
+                                                    return [
+                                                        'section' => optional($i['jawaban']->pertanyaan->section)->judul_section,
+                                                        'pertanyaan' => optional($i['jawaban']->pertanyaan)->pertanyaan,
+                                                        'jawaban' => $i['jawaban']->value_jawaban
+                                                    ];
+                                                })->values()
+                                            ];
+                                        })
+                                        ->values();
+
+                                    return [
+                                        'siklus' => $siklusName,
+                                        'target_skrining' => $target,
+                                        'anggota' => $anggotaGroup
+                                    ];
+                                }
+
+                                return [
+                                    'siklus' => $siklusName,
+                                    'target_skrining' => $target,
+                                    'pertanyaan' => collect($groupItems)->map(function ($item) {
+                                        return [
+                                            'section' => optional($item['jawaban']->pertanyaan->section)->judul_section,
+                                            'pertanyaan' => optional($item['jawaban']->pertanyaan)->pertanyaan,
+                                            'jawaban' => $item['jawaban']->value_jawaban
+                                        ];
+                                    })->values()
+                                ];
+                            })
+                            ->values();
 
                         $keluarga = $kkItems->first()->keluarga;
                         $kepala = optional($keluarga->kepalaKeluarga);
+
+                        $anggota = $keluarga->anggota->map(function ($agt) {
+                            return [
+                                'id' => $agt->id,
+                                'nama' => $agt->nama,
+                                'nik' => $agt->nik,
+                                'tempat_lahir' => $agt->tempat_lahir,
+                                'tanggal_lahir' => $agt->tanggal_lahir,
+                                'jenis_kelamin' => $agt->jenis_kelamin,
+                                'hubungan_keluarga' => $agt->hubungan_keluarga,
+                                'status_perkawinan' => $agt->status_perkawinan,
+                                'pendidikan_terakhir' => $agt->pendidikan_terakhir,
+                                'pekerjaan' => $agt->pekerjaan,
+                            ];
+                        });
 
                         return [
                             'no_kk' => $keluarga->no_kk,
                             'kepala_keluarga' => $kepala->nama,
                             'nik_kepala_keluarga' => $kepala->nik,
+                            'no_telepon' => $keluarga->no_telepon,
                             'jumlah_anggota' => $keluarga->anggota->count(),
-                            'skrining' => $skriningList->values()
+                            'anggota' => $anggota->values(),
+                            'skrining' => $skriningList
                         ];
                     });
 
                     return [
+                        'tanggal_skrining_kk' => $tanggalKK,
                         'kelurahan' => optional($unit->posyandu->kelurahan)->nama_kelurahan,
                         'posyandu' => optional($unit->posyandu)->nama_posyandu,
                         'alamat_unit' => $unit->alamat,
                         'rt_unit' => $unit->rt,
                         'rw_unit' => $unit->rw,
+                        'jumlah_kk' => $keluarga->count(),
                         'keluarga' => $keluarga->values()
                     ];
                 });
 
                 return [
+                    'id' => $kaderItems->first()->user_id,
                     'nama_kader' => $kader,
                     'unit_rumah' => $unitList->values()
                 ];
