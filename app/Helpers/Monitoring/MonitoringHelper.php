@@ -3,8 +3,13 @@
 namespace App\Helpers\Monitoring;
 
 use App\Helpers\Helper;
+use App\Models\AnggotaKeluargaModel;
+use App\Models\JawabanModel;
+use App\Models\KeluargaModel;
 use App\Models\SkriningModel;
+use App\Models\UnitModel;
 use App\Models\User\UserModel;
+use Illuminate\Support\Facades\DB;
 
 class MonitoringHelper extends Helper
 {
@@ -57,6 +62,19 @@ class MonitoringHelper extends Helper
 
             $keluarga = $skrining->map(function ($items) use (&$totalNik) {
                 $skr = $items->first();
+                $keluarga = $skr->keluarga;
+
+                $alamat = $keluarga->is_luar_wilayah
+                    ? $keluarga->alamat_ktp
+                    : optional($keluarga->unitRumah)->alamat;
+
+                $rt = $keluarga->is_luar_wilayah
+                    ? $keluarga->rt_ktp
+                    : optional($keluarga->unitRumah)->rt;
+
+                $rw = $keluarga->is_luar_wilayah
+                    ? $keluarga->rw_ktp
+                    : optional($keluarga->unitRumah)->rw;
 
                 $kategori = $items
                     ->flatMap(function ($s) {
@@ -97,6 +115,10 @@ class MonitoringHelper extends Helper
                     'kepala_keluarga' => optional($skr->keluarga->kepalaKeluarga)->nama,
                     'jumlah_skrining' => $items->count(),
                     'tanggal_skrining_terakhir' => $items->max('tanggal_skrining'),
+                    'is_luar_wilayah' => $keluarga->is_luar_wilayah,
+                    'alamat' => $alamat,
+                    'rt' => $rt,
+                    'rw' => $rw,
                     'anggota' => $anggota
                 ];
             })->values();
@@ -324,9 +346,22 @@ class MonitoringHelper extends Helper
             });
         }
 
-        if (!empty($filter['siklus_id'])) {
-            $query->whereHas('jawaban.pertanyaan.section.kategori', function ($q) use ($filter) {
-                $q->where('id', $filter['siklus_id']);
+        if (!empty($filter['search'])) {
+            $search = $filter['search'];
+
+            $query->where(function ($q) use ($search) {
+
+                $q->whereHas('keluarga', function ($q2) use ($search) {
+                    $q2->where('no_kk', 'like', "%{$search}%")
+                        ->orWhereHas('kepalaKeluarga', function ($q3) use ($search) {
+                            $q3->where('nama', 'like', "%{$search}%");
+                        });
+                })
+
+                    ->orWhereHas('keluarga.anggota', function ($q2) use ($search) {
+                        $q2->where('nama', 'like', "%{$search}%")
+                            ->orWhere('nik', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -360,6 +395,21 @@ class MonitoringHelper extends Helper
                     $keluargaGroup = $unitItems->groupBy('keluarga_id');
 
                     $keluarga = $keluargaGroup->map(function ($kkItems) {
+                        $keluarga = $kkItems->first()->keluarga;
+                        $kepala = optional($keluarga->kepalaKeluarga);
+
+                        $alamat = $keluarga->is_luar_wilayah
+                            ? $keluarga->alamat_ktp
+                            : optional($keluarga->unitRumah)->alamat;
+
+                        $rt = $keluarga->is_luar_wilayah
+                            ? $keluarga->rt_ktp
+                            : optional($keluarga->unitRumah)->rt;
+
+                        $rw = $keluarga->is_luar_wilayah
+                            ? $keluarga->rw_ktp
+                            : optional($keluarga->unitRumah)->rw;
+
                         $skriningList = $kkItems
                             ->flatMap(function ($skr) {
                                 return $skr->jawaban->map(function ($jawaban) use ($skr) {
@@ -450,6 +500,12 @@ class MonitoringHelper extends Helper
                             'kepala_keluarga' => $kepala->nama,
                             'nik_kepala_keluarga' => $kepala->nik,
                             'no_telepon' => $keluarga->no_telepon,
+                            'alamat' => $alamat,
+
+                            'rt' => $rt,
+                            'rw' => $rw,
+                            'is_luar_wilayah' => $keluarga->is_luar_wilayah,
+
                             'jumlah_anggota' => $keluarga->anggota->count(),
                             'anggota' => $anggota->values(),
                             'skrining' => $skriningList
@@ -474,9 +530,264 @@ class MonitoringHelper extends Helper
                     'unit_rumah' => $unitList->values()
                 ];
             })->values();
+
         return [
             'status' => true,
             'data' => $data
         ];
+    }
+
+    public function chartHasilSkrining(array $filter = [])
+    {
+        $query = $this->skriningModel
+            ->with([
+                'keluarga.unitRumah.posyandu.kelurahan',
+                'keluarga.kepalaKeluarga',
+                'keluarga.anggota',
+                'jawaban.pertanyaan.section.kategori'
+            ]);
+
+        if (!empty($filter['kelurahan_id'])) {
+            $query->whereHas('keluarga.unitRumah.posyandu', function ($q) use ($filter) {
+                $q->where('kelurahan_id', $filter['kelurahan_id']);
+            });
+        }
+
+        if (!empty($filter['posyandu_id'])) {
+            $query->whereHas('keluarga.unitRumah', function ($q) use ($filter) {
+                $q->where('posyandu_id', $filter['posyandu_id']);
+            });
+        }
+
+        $skrining = $query->get();
+
+        $groupByUnit = $skrining->groupBy(function ($item) {
+            return optional($item->keluarga->unitRumah)->id;
+        });
+
+        $result = $groupByUnit->map(function ($items, $unitId) {
+            $first = $items->first();
+
+            $unit = $first->keluarga->unitRumah;
+            $kelurahan = optional($unit->posyandu->kelurahan)->nama_kelurahan;
+            $posyandu = optional($unit->posyandu)->nama_posyandu;
+
+            $listKK = $unit->keluarga->map(function ($keluarga) use ($first) {
+                $kepala = optional($keluarga->kepalaKeluarga);
+
+                return [
+                    'no_kk' => $keluarga->no_kk,
+                    'kepala_keluarga' => $kepala->nama,
+                    'nik_kepala_keluarga' => $kepala->nik,
+                    'no_telepon' => $keluarga->no_telepon,
+                    'alamat_ktp' => $keluarga->alamat_ktp, 
+                    'rt_ktp' => $keluarga->rt_ktp,
+                    'rw_ktp' => $keluarga->rw_ktp,
+                    'tanggal_skrining' => $first->tanggal_skrining,
+                ];
+            });
+
+            $jawabanKK = [];
+
+            foreach ($items as $skr) {
+                foreach ($skr->jawaban as $jwb) {
+                    $target = $jwb->pertanyaan->section->kategori->target_skrining
+                        ?? $jwb->pertanyaan->target_skrining
+                        ?? 'kk';
+
+                    if ($target === 'kk') {
+                        $jawabanKK[$jwb->pertanyaan_id] = [
+                            'pertanyaan_id' => $jwb->pertanyaan_id,
+                            'pertanyaan' => $jwb->pertanyaan->pertanyaan,
+                            'jawaban' => $jwb->value_jawaban
+                        ];
+                    }
+                }
+            }
+
+            $jawabanNIK = [];
+
+            foreach ($items as $skr) {
+                foreach ($skr->jawaban as $jwb) {
+                    $kategori = $jwb->pertanyaan->section->kategori;
+
+                    if (!$kategori || $kategori->target_skrining !== 'nik') {
+                        continue;
+                    }
+
+                    $anggotaId = $jwb->anggota_keluarga_id;
+
+                    if (!isset($jawabanNIK[$anggotaId])) {
+                        $jawabanNIK[$anggotaId] = [
+                            'siklus' => $kategori->nama_kategori,
+                            'jawaban' => []
+                        ];
+                    }
+
+                    $jawabanNIK[$anggotaId]['jawaban'][$jwb->pertanyaan_id] = [
+                        'pertanyaan_id' => $jwb->pertanyaan_id,
+                        'pertanyaan' => $jwb->pertanyaan->pertanyaan,
+                        'jawaban' => $jwb->value_jawaban
+                    ];
+                }
+            }
+
+            $jawabanNIK = array_values($jawabanNIK);
+
+            $dataNIK = $unit->keluarga->flatMap(function ($keluarga) use ($items) {
+                return $keluarga->anggota->map(function ($anggota) use ($items) {
+                    $jawabanAnggota = [];
+
+                    foreach ($items as $skr) {
+                        foreach ($skr->jawaban as $jwb) {
+
+                            $target = $jwb->pertanyaan->section->kategori->target_skrining
+                                ?? $jwb->pertanyaan->target_skrining
+                                ?? 'kk';
+
+                            if ($target === 'nik' && $jwb->anggota_keluarga_id === $anggota->id) {
+
+                                $kategori = optional($jwb->pertanyaan->section->kategori)->nama_kategori;
+
+                                $jawabanAnggota[] = [
+                                    'pertanyaan_id' => $jwb->pertanyaan_id,
+                                    'pertanyaan' => $jwb->pertanyaan->pertanyaan,
+                                    'jawaban' => $jwb->value_jawaban,
+                                    'kategori' => $kategori,
+                                ];
+                            }
+                        }
+                    }
+
+                    $siklusNama = null;
+                    if (!empty($jawabanAnggota)) {
+                        $siklusNama = $jawabanAnggota[0]['kategori'];
+                    }
+
+                    return [
+                        'nama' => $anggota->nama,
+                        'nik' => $anggota->nik,
+                        'tempat_lahir' => $anggota->tempat_lahir,
+                        'tanggal_lahir' => $anggota->tanggal_lahir,
+                        'jenis_kelamin' => $anggota->jenis_kelamin,
+                        'pendidikan_terakhir' => $anggota->pendidikan_terakhir,
+                        'hubungan_keluarga' => $anggota->hubungan_keluarga,
+                        'tanggal_skrining' => optional($items->first())->tanggal_skrining,
+                        'siklus' => $siklusNama,
+                        'jawaban' => $jawabanAnggota
+                    ];
+                });
+            });
+
+            return [
+                'unit_rumah' => $unitId,
+                'kelurahan' => $kelurahan,
+                'posyandu' => $posyandu,
+                'tanggal_skrining' => $first->tanggal_skrining,
+                'alamat_unit' => $unit->alamat, 
+                'rt_unit' => $unit->rt,
+                'rw_unit' => $unit->rw,
+                'kk_di_unit' => $listKK,
+                'skrining_kk' => $jawabanKK,
+                'skrining_nik' => $dataNIK
+            ];
+        })->values();
+
+        return [
+            'status' => true,
+            'data' => $result
+        ];
+    }
+
+    public function updateUnitSkrining($unitId, $data)
+    {
+        DB::beginTransaction();
+
+        try {
+            SkriningModel::whereHas('keluarga', function ($q) use ($unitId) {
+                $q->where('unit_rumah_id', $unitId);
+            })->update([
+                'tanggal_skrining' => $data['tanggal_skrining'],
+                'user_id' => $data['user_id']
+            ]);
+
+            if (!empty($data['skrining_kk'])) {
+                foreach ($data['skrining_kk'] as $kk) {
+
+                    JawabanModel::whereNull('anggota_keluarga_id')
+                        ->whereHas('skrining', function ($q) use ($unitId) {
+                            $q->whereHas('keluarga', function ($q2) use ($unitId) {
+                                $q2->where('unit_rumah_id', $unitId);
+                            });
+                        })
+                        ->where('pertanyaan_id', $kk['pertanyaan_id'])
+                        ->update([
+                            'value_jawaban' => $kk['jawaban']
+                        ]);
+                }
+            }
+
+            if (!empty($data['unit'])) {
+                $unitData = $data['unit'];
+                UnitModel::where('id', $unitId)->update([
+                    'kelurahan_id' => $unitData['kelurahan_id'] ?? null,
+                    'posyandu_id'  => $unitData['posyandu_id'] ?? null,
+                    'alamat' => $unitData['alamat'] ?? null,
+                    'rt'     => $unitData['rt'] ?? null,
+                    'rw'     => $unitData['rw'] ?? null,
+                ]);
+            }
+
+            foreach ($data['keluarga'] as $kel) {
+                $identitas = $kel['identitas'] ?? [];
+
+                $isLuarWilayah = !empty($identitas['alamat']) && !empty($identitas['rt']) && !empty($identitas['rw']);
+
+                KeluargaModel::where('id', $kel['keluarga_id'])->update([
+                    'no_kk' => $identitas['no_kk'] ?? null,
+                    'alamat_ktp' => $identitas['alamat'] ?? null,
+                    'rt_ktp' => $identitas['rt'] ?? null,
+                    'rw_ktp' => $identitas['rw'] ?? null,
+                    'no_telepon' => $identitas['no_telepon'] ?? null,
+                    'is_luar_wilayah' => $isLuarWilayah
+                ]);
+
+                if (!empty($kel['skrining_nik'])) {
+                    foreach ($kel['skrining_nik'] as $nikData) {
+                        if (!empty($nikData['identitas'])) {
+                            AnggotaKeluargaModel::where('id', $nikData['anggota_id'])
+                                ->update([
+                                    'nama'              => $nikData['identitas']['nama'] ?? null,
+                                    'nik'               => $nikData['identitas']['nik'] ?? null,
+                                    'tempat_lahir'      => $nikData['identitas']['tempat_lahir'] ?? null,
+                                    'tanggal_lahir'     => $nikData['identitas']['tanggal_lahir'] ?? null,
+                                    'jenis_kelamin'     => $nikData['identitas']['jenis_kelamin'] ?? null,
+                                    'hubungan_keluarga' => $nikData['identitas']['hubungan_keluarga'] ?? null,
+                                    'pendidikan_terakhir' => $nikData['identitas']['pendidikan_terakhir'] ?? null,
+                                    'pekerjaan'         => $nikData['identitas']['pekerjaan'] ?? null,
+                                    'status_perkawinan' => $nikData['identitas']['status_perkawinan'] ?? null,
+                                ]);
+                        }
+
+                        foreach ($nikData['jawaban_list'] as $n) {
+                            JawabanModel::whereHas('skrining', function ($q) use ($kel) {
+                                $q->where('keluarga_id', $kel['keluarga_id']);
+                            })
+                                ->where('anggota_keluarga_id', $nikData['anggota_id'])
+                                ->where('pertanyaan_id', $n['pertanyaan_id'])
+                                ->update([
+                                    'value_jawaban' => $n['jawaban']
+                                ]);
+                        }
+                    }
+                }
+            }
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 }

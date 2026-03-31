@@ -159,7 +159,7 @@
                             <div class="flex justify-between items-center">
                                 <span></span>
                                 ${kkData.is_luar_wilayah 
-                                    ? `<span class="text-xs font-semibold text-white bg-red-500 px-2 py-0.5 rounded">Luar Wilayah</span>` 
+                                    ? `<span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full">Luar Wilayah</span>` 
                                     : ''}
                             </div>
 

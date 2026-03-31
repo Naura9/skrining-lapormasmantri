@@ -9,7 +9,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-center gap-4 mb-5 flex-wrap">
         <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <input id="searchInput" type="text"
-                placeholder="Cari berdasarkan nama hasil..."
+                placeholder="Cari nama, No KK, atau NIK..."
                 class="h-9 bg-white border border-[#00000033] rounded-lg px-3 text-sm
                    focus:outline-none focus:ring-2 focus:ring-[#61359C]/50 w-full sm:w-70">
 
@@ -32,6 +32,14 @@
                    border border-[#00000033] px-3 rounded-lg text-sm
                    hover:bg-[#61359C]/80 transition w-full sm:w-auto">
                 <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+
+            <button id="downloadSkriningBtn"
+                class="h-9 flex items-center gap-2 bg-[#61359C] text-white
+                    text-sm px-4 rounded-lg hover:bg-[#61359C]/80
+                    transition w-full sm:w-auto justify-center">
+                <i class="fa-solid fa-file-excel"></i>
+                Export Excel
             </button>
 
             <input type="hidden" id="kelurahan_id" value="">
@@ -147,11 +155,10 @@
                                 Detail
                             </button>
                             
-                            <button
-                                onclick="openKelurahanModal('edit', '${item.id}')"
+                            <a href="/hasil-skrining/${item.id}/edit"
                                 class="px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition">
                                 Edit
-                            </button>
+                            </a>
 
                             <button
                                 class="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-btn"
@@ -410,7 +417,14 @@
                                 <div class="flex items-center justify-between cursor-pointer
                                     font-semibold text-[#61359C] bg-[#61359C]/22 px-2 py-1 rounded-lg"
                                     data-target="kk-${index}">
-                                    <span>KK ${index + 1}</span>
+                                    <div class="flex items-center justify-between w-full">
+                                        <span>KK ${index + 1}</span>
+                                        ${kk.is_luar_wilayah 
+                                            ? `<span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full mr-3">
+                                                Luar Wilayah
+                                            </span>` 
+                                            : ''}
+                                    </div>
                                     <i class="fa-solid fa-chevron-down transition-transform duration-200"></i>
                                 </div>
 
@@ -435,6 +449,18 @@
                                             <span class="font-semibold">No Telepon</span>
                                             <span>: ${kk.no_telepon ?? '-'}</span>
                                         </div>
+
+                                        ${kk.is_luar_wilayah ? `
+                                            <div class="grid grid-cols-[120px_1fr]">
+                                                <span class="font-semibold">Alamat KTP</span>
+                                                <span>: ${kk.alamat ?? '-'}</span>
+                                            </div>
+
+                                            <div class="grid grid-cols-[120px_1fr]">
+                                                <span class="font-semibold">RT / RW KTP</span>
+                                                <span>: ${kk.rt ?? '-'} / ${kk.rw ?? '-'}</span>
+                                            </div>
+                                        ` : ''}
                                     </div>
 
                                     ${skriningHtml}
@@ -601,6 +627,10 @@
                 console.error("Gagal memuat data:", err);
             }
         }
+
+        document.getElementById("downloadSkriningBtn").addEventListener("click", () => {
+            window.location.href = "{{ url('/download/hasil-skrining') }}";
+        });
 
         fetchHasil();
         loadKelurahan();

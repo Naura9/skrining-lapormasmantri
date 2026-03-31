@@ -124,46 +124,25 @@ class IdentitasAnggotaHelper extends Helper
         DB::beginTransaction();
 
         try {
+            $anggota = AnggotaKeluargaModel::findOrFail($id);
 
-            $unit = UnitModel::findOrFail($id);
-
-            $unit->update([
-                'kelurahan_id' => $payload['kelurahan_id'],
-                'posyandu_id'  => $payload['posyandu_id'],
-                'alamat'       => $payload['alamat'],
-                'rt'           => $payload['rt'],
-                'rw'           => $payload['rw'],
+            $anggota->update([
+                'nama'               => $payload['nama'],
+                'nik'                => $payload['nik'],
+                'tempat_lahir'       => $payload['tempat_lahir'],
+                'tanggal_lahir'      => $payload['tanggal_lahir'],
+                'jenis_kelamin'      => $payload['jenis_kelamin'],
+                'hubungan_keluarga'  => $payload['hubungan_keluarga'],
+                'status_perkawinan'  => $payload['status_perkawinan'],
+                'pendidikan_terakhir' => $payload['pendidikan_terakhir'],
+                'pekerjaan'          => $payload['pekerjaan'],
             ]);
-
-            foreach ($unit->keluarga as $kel) {
-                AnggotaKeluargaModel::where('keluarga_id', $kel->id)->delete();
-                $kel->delete();
-            }
-
-            foreach ($payload['keluarga'] as $item) {
-
-                $nik  = $item['nik_kepala_keluarga'];
-                $nama = $item['nama_kepala_keluarga'];
-
-                unset($item['nik_kepala_keluarga'], $item['nama_kepala_keluarga']);
-
-                $item['unit_rumah_id'] = $unit->id;
-
-                $keluarga = KeluargaModel::create($item);
-
-                AnggotaKeluargaModel::create([
-                    'keluarga_id' => $keluarga->id,
-                    'nama' => $nama,
-                    'nik' => $nik,
-                    'hubungan_keluarga' => 'Kepala Keluarga'
-                ]);
-            }
 
             DB::commit();
 
             return [
                 'status' => true,
-                'data' => $unit->fresh('keluarga.kepalaKeluarga')
+                'data' => $anggota
             ];
         } catch (Throwable $th) {
 

@@ -14,7 +14,7 @@ class SkriningController extends Controller
 
     public function __construct()
     {
-        $this->skriningHelper= new SkriningHelper();
+        $this->skriningHelper = new SkriningHelper();
     }
 
     public function index(Request $request)
@@ -87,4 +87,5 @@ class SkriningController extends Controller
 
         return response()->success($skrining, 'Skrining berhasil dihapus');
     }
+
 }

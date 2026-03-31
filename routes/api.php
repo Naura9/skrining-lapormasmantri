@@ -94,12 +94,15 @@ Route::get('/skrining/{id}', [SkriningController::class, 'show']);
 Route::post('/skrining', [SkriningController::class, 'store']);
 Route::put('/skrining', [SkriningController::class, 'update']);
 Route::delete('/skrining/{id}', [SkriningController::class, 'destroy']);
+Route::put('/skrining/{id}', [SkriningController::class, 'update']);
 
 Route::get('/monitoring/kader', [MonitoringController::class, 'monitoringKader']);
 Route::get('/monitoring/nik-per-kk', [MonitoringController::class, 'monitoringNikPerKk']);
 Route::get('/monitoring/nik-per-siklus', [MonitoringController::class, 'monitoringNikPerSiklus']);
 Route::get('/monitoring/hasil-skrining', [MonitoringController::class, 'monitoringHasilSkrining']);
-
+Route::get('/download/hasil-skrining', [MonitoringController::class, 'exportHasilSkrining']);
+Route::get('/monitoring/hasil-skrining-chart', [MonitoringController::class, 'chartHasilSkrining']);
+Route::put('/monitoring/hasil-skrining/{unit_id}', [MonitoringController::class, 'updateUnit']);
 Route::get('/', function () {
     return response()->failed(['Endpoint yang anda minta tidak tersedia']);
 });

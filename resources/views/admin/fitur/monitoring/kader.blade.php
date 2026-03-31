@@ -221,9 +221,16 @@
                         detailBody.innerHTML += `
                         <div class="overflow-hidden">
                             <div class="flex items-center justify-between cursor-pointer toggle-kk 
-                                font-semibold text-[#61359C] bg-[#61359C]/10 px-2 py-1 rounded-lg"
+                                font-semibold px-2 py-1 rounded-lg bg-[#61359C]/10 text-[#61359C]"
                                 data-target="kk-${index}">
-                                <span>KK ${index + 1}</span>
+                                <div class="flex items-center justify-between w-full">
+                                    <span>KK ${index + 1}</span>
+                                    ${kk.is_luar_wilayah 
+                                        ? `<span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full mr-3">
+                                            Luar Wilayah
+                                        </span>` 
+                                        : ''}
+                                </div>
                                 <i class="fa-solid fa-chevron-down transition-transform duration-200"></i>
                             </div>
 
@@ -240,29 +247,30 @@
                                     <span class="font-medium text-gray-700">Jumlah NIK</span>
                                     <span>: ${kk.anggota?.length ?? 0}</span>
                                 </div>
-
-                                ${siklusHtml} <!-- NIK per siklus -->
+                                ${kk.is_luar_wilayah ? `
+                                    <div class="grid grid-cols-[120px_1fr]">
+                                        <span class="font-medium text-gray-700">Alamat KTP</span>
+                                        <span>: ${kk.alamat ?? '-'}</span>
+                                    </div>
+                                    <div class="grid grid-cols-[120px_1fr]">
+                                        <span class="font-medium text-gray-700">RT / RW KTP</span>
+                                        <span>: ${kk.rt ?? '-'} / ${kk.rw ?? '-'}</span>
+                                    </div>
+                                ` : ''}
+                                ${siklusHtml} 
                             </div>
                         </div>
                         `;
                     });
 
                     setTimeout(() => {
-                        document.querySelectorAll(".toggle-kk").forEach(btn => {
+                        document.querySelectorAll("[data-target]").forEach(btn => {
                             btn.onclick = () => {
                                 const el = document.getElementById(btn.dataset.target);
                                 const icon = btn.querySelector("i");
-                                el.classList.toggle("hidden");
-                                icon.classList.toggle("rotate-180");
-                            };
-                        });
 
-                        document.querySelectorAll(".toggle-siklus").forEach(btn => {
-                            btn.onclick = () => {
-                                const el = document.getElementById(btn.dataset.target);
-                                const icon = btn.querySelector("i");
-                                el.classList.toggle("hidden");
-                                icon.classList.toggle("rotate-180");
+                                if (el) el.classList.toggle("hidden");
+                                if (icon) icon.classList.toggle("rotate-180");
                             };
                         });
                     }, 50);
