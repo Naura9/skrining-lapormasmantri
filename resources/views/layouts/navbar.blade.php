@@ -1,4 +1,4 @@
-<header class="fixed top-0 inset-x-0 h-12 bg-white border-b border-[#00000033]">
+<header class="fixed top-0 inset-x-0 h-12 bg-[#61359C]/30 border-b border-[#00000033]">
     <div class="flex items-center justify-between h-full px-4">
 
         <div class="flex items-center gap-3">

@@ -28,6 +28,8 @@ Route::get('/download/hasil-skrining', [MonitoringController::class, 'exportHasi
 
 
 //kader
+Route::view('/dashboard-kader', 'kader.dashboard_kader')->name('kader.dashboard_kader');
+
 Route::view('/skrining-kk', 'kader.fitur.skrining.skrining_kk')->name('kader.fitur.skrining_kk');
 Route::view('/skrining-nik', 'kader.fitur.skrining.skrining_nik')->name('kader.fitur.skrining_nik');
 

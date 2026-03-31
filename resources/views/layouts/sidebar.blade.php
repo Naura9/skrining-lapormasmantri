@@ -1,16 +1,11 @@
-<div class="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b">
-    <h1 class="text-xl font-bold">LAPOR</h1>
-    <button id="menu-toggle" class="p-2 rounded-md hover:bg-gray-100">
-        <i class="fa-solid fa-bars"></i>
-    </button>
-</div>
-
 <aside id="sidebar"
     class="fixed top-0 left-0 h-full w-64 bg-white border-r border-[#00000033] flex flex-col
            transform -translate-x-full md:translate-x-0 transition z-50">
 
-    <div class="px-6 py-5 hidden md:block">
-        <h1 class="text-2xl font-bold leading-tight">
+   <div class="px-6 py-5 hidden md:flex items-center space-x-2">
+        <img src="/logo_puskesmas.png" alt="Logo Puskesmas" class="w-15 h-15 object-contain">
+        
+        <h1 class="text-xl font-bold leading-tight">
             LAPOR<br>MAS MANTRI
         </h1>
     </div>
@@ -23,9 +18,21 @@
                 : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
 
             <i class="fa-solid fa-house text-lg 
-            {{ request()->routeIs('dashboard') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                {{ request()->routeIs('dashboard') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
             </i>
             <span>Dashboard</span>
+        </a>
+
+        <a href="{{ route('kader.dashboard_kader') }}"
+            class="group flex items-center gap-2 px-2 py-2.5 rounded-lg transition
+            {{ request()->routeIs('kader.dashboard_kader') 
+                ? 'bg-[#61359C]/65 text-white font-semibold' 
+                : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
+
+            <i class="fa-solid fa-house text-lg 
+                {{ request()->routeIs('kader.dashboard_kader') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+            </i>
+            <span>Dashboard Kader</span>
         </a>
 
         @php

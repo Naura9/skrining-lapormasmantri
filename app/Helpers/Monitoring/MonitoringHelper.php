@@ -55,6 +55,7 @@ class MonitoringHelper extends Helper
                     'jawaban.pertanyaan.section.kategori'
                 ])
                 ->where('user_id', $kader->id)
+                ->orderBy('tanggal_skrining', 'desc')
                 ->get()
                 ->groupBy('keluarga_id');
 
@@ -105,6 +106,8 @@ class MonitoringHelper extends Helper
                     return [
                         'nik' => $agt->nik,
                         'nama' => $agt->nama,
+                        'jenis_kelamin' => $agt->jenis_kelamin,
+                        'hubungan_keluarga' => $agt->hubungan_keluarga,
                         'siklus' => optional($skriningNik->pertanyaan->section->kategori)->nama_kategori,
                         'sudah_skrining' => true
                     ];
@@ -580,7 +583,7 @@ class MonitoringHelper extends Helper
                     'kepala_keluarga' => $kepala->nama,
                     'nik_kepala_keluarga' => $kepala->nik,
                     'no_telepon' => $keluarga->no_telepon,
-                    'alamat_ktp' => $keluarga->alamat_ktp, 
+                    'alamat_ktp' => $keluarga->alamat_ktp,
                     'rt_ktp' => $keluarga->rt_ktp,
                     'rw_ktp' => $keluarga->rw_ktp,
                     'tanggal_skrining' => $first->tanggal_skrining,
@@ -684,7 +687,7 @@ class MonitoringHelper extends Helper
                 'kelurahan' => $kelurahan,
                 'posyandu' => $posyandu,
                 'tanggal_skrining' => $first->tanggal_skrining,
-                'alamat_unit' => $unit->alamat, 
+                'alamat_unit' => $unit->alamat,
                 'rt_unit' => $unit->rt,
                 'rw_unit' => $unit->rw,
                 'kk_di_unit' => $listKK,

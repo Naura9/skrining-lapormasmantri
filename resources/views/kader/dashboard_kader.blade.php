@@ -1,82 +1,32 @@
 @extends('layouts.main')
 
-@section('title', 'Dashboard')
+@section('title', 'Dashboard Kader')
 
 @section('content')
-<div class="flex flex-col gap-4 w-full max-w-3xl mx-auto p-4 text-base">
-    <div class="flex gap-3 w-full">
-        <button id="btnSkriningKK"
-            class="flex-1 h-10 bg-[#61359C] text-white font-semibold rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200">
-            Skrining KK
-        </button>
-        <button id="btnSkriningNIK"
-            class="flex-1 h-10 bg-[#61359C] text-white font-semibold rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200">
-            Skrining NIK
-        </button>
-    </div>
+<div class="flex flex-col gap-4 w-full max-w-4xl mx-auto text-base">
+    <div id="kaderCards" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
-    <x-dropdown
-        id="nikCategoryDropdown"
-        label="Pilih Siklus"
-        :options="[]"
-        width="w-full h-10"
-        data-dropdown="filter" />
-
-    <x-dropdown
-        id="pertanyaanFilterDropdown"
-        label="Cari Pertanyaan"
-        :options="[]"
-        width="w-full h-10"
-        data-dropdown="filter" />
-
-    <div class="flex gap-3 w-full flex-wrap">
-        <x-dropdown
-            id="kelurahanFilterDropdown"
-            label="Pilih Kelurahan"
-            :options="[]"
-            width="flex-1 h-10"
-            data-dropdown="filter" />
-
-        <x-dropdown
-            id="posyanduFilterDropdown"
-            label="Pilih Posyandu"
-            :options="[]"
-            width="flex-1 h-10"
-            data-dropdown="filter" />
-
-        <button id="searchBtn"
-            class="h-10 px-4 bg-[#61359C] text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200 flex items-center justify-center flex-none">
-            <i class="fa-solid fa-magnifying-glass mr-2"></i> Cari
-        </button>
-    </div>
-
-    <input type="hidden" id="skrining_type" value="">
-    <input type="hidden" id="pertanyaan_id" value="">
-    <input type="hidden" id="kelurahan_id" value="">
-    <input type="hidden" id="posyandu_id" value="">
-
-    <div id="noJawabanText" class="mt-4 text-center text-sm text-gray-500 hidden">
-        Tidak ada jawaban untuk pertanyaan ini
-    </div>
-
-    <div class="mt-4 mx-auto" style="width:250px; height:250px;">
-        <canvas id="jawabanPieChart"></canvas>
-    </div>
-
-    <div id="skriningTableContainer" class="mt-4 w-full overflow-x-auto text-sm"></div>
+    <div id="detailTableContainer" class="mt-3 hidden overflow-x-auto">
+    <table id="detailTable" class="min-w-[700px] w-full border-collapse table-auto text-left">
+        <thead class="bg-gray-100" id="detailTableHead"></thead>
+        <tbody id="detailTableBody"></tbody>
+    </table>
+</div>
 </div>
 
 <div id="skriningDetailModal" class="fixed inset-0 bg-slate-950/30 hidden items-center justify-center z-50 px-4">
-    <div class="bg-white rounded-xl shadow-lg w-full sm:w-11/12 md:w-10/12 lg:w-5/12 xl:w-4/12 max-w-3xl flex flex-col relative max-h-[90vh]">
+    <div class="bg-white rounded-xl shadow-lg 
+                w-full sm:w-11/12 md:w-10/12 lg:w-5/12 xl:w-4/12 
+                max-w-3xl flex flex-col relative max-h-[90vh]">
         <div class="w-full py-3 px-4">
-            <h3 id="skriningDetailModalTitle" class="text-lg font-bold">Detail</h3>
+            <h2 class="text-lg font-semibold">Detail</h2>
         </div>
 
-        <div id="skriningDetailBody" class="px-4 py-4 w-full space-y-2 text-sm overflow-y-auto" style="max-height: calc(90vh - 120px);">
-        </div>
+        <div id="skriningDetailBody" class="overflow-auto flex-1"></div>
 
-        <div class="flex justify-center px-4 py-3">
-            <button id="closeSkriningDetailModalBtn"
+        <div class="flex justify-center mt-4 mb-2 sm:mt-6 px-4">
+            <button
+                id="closeModalBtn"
                 class="w-full bg-[#61359C] text-white text-sm font-semibold py-2 rounded-lg hover:bg-[#61359C]/80 transition">
                 Tutup
             </button>
@@ -85,643 +35,251 @@
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        let pertanyaanData = [];
-        setDropdownDisabled('kelurahanFilterDropdown', true);
-        setDropdownDisabled('posyanduFilterDropdown', true);
+        const container = document.getElementById('kaderCards');
+        const tableContainer = document.getElementById('detailTableContainer');
+        const tableHead = document.getElementById('detailTableHead');
+        const tableBody = document.getElementById('detailTableBody');
 
-        async function loadPertanyaan() {
-            const res = await fetch("{{ url('api/pertanyaan') }}", {
-                headers: {
-                    "Accept": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                }
-            });
-            const result = await res.json();
-            pertanyaanData = result?.data?.list || [];
+        async function fetchKader() {
+            try {
+                const res = await fetch("{{ url('api/monitoring/kader') }}");
+                const result = await res.json();
 
-            setActiveButton('btnSkriningKK');
-            document.getElementById('skrining_type').value = 'kk';
-            document.getElementById('nikCategoryDropdown').classList.add('hidden');
-            const filtered = pertanyaanData.filter(p => p.target_skrining.toLowerCase() === 'kk');
-            renderPertanyaanDropdown(filtered);
-        }
-
-        function setActiveButton(activeId) {
-            ['btnSkriningKK', 'btnSkriningNIK'].forEach(id => {
-                const btn = document.getElementById(id);
-                if (id === activeId) {
-                    btn.classList.add('bg-[#61359C]');
-                    btn.classList.remove('bg-[#61359C]/70', 'hover:bg-[#4B1F8B]');
-                } else {
-                    btn.classList.remove('bg-[#61359C]');
-                    btn.classList.add('bg-[#61359C]/70', 'hover:bg-[#4B1F8B]');
-                }
-            });
-        }
-
-        function renderPertanyaanDropdown(data) {
-            const wrapper = document.getElementById('pertanyaanFilterDropdown');
-            const menu = wrapper.querySelector('.dropdown-menu');
-            menu.innerHTML = '';
-
-            if (!data.length) {
-                menu.innerHTML = `<div class="px-4 py-2 text-sm text-gray-400 text-center">Tidak ada pertanyaan</div>`;
-                return;
-            }
-
-            const searchInput = document.createElement('input');
-            searchInput.type = 'text';
-            searchInput.placeholder = 'Cari pertanyaan...';
-            searchInput.className =
-                'w-full px-3 py-1 mb-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring focus:ring-gray-300';
-            menu.appendChild(searchInput);
-
-            const listContainer = document.createElement('div');
-            menu.appendChild(listContainer);
-
-            function renderList(filteredData) {
-                listContainer.innerHTML = '';
-
-                if (!filteredData.length) {
-                    listContainer.innerHTML =
-                        `<div class="px-4 py-2 text-sm text-gray-400 text-center">Tidak ada pertanyaan</div>`;
+                if (!result.status) {
+                    container.innerHTML = '<p class="text-red-500">Gagal memuat data kader.</p>';
                     return;
                 }
 
-                filteredData.forEach(p => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'dropdown-item block w-full text-left px-4 py-1 text-sm hover:bg-gray-100';
-                    btn.textContent = p.pertanyaan;
+                const data = result.data;
+                container.innerHTML = '';
 
-                    btn.onclick = () => {
-                        wrapper.querySelector('.dropdown-selected').textContent = p.pertanyaan;
-                        menu.classList.add('hidden');
-                        document.getElementById('pertanyaan_id').value = p.id;
+                data.forEach(kader => {
+                    const cardKK = document.createElement('div');
+                    cardKK.className = `bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col relative overflow-hidden mb-4`;
+                    cardKK.innerHTML = `
+                        <div class="absolute left-1/2 top-1/5 h-3/5 transform -translate-x-1/2 border-l-2 border-gray-300"></div>
+                        <div class="flex w-full z-10 p-4">
+                            <div class="w-1/2 flex items-center justify-center">
+                                <div class="bg-blue-100 text-blue-600 rounded-full p-4 text-5xl shadow-inner">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            </div>
+                            <div class="w-1/2 flex flex-col items-center justify-center">
+                                <div class="text-4xl font-bold text-blue-700">${kader.jumlah_skrining_kk}</div>
+                                <div class="text-gray-500 font-semibold mb-3 text-lg">Skrining KK</div>
+                                <button class="detailBtn inline-flex items-center text-sm text-blue-600 hover:text-white hover:bg-blue-600 rounded-full px-3 py-1 transition-colors">
+                                    Detail <i class="fas fa-chevron-down ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(cardKK);
 
-                        setDropdownDisabled('kelurahanFilterDropdown', false);
-                        setDropdownLabel('kelurahanFilterDropdown', null, 'Pilih Kelurahan');
-                        document.getElementById('kelurahan_id').value = '';
-                        setDropdownDisabled('posyanduFilterDropdown', true);
-                        setDropdownLabel('posyanduFilterDropdown', null, 'Pilih Posyandu');
-                    };
+                    const cardNIK = document.createElement('div');
+                    cardNIK.className = `bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col relative overflow-hidden mb-4`;
+                    cardNIK.innerHTML = `
+                        <div class="absolute left-1/2 top-1/5 h-3/5 transform -translate-x-1/2 border-l-2 border-gray-300"></div>
+                        <div class="flex w-full z-10 p-4">
+                            <div class="w-1/2 flex items-center justify-center">
+                                <div class="bg-yellow-100 text-yellow-400 rounded-full p-4 text-5xl shadow-inner">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                            <div class="w-1/2 flex flex-col items-center justify-center">
+                                <div class="text-4xl font-bold text-yellow-600">${kader.jumlah_skrining_nik}</div>
+                                <div class="text-gray-500 font-semibold mb-3 text-lg">Skrining NIK</div>
+                                <button class="detailBtn inline-flex items-center text-sm text-yellow-600 hover:text-white hover:bg-yellow-600 rounded-full px-3 py-1 transition-colors">
+                                    Detail <i class="fas fa-chevron-down ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(cardNIK);
 
-                    listContainer.appendChild(btn);
+                    cardKK.querySelector('.detailBtn').addEventListener('click', () => {
+                        renderTable('kk', kader);
+                    });
+
+                    cardNIK.querySelector('.detailBtn').addEventListener('click', () => {
+                        renderTable('nik', kader);
+                    });
                 });
+
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = '<p class="text-red-500">Terjadi kesalahan saat memuat data kader.</p>';
             }
-
-            renderList(data);
-
-            searchInput.addEventListener('input', (e) => {
-                const text = e.target.value.toLowerCase();
-                const filtered = data.filter(p => p.pertanyaan.toLowerCase().includes(text));
-                renderList(filtered);
-            });
-
-            setDropdownDisabled('pertanyaanFilterDropdown', false);
         }
 
-        document.getElementById("searchBtn").addEventListener("click", async () => {
-            const skriningType = document.getElementById("skrining_type").value;
-            const pertanyaanId = document.getElementById("pertanyaan_id").value;
-            const kelurahanId = document.getElementById("kelurahan_id").value;
-            const posyanduId = document.getElementById("posyandu_id").value;
+        function renderTable(type, kader) {
+            tableContainer.classList.remove('hidden');
+            tableBody.innerHTML = '';
 
-            if (!pertanyaanId) {
-                showErrorToast("Silakan pilih pertanyaan terlebih dahulu.");
-                return;
-            }
+            tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            if (type === 'kk') {
+                tableHead.innerHTML = `
+                    <tr class="bg-blue-700 text-white text-center text-sm">
+                        <th class="p-2 border border-[#00000033] w-[15%]">Tanggal</th>
+                        <th class="p-2 border border-[#00000033] w-[35%]">Alamat</th>
+                        <th class="p-2 border border-[#00000033] w-[10%]">RT/RW</th>
+                        <th class="p-2 border border-[#00000033] w-[30%]">Kepala Keluarga</th>
+                        <th class="p-2 border border-[#00000033] w-[10%]">Aksi</th>
+                    </tr>
+                `;
 
-            const url = new URL("{{ url('api/monitoring/hasil-skrining-chart') }}");
-
-            if (kelurahanId) url.searchParams.append("kelurahan_id", kelurahanId);
-            if (posyanduId) url.searchParams.append("posyandu_id", posyanduId);
-
-            const res = await fetch(url, {
-                headers: {
-                    "Accept": "application/json"
-                },
-            });
-
-            const result = await res.json();
-
-            if (!result.status) {
-                showErrorToast("Gagal mengambil data skrining");
-                return;
-            }
-
-            const jawabanArray = [];
-            const tableData = [];
-
-            result.data.forEach(item => {
-                if (skriningType === "kk") {
-                    const kkArray = Object.values(item.skrining_kk || {});
-                    kkArray.forEach(j => {
-                        if (j.pertanyaan_id == pertanyaanId || j.pertanyaan === wrapperSelectedText()) {
-                            jawabanArray.push(j.jawaban);
-                            item.kk_di_unit.forEach(kk => {
-                                tableData.push({
-                                    tanggal_skrining: kk.tanggal_skrining,
-                                    no_kk: kk.no_kk,
-                                    jumlah_kk: item.kk_di_unit.length,
-                                    alamat: `${kk.alamat_ktp ?? kk.alamat_unit ?? 'null'}, RT ${kk.rt_ktp ?? kk.rt_unit ?? 'null'}/RW ${kk.rw_ktp ?? kk.rw_unit ?? 'null'}`,
-                                    kepala_keluarga: kk.kepala_keluarga,
-                                    nik_kepala_keluarga: kk.nik_kepala_keluarga,
-                                    no_telepon: kk.no_telepon,
-                                    jawaban: j.jawaban,
-                                    kelurahan: item.kelurahan ?? '-',
-                                    posyandu: item.posyandu ?? '-',
-                                    alamat_unit: item.alamat_unit ?? '-',
-                                    rt_unit: item.rt_unit ?? '-',
-                                    rw_unit: item.rw_unit ?? '-',
-                                    alamat_ktp: kk.alamat_ktp,
-                                    rt_ktp: kk.rt_ktp,
-                                    rw_ktp: kk.rw_ktp
-                                });
-                            });
-                        }
-                    });
+                if (!kader.detail.length) {
+                    const row = document.createElement('tr');
+                    row.className = "bg-white";
+                    row.innerHTML = `<td class="p-2 border border-[#00000033] text-center text-sm" colspan="6">Data tidak tersedia</td>`;
+                    tableBody.appendChild(row);
                 } else {
-                    item.skrining_nik.forEach(anggota => {
-                        anggota.jawaban.forEach(j => {
-                            if (j.pertanyaan === wrapperSelectedText()) {
-                                jawabanArray.push(j.jawaban);
-                                tableData.push({
-                                    tanggal_skrining: anggota.tanggal_skrining,
-                                    no: anggota.nik,
-                                    nama_lengkap: anggota.nama,
-                                    jenis_kelamin: anggota.jenis_kelamin,
-                                    hubungan_keluarga: anggota.hubungan_keluarga,
-                                    siklus: anggota.siklus ?? '-',
-                                    jawaban: j.jawaban
-                                });
-                            }
+                    kader.detail.forEach((kel, idx) => {
+                        const row = document.createElement('tr');
+                        row.className = "bg-white";
+                        row.innerHTML = `
+                            <td class="p-2 border border-[#00000033] text-sm text-center">${kel.tanggal_skrining_terakhir ?? '-'}</td>
+                            <td class="p-2 border border-[#00000033] text-sm text-center">${kel.alamat ?? '-'}</td>
+                            <td class="p-2 border border-[#00000033] text-sm text-center">${kel.rt ?? '-'}/${kel.rw ?? '-'}</td>
+                            <td class="p-2 border border-[#00000033] text-sm text-center">${kel.kepala_keluarga ?? '-'}</td>
+                            <td class="p-2 border border-[#00000033] text-sm text-center">
+                                <button class="px-3 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition open-detail">Detail</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+
+                        row.querySelector('.open-detail').addEventListener('click', () => {
+                            const htmlContent = `
+                            <div class="px-4 py-2 w-full space-y-1 text-sm">
+                                <div class="grid grid-cols-[130px_10px_1fr] items-start">
+                                    <p class="font-medium">Tanggal Skrining</p>
+                                    <p class="font-medium text-left">:</p>
+                                    <p class="text-left">${kel.tanggal_skrining_terakhir ?? '-'}</p>
+                                </div>
+
+                                <div class="grid grid-cols-[130px_10px_1fr] items-start">
+                                    <p class="font-medium">No KK</p>
+                                    <p class="font-medium text-left">:</p>
+                                    <p class="text-left">${kel.no_kk ?? '-'}</p>
+                                </div>
+
+                                <div class="grid grid-cols-[130px_10px_1fr] items-start">
+                                    <p class="font-medium">Kepala Keluarga</p>
+                                    <p class="font-medium text-left">:</p>
+                                    <p class="text-left">${kel.kepala_keluarga ?? '-'}</p>
+                                </div>
+
+                                <div class="grid grid-cols-[130px_10px_1fr] items-start">
+                                    <p class="font-medium">Alamat</p>
+                                    <p class="font-medium text-left">:</p>
+                                    <p class="text-left">${kel.alamat ?? '-'}</p>
+                                </div>
+
+                                <div class="grid grid-cols-[130px_10px_1fr] items-start">
+                                    <p class="font-medium">RT / RW</p>
+                                    <p class="font-medium text-left">:</p>
+                                    <p class="text-left">${kel.rt ?? '-'} / ${kel.rw ?? '-'}</p>
+                                </div>
+                            </div>
+                        `;
+
+                            openSkriningModal(`Detail KK ${kel.no_kk ?? '-'}`, htmlContent);
                         });
                     });
                 }
-            });
 
-            const noJawabanEl = document.getElementById("noJawabanText");
-            if (jawabanArray.length === 0) {
-                noJawabanEl.classList.remove("hidden");
+            } else if (type === 'nik') {
+                tableHead.innerHTML = `
+                    <tr class="bg-yellow-500 text-white text-center text-sm">
+                        <th class="p-2 border border-[#00000033] w-[15%]">Tanggal</th>
+                        <th class="p-2 border border-[#00000033] w-[20%]">NIK</th>
+                        <th class="p-2 border border-[#00000033] w-[30%]">Nama Lengkap</th>
+                        <th class="p-2 border border-[#00000033] w-[15%]">Siklus</th>
+                        <th class="p-2 border border-[#00000033] w-[20%]">Aksi</th>
+                    </tr>
+                `;
 
-                document.getElementById("jawabanPieChart").getContext('2d').clearRect(0, 0, 250, 250);
-                document.getElementById("skriningTableContainer").innerHTML = '';
+                const anggotaSorted = kader.detail
+                    .flatMap(kel => kel.anggota.map(agt => ({
+                        ...agt,
+                        tanggal: kel.tanggal_skrining_terakhir
+                    })))
+                    .sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-                return;
-            } else {
-                noJawabanEl.classList.add("hidden");
-            }
+                if (!anggotaSorted.length) {
+                    const row = document.createElement('tr');
+                    row.className = "bg-white";
+                    row.innerHTML = `<td class="p-2 border border-[#00000033] text-center text-sm" colspan="5">Data tidak tersedia</td>`;
+                    tableBody.appendChild(row);
+                } else {
+                    anggotaSorted.forEach((agt, idx) => {
+                        const row = document.createElement('tr');
+                        row.className = "bg-white";
+                        row.innerHTML = `
+                            <td class="p-2 border border-[#00000033] text-sm text-center">${agt.tanggal ?? '-'}</td>
+                            <td class="p-2 border border-[#00000033] text-sm text-center">${agt.nik ?? '-'}</td>
+                            <td class="p-2 border border-[#00000033] text-sm text-center">${agt.nama ?? '-'}</td>
+                            <td class="p-2 border border-[#00000033] text-sm text-center">${agt.siklus ?? '-'}</td>
+                            <td class="p-2 border border-[#00000033] text-sm text-center">
+                                <button class="px-3 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition open-detail">Detail</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
 
-            renderJawabanPieChart(jawabanArray);
-            renderSkriningTable(tableData, skriningType);
-        });
-
-        function wrapperSelectedText() {
-            try {
-                return document
-                    .querySelector('#pertanyaanFilterDropdown .dropdown-selected')
-                    .textContent.trim();
-            } catch {
-                return "";
+                        row.querySelector('.open-detail').addEventListener('click', () => {
+                            const htmlContent = `
+                                <div class="px-4 py-2 w-full space-y-1 text-sm">
+                                    <div class="grid grid-cols-[130px_10px_1fr] items-start">
+                                        <p class="font-medium">Siklus</p>
+                                        <p class="font-medium text-left">:</p>
+                                        <p class="text-left">${agt.siklus ?? '-'}</p>
+                                    </div>
+                                    <div class="grid grid-cols-[130px_10px_1fr] items-start">
+                                        <p class="font-medium">NIK</p>
+                                        <p class="font-medium text-left">:</p>
+                                        <p class="text-left">${agt.nik ?? '-'}</p>
+                                    </div>
+                                    <div class="grid grid-cols-[130px_10px_1fr] items-start">
+                                        <p class="font-medium">Nama Lengkap</p>
+                                        <p class="font-medium text-left">:</p>
+                                        <p class="text-left">${agt.nama ?? '-'}</p>
+                                    </div>
+                                    <div class="grid grid-cols-[130px_10px_1fr] items-start">
+                                        <p class="font-medium">Jenis Kelamin</p>
+                                        <p class="font-medium text-left">:</p>
+                                        <p class="text-left">${agt.jenis_kelamin ?? '-'}</p>
+                                    </div>
+                                    <div class="grid grid-cols-[130px_10px_1fr] items-start">
+                                        <p class="font-medium">Hubungan Keluarga</p>
+                                        <p class="font-medium text-left">:</p>
+                                        <p class="text-left">${agt.hubungan_keluarga ?? '-'}</p>
+                                    </div>
+                                </div>
+                            `;
+                            openSkriningModal(`Detail ${agt.nama ?? '-'}`, htmlContent);
+                        });
+                    });
+                }
             }
         }
 
-        function renderSkriningTable(data, type) {
-            const tableContainer = document.getElementById('skriningTableContainer');
-            tableContainer.innerHTML = '';
+        const skriningModal = document.getElementById('skriningDetailModal');
+        const skriningModalBody = document.getElementById('skriningDetailBody');
+        const closeModalBtn = document.getElementById('closeModalBtn');
 
-            if (type === 'kk') {
-                const groupedByJawaban = data.reduce((acc, row) => {
-                    const jawaban = row.jawaban ?? '-';
-
-                    if (!acc[jawaban]) acc[jawaban] = [];
-                    acc[jawaban].push(row);
-                    return acc;
-                }, {});
-
-                Object.keys(groupedByJawaban).forEach(jawaban => {
-                    const rows = groupedByJawaban[jawaban];
-
-                    const title = document.createElement('h3');
-                    title.className = 'font-semibold mt-4 mb-2 bg-gray-100 border border-[#00000033] text-sm rounded-lg px-4 py-2';
-                    title.textContent = `Jawaban: ${jawaban}`;
-                    tableContainer.appendChild(title);
-
-                    const table = document.createElement('table');
-                    table.className = 'min-w-full border border-gray-200 mb-4 text-sm';
-
-                    const thead = document.createElement('thead');
-                    const tbody = document.createElement('tbody');
-
-                    thead.innerHTML = `
-                        <tr class="bg-gray-100 font-semibold text-sm">
-                            <th class="px-3 py-2 border border-[#00000033]">No</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Alamat</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Jumlah KK</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Aksi</th>
-                        </tr>
-                    `;
-
-                    const groupedByUnit = rows.reduce((acc, row) => {
-                        const key = row.unit_rumah || 'unknown_unit';
-                        if (!acc[key]) acc[key] = [];
-                        acc[key].push(row);
-                        return acc;
-                    }, {});
-
-                    Object.values(groupedByUnit).forEach((unitRows, index) => {
-                        const firstKK = unitRows[0];
-
-                        const kk_di_unit = unitRows.map(kk => ({
-                            no_kk: kk.no_kk,
-                            kepala_keluarga: kk.kepala_keluarga,
-                            nik_kepala_keluarga: kk.nik_kepala_keluarga,
-                            no_telepon: kk.no_telepon,
-                            alamat_unit: kk.alamat_unit ?? '-',
-                            rt_unit: kk.rt_unit ?? '-',
-                            rw_unit: kk.rw_unit ?? '-',
-                            alamat_ktp: kk.alamat_ktp,
-                            rt_ktp: kk.rt_ktp,
-                            rw_ktp: kk.rw_ktp,
-                            tanggal_skrining: kk.tanggal_skrining
-                        }));
-
-                        tbody.innerHTML += `
-                            <tr class="bg-white">
-                                <td class="px-3 py-2 border border-[#00000033] text-center">${index + 1}</td>
-                                <td class="px-3 py-2 border border-[#00000033]">${firstKK.alamat_unit}</td>
-                                <td class="px-3 py-2 border border-[#00000033] text-center">${unitRows.length}</td>
-                                <td class="px-3 py-2 border border-[#00000033] text-center">
-                                    <button class="btn-detail px-3 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700"
-                                        data-detail='${JSON.stringify({
-                                            tanggal_skrining: firstKK.tanggal_skrining ?? '',
-                                            kk_di_unit: kk_di_unit,
-                                            skrining_kk: firstKK.skrining_kk ?? {},
-                                            alamat_unit: firstKK.alamat_unit ?? '-',
-                                            rt_unit: firstKK.rt_unit ?? '-',
-                                            rw_unit: firstKK.rw_unit ?? '-',
-                                            kelurahan: firstKK.kelurahan ?? '-',
-                                            posyandu: firstKK.posyandu ?? '-',
-                                        })}'
-                                        data-type="kk">
-                                        Detail
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-
-                    table.appendChild(thead);
-                    table.appendChild(tbody);
-                    tableContainer.appendChild(table);
-                });
-            } else {
-                const groupedByJawaban = data.reduce((acc, row) => {
-                    const key = row.jawaban ?? '-';
-                    if (!acc[key]) acc[key] = [];
-                    acc[key].push(row);
-                    return acc;
-                }, {});
-
-                Object.keys(groupedByJawaban).forEach(jawaban => {
-                    const rows = groupedByJawaban[jawaban];
-
-                    const title = document.createElement('h3');
-                    title.className = 'font-semibold mt-4 mb-2 bg-gray-100 border border-[#00000033] text-sm rounded-lg px-4 py-2';
-                    title.textContent = `Jawaban: ${jawaban}`;
-                    tableContainer.appendChild(title);
-
-                    const table = document.createElement('table');
-                    table.className = 'min-w-full border border-gray-200 mb-4 text-sm';
-
-                    const thead = document.createElement('thead');
-                    const tbody = document.createElement('tbody');
-
-                    thead.innerHTML = `
-                        <tr class="bg-gray-100 font-semibold text-sm">
-                            <th class="px-3 py-2 border border-[#00000033]">No</th>
-                            <th class="px-3 py-2 border border-[#00000033]">NIK</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Nama Lengkap</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Siklus</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Aksi</th>
-                        </tr>
-                    `;
-
-                    rows.forEach((row, index) => {
-                        tbody.innerHTML += `
-                            <tr class="bg-white">
-                                <td class="px-3 py-2 border border-[#00000033] text-center">${index + 1}</td>
-                                <td class="px-3 py-2 border border-[#00000033] text-center">${row.no}</td>
-                                <td class="px-3 py-2 border border-[#00000033]">${row.nama_lengkap}</td>
-                                <td class="px-3 py-2 border border-[#00000033] text-center">${row.siklus ?? '-'}</td>
-                                <td class="px-3 py-2 border border-[#00000033] text-center">
-                                    <button class="btn-detail px-3 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700"
-                                        data-detail='${JSON.stringify({
-                                            tanggal_skrining: row.tanggal_skrining ?? '',
-                                            no_nik: row.no,
-                                            nama_lengkap: row.nama_lengkap,
-                                            jenis_kelamin: row.jenis_kelamin ?? '',
-                                            hubungan_keluarga: row.hubungan_keluarga,
-                                            siklus: row.siklus ?? '-'
-                                        })}'
-                                        data-type="nik">
-                                        Detail
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-
-                    table.appendChild(thead);
-                    table.appendChild(tbody);
-                    tableContainer.appendChild(table);
-                });
-            }
-        }
-
-        document.addEventListener('click', function(e) {
-            if (e.target.matches('.btn-detail')) {
-                const data = JSON.parse(e.target.dataset.detail);
-                const type = e.target.dataset.type;
-                showSkriningDetailModal(data, type);
-            }
-        });
-
-        const skriningDetailModal = document.getElementById("skriningDetailModal");
-        const skriningDetailBody = document.getElementById("skriningDetailBody");
-        const closeSkriningDetailModalBtn = document.getElementById("closeSkriningDetailModalBtn");
-
-        closeSkriningDetailModalBtn.addEventListener("click", () => {
-            skriningDetailModal.classList.add("hidden");
-            skriningDetailModal.classList.remove("flex");
+        closeModalBtn.addEventListener("click", () => {
+            skriningModal.classList.add("hidden");
+            skriningModal.classList.remove("flex");
             document.body.style.overflow = "";
         });
 
-        function showSkriningDetailModal(data, type) {
-            skriningDetailBody.innerHTML = '';
-
-            const createRow = (label, value) => `
-                <div class="flex mb-1">
-                    <div class="w-35 font-semibold">${label}</div>
-                    <div>: ${value ?? '-'}</div>
-                </div>
-            `;
-
-            if (type === 'kk') {
-                skriningDetailBody.innerHTML += createRow('Tanggal Skrining', data.tanggal_skrining);
-                skriningDetailBody.innerHTML += createRow('Kelurahan', data.kelurahan ?? '-');
-                skriningDetailBody.innerHTML += createRow('Posyandu', data.posyandu ?? '-');
-                skriningDetailBody.innerHTML += createRow(
-                    'Alamat',
-                    `${data.alamat_unit ?? '-'}, RT ${data.rt_unit ?? '-'} / RW ${data.rw_unit ?? '-'}`);
-
-                data.kk_di_unit.forEach((kk, index) => {
-                    const hasAlamatKTP = kk.alamat_ktp && kk.alamat_ktp.trim() !== '';
-                    const alamatRow = hasAlamatKTP ?
-                        `<div class="flex mb-1">
-                                <div class="w-30 font-semibold">Alamat KTP</div>
-                                <div>: ${kk.alamat_ktp}${kk.rt_ktp ? ', RT ' + kk.rt_ktp : ''}${kk.rw_ktp ? ' / RW ' + kk.rw_ktp : ''}</div>
-                        </div>` :
-                        '';
-
-                    skriningDetailBody.innerHTML += `
-                        <div class="mt-3 mb-2 p-2 border border-gray-200 rounded bg-gray-50 relative">
-                            ${hasAlamatKTP ? `
-                                <span class="absolute top-2 right-2 text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full">
-                                    Luar Wilayah
-                                </span>
-                            ` : ''}
-                            <div class="flex mb-1">
-                                <div class="w-30 font-semibold">No KK</div>
-                                <div>: ${kk.no_kk}</div>
-                            </div>
-                            <div class="flex mb-1">
-                                <div class="w-30 font-semibold">Kepala Keluarga</div>
-                                <div>: ${kk.kepala_keluarga}</div>
-                            </div>
-                            <div class="flex mb-1">
-                                <div class="w-30 font-semibold">No Telepon</div>
-                                <div>: ${kk.no_telepon}</div>
-                            </div>
-                            ${alamatRow}
-                        </div>
-                    `;
-                });
-            } else if (type === 'nik') {
-                skriningDetailBody.innerHTML = `
-                    ${createRow('Tanggal Skrining', data.tanggal_skrining)}
-                    ${createRow('Siklus', data.siklus ?? '-')}
-                    ${createRow('No NIK', data.no_nik)}
-                    ${createRow('Nama Lengkap', data.nama_lengkap)}
-                    ${createRow('Jenis Kelamin', data.jenis_kelamin)}
-                    ${createRow('Hubungan Keluarga', data.hubungan_keluarga)}
-                `;
-            }
-
-            skriningDetailModal.classList.remove("hidden");
-            skriningDetailModal.classList.add("flex");
-            document.body.style.overflow = "hidden";
+        function openSkriningModal(title, htmlContent) {
+            skriningModalBody.innerHTML = htmlContent;
+            skriningModal.classList.remove('hidden');
+            skriningModal.classList.add('flex');
         }
 
-        function renderNikCategoryDropdown() {
-            const wrapper = document.getElementById('nikCategoryDropdown');
-            const menu = wrapper.querySelector('.dropdown-menu');
-            menu.innerHTML = '';
-
-            const uniqueCategories = [...new Set(
-                pertanyaanData.filter(p => p.target_skrining.toLowerCase() === 'nik')
-                .map(p => p.nama_kategori)
-            )];
-
-            uniqueCategories.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
-                btn.textContent = cat;
-                btn.onclick = () => {
-                    wrapper.querySelector('.dropdown-selected').textContent = cat;
-                    menu.classList.add('hidden');
-
-                    const filteredPertanyaan = pertanyaanData.filter(p => p.target_skrining.toLowerCase() === 'nik' && p.nama_kategori === cat);
-                    renderPertanyaanDropdown(filteredPertanyaan);
-                };
-                menu.appendChild(btn);
-            });
-
-            wrapper.classList.remove('hidden');
-            setDropdownDisabled('nikCategoryDropdown', false);
-            setDropdownDisabled('pertanyaanFilterDropdown', true);
-        }
-
-        function setDropdownLabel(id, text, fallback) {
-            const el = document.getElementById(id);
-            if (!el) return;
-
-            const label = el.querySelector('.dropdown-selected');
-            if (label) label.textContent = text || fallback;
-        }
-
-        let kelurahanData = [];
-
-        async function loadKelurahan() {
-            const res = await fetch(`{{ url('api/kelurahan') }}`);
-            const json = await res.json();
-
-            kelurahanData = json.data.list || [];
-            renderKelurahanDropdown();
-        }
-
-        function renderKelurahanDropdown() {
-            const dropdown = document
-                .getElementById('kelurahanFilterDropdown')
-                .querySelector('.dropdown-menu');
-
-            dropdown.innerHTML = '';
-
-            kelurahanData.forEach(kel => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
-                btn.textContent = kel.nama_kelurahan;
-
-                btn.onclick = () => {
-                    setDropdownLabel('kelurahanFilterDropdown', kel.nama_kelurahan, 'Pilih Kelurahan');
-                    document.getElementById('kelurahan_id').value = kel.id;
-
-                    setDropdownDisabled('posyanduFilterDropdown', false);
-                    renderPosyanduDropdown(kel.posyandu);
-                };
-
-                dropdown.appendChild(btn);
-            });
-        }
-
-        function renderPosyanduDropdown(posyanduList = []) {
-            const dropdownWrapper = document.getElementById('posyanduFilterDropdown'); // <- ubah di sini
-            const dropdown = dropdownWrapper.querySelector('.dropdown-menu');
-
-            dropdown.innerHTML = '';
-            document.getElementById('posyandu_id').value = '';
-            setDropdownLabel('posyanduFilterDropdown', null, 'Pilih Posyandu');
-
-            if (!posyanduList.length) {
-                setDropdownDisabled('posyanduFilterDropdown', true);
-                dropdown.innerHTML = `
-            <div class="px-4 py-2 text-sm text-gray-400 text-center">
-                Tidak ada posyandu
-            </div>`;
-                return;
-            }
-
-            posyanduList.forEach(p => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
-                btn.textContent = p.nama_posyandu;
-
-                btn.onclick = () => {
-                    setDropdownLabel('posyanduFilterDropdown', p.nama_posyandu, 'Pilih Posyandu');
-                    document.getElementById('posyandu_id').value = p.id;
-                };
-
-                dropdown.appendChild(btn);
-            });
-        }
-
-        function renderJawabanPieChart(jawabanData) {
-            const counts = jawabanData.reduce((acc, val) => {
-                acc[val] = (acc[val] || 0) + 1;
-                return acc;
-            }, {});
-
-            const labels = Object.keys(counts);
-            const data = Object.values(counts);
-
-            const ctx = document.getElementById('jawabanPieChart').getContext('2d');
-
-            if (window.jawabanChart) window.jawabanChart.destroy();
-
-            window.jawabanChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: 'Distribusi Jawaban',
-                        data,
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.chart._metasets[context.datasetIndex].total;
-                                    const percent = ((value / total) * 100).toFixed(1);
-                                    return `${label}: ${value} (${percent}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function setDropdownDisabled(id, disabled = true) {
-            const wrapper = document.getElementById(id);
-            if (!wrapper) return;
-            const button = wrapper.querySelector('button');
-            if (disabled) {
-                button.classList.add('opacity-50', 'cursor-not-allowed');
-                button.setAttribute('disabled', true);
-            } else {
-                button.classList.remove('opacity-50', 'cursor-not-allowed');
-                button.removeAttribute('disabled');
-            }
-        }
-
-        function resetPertanyaanDropdown() {
-            const wrapper = document.getElementById('pertanyaanFilterDropdown');
-            const selected = wrapper.querySelector('.dropdown-selected');
-            if (selected) selected.textContent = 'Pilih pertanyaan...';
-            document.getElementById('pertanyaan_id').value = '';
-
-            const tableContainer = document.getElementById('skriningTableContainer');
-            tableContainer.innerHTML = '';
-
-            if (window.jawabanChart) {
-                window.jawabanChart.destroy();
-                window.jawabanChart = null;
-            }
-        }
-
-        document.getElementById('btnSkriningKK').addEventListener('click', () => {
-            setActiveButton('btnSkriningKK');
-            resetPertanyaanDropdown();
-            document.getElementById('skrining_type').value = 'kk';
-            document.getElementById('nikCategoryDropdown').classList.add('hidden');
-            const filtered = pertanyaanData.filter(p => p.target_skrining.toLowerCase() === 'kk');
-            renderPertanyaanDropdown(filtered);
-        });
-
-        document.getElementById('btnSkriningNIK').addEventListener('click', () => {
-            setActiveButton('btnSkriningNIK');
-            resetPertanyaanDropdown();
-            document.getElementById('skrining_type').value = 'nik';
-            renderNikCategoryDropdown();
-        });
-
-        loadPertanyaan();
-        loadKelurahan();
-        setDropdownDisabled('posyanduFilterDropdown', true);
+        fetchKader();
     });
 </script>
 @endsection
