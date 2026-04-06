@@ -3,8 +3,8 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="flex flex-col gap-4 w-full max-w-3xl mx-auto p-4 text-base">
-    <div class="flex gap-3 w-full">
+<div class="flex flex-col gap-4 w-full max-w-3xl mx-auto text-base">
+    <div class="flex gap-3 w-full mb-3">
         <button id="btnSkriningKK"
             class="flex-1 h-10 bg-[#61359C] text-white font-semibold rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200">
             Skrining KK
@@ -29,23 +29,23 @@
         width="w-full h-10"
         data-dropdown="filter" />
 
-    <div class="flex gap-3 w-full flex-wrap">
+    <div class="flex flex-col sm:flex-row gap-3 w-full flex-wrap">
         <x-dropdown
             id="kelurahanFilterDropdown"
             label="Pilih Kelurahan"
             :options="[]"
-            width="flex-1 h-10"
+            width="w-full sm:flex-1 h-10"
             data-dropdown="filter" />
 
         <x-dropdown
             id="posyanduFilterDropdown"
             label="Pilih Posyandu"
             :options="[]"
-            width="flex-1 h-10"
+            width="w-full sm:flex-1 h-10"
             data-dropdown="filter" />
 
         <button id="searchBtn"
-            class="h-10 px-4 bg-[#61359C] text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200 flex items-center justify-center flex-none">
+            class="h-10 px-4 bg-[#61359C] text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200 w-full sm:w-auto flex items-center justify-center">
             <i class="fa-solid fa-magnifying-glass mr-2"></i> Cari
         </button>
     </div>
@@ -59,11 +59,11 @@
         Tidak ada jawaban untuk pertanyaan ini
     </div>
 
-    <div class="mt-4 mx-auto" style="width:250px; height:250px;">
+    <div class="mt-4 mx-auto w-full max-w-xs" style="height:250px;">
         <canvas id="jawabanPieChart"></canvas>
     </div>
 
-    <div id="skriningTableContainer" class="mt-4 w-full overflow-x-auto text-sm"></div>
+    <div id="skriningTableContainer" class="mt-4 w-full !max-w-full overflow-x-auto text-sm"></div>
 </div>
 
 <div id="skriningDetailModal" class="fixed inset-0 bg-slate-950/30 hidden items-center justify-center z-50 px-4">
@@ -72,8 +72,7 @@
             <h3 id="skriningDetailModalTitle" class="text-lg font-bold">Detail</h3>
         </div>
 
-        <div id="skriningDetailBody" class="px-4 py-4 w-full space-y-2 text-sm overflow-y-auto" style="max-height: calc(90vh - 120px);">
-        </div>
+        <div id="skriningDetailBody" class="px-4 py-4 w-full space-y-2 text-sm overflow-y-auto"></div>
 
         <div class="flex justify-center px-4 py-3">
             <button id="closeSkriningDetailModalBtn"
@@ -117,6 +116,17 @@
                     btn.classList.add('bg-[#61359C]/70', 'hover:bg-[#4B1F8B]');
                 }
             });
+
+            if (activeId === 'btnSkriningNIK') {
+                setDropdownDisabled('kelurahanFilterDropdown', true);
+                setDropdownDisabled('posyanduFilterDropdown', true);
+
+                setDropdownLabel('kelurahanFilterDropdown', null, 'Pilih Kelurahan');
+                setDropdownLabel('posyanduFilterDropdown', null, 'Pilih Posyandu');
+
+                document.getElementById('kelurahan_id').value = '';
+                document.getElementById('posyandu_id').value = '';
+            }
         }
 
         function renderPertanyaanDropdown(data) {
@@ -309,17 +319,17 @@
                     tableContainer.appendChild(title);
 
                     const table = document.createElement('table');
-                    table.className = 'min-w-full border border-gray-200 mb-4 text-sm';
+                    table.className = 'min-w-full table-fixed border border-gray-200 mb-4 text-sm';
 
                     const thead = document.createElement('thead');
                     const tbody = document.createElement('tbody');
 
                     thead.innerHTML = `
                         <tr class="bg-gray-100 font-semibold text-sm">
-                            <th class="px-3 py-2 border border-[#00000033]">No</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Alamat</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Jumlah KK</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Aksi</th>
+                            <th class="px-3 py-2 border border-[#00000033] w-[15%]">No</th>
+                            <th class="px-3 py-2 border border-[#00000033] w-[50%]">Alamat</th>
+                            <th class="px-3 py-2 border border-[#00000033] w-[20%]">Jumlah KK</th>
+                            <th class="px-3 py-2 border border-[#00000033] w-[15%]">Aksi</th>
                         </tr>
                     `;
 
@@ -374,7 +384,11 @@
 
                     table.appendChild(thead);
                     table.appendChild(tbody);
-                    tableContainer.appendChild(table);
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'overflow-x-auto w-full min-w-full';
+                    wrapper.appendChild(table);
+
+                    tableContainer.appendChild(wrapper);
                 });
             } else {
                 const groupedByJawaban = data.reduce((acc, row) => {
@@ -400,11 +414,11 @@
 
                     thead.innerHTML = `
                         <tr class="bg-gray-100 font-semibold text-sm">
-                            <th class="px-3 py-2 border border-[#00000033]">No</th>
-                            <th class="px-3 py-2 border border-[#00000033]">NIK</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Nama Lengkap</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Siklus</th>
-                            <th class="px-3 py-2 border border-[#00000033]">Aksi</th>
+                            <th class="px-3 py-2 border border-[#00000033] w-[5%]">No</th>
+                            <th class="px-3 py-2 border border-[#00000033] w-[5%]">NIK</th>
+                            <th class="px-3 py-2 border border-[#00000033] w-[30%]">Nama Lengkap</th>
+                            <th class="px-3 py-2 border border-[#00000033] w-[25%]">Siklus</th>
+                            <th class="px-3 py-2 border border-[#00000033] w-[20%]">Aksi</th>
                         </tr>
                     `;
 
@@ -435,7 +449,14 @@
 
                     table.appendChild(thead);
                     table.appendChild(tbody);
-                    tableContainer.appendChild(table);
+                    table.appendChild(thead);
+                    table.appendChild(tbody);
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'overflow-x-auto w-full min-w-full';
+                    wrapper.appendChild(table);
+
+                    tableContainer.appendChild(wrapper);
                 });
             }
         }
@@ -598,7 +619,7 @@
         }
 
         function renderPosyanduDropdown(posyanduList = []) {
-            const dropdownWrapper = document.getElementById('posyanduFilterDropdown'); // <- ubah di sini
+            const dropdownWrapper = document.getElementById('posyanduFilterDropdown');
             const dropdown = dropdownWrapper.querySelector('.dropdown-menu');
 
             dropdown.innerHTML = '';
@@ -691,7 +712,7 @@
         function resetPertanyaanDropdown() {
             const wrapper = document.getElementById('pertanyaanFilterDropdown');
             const selected = wrapper.querySelector('.dropdown-selected');
-            if (selected) selected.textContent = 'Pilih pertanyaan...';
+            if (selected) selected.textContent = 'Pilih pertanyaan';
             document.getElementById('pertanyaan_id').value = '';
 
             const tableContainer = document.getElementById('skriningTableContainer');

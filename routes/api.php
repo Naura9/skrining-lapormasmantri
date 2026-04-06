@@ -103,6 +103,7 @@ Route::get('/monitoring/hasil-skrining', [MonitoringController::class, 'monitori
 Route::get('/download/hasil-skrining', [MonitoringController::class, 'exportHasilSkrining']);
 Route::get('/monitoring/hasil-skrining-chart', [MonitoringController::class, 'chartHasilSkrining']);
 Route::put('/monitoring/hasil-skrining/{unit_id}', [MonitoringController::class, 'updateUnit']);
+
 Route::get('/', function () {
     return response()->failed(['Endpoint yang anda minta tidak tersedia']);
 });

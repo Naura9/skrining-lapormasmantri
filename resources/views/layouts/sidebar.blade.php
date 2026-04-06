@@ -306,6 +306,58 @@
                 </a>
             </li>
         </ul>
+
+        @php
+        $isDataWargaActive = request()->routeIs([
+        'admin.data_warga',
+        'admin.data_warga_kk',
+        'admin.data_warga_nik',
+        ]);
+        @endphp
+
+        <a href="#" id="dataWargaMenuToggle"
+            class="group flex items-center justify-between gap-1.5 px-2 py-2.5 rounded-lg transition font-semibold
+                {{ $isDataWargaActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+            <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-address-book text-lg transition
+                    {{ $isDataWargaActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                </i>
+                <span class="ml-0.5">Data Warga</span>
+            </div>
+        </a>
+
+        <ul id="dataWargaSubMenu" class="pl-5 mt-1 space-y-1 {{ $isDataWargaActive ? 'block' : 'hidden' }}">
+            <li>
+                <a href="{{ route('admin.fitur.data_warga.kk') }}"
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.data_warga.kk')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                    <i class="fa-solid fa-people-roof text-lg
+                        {{ request()->routeIs('admin.fitur.data_warga.kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+
+                    <span>KK</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.fitur.data_warga.nik') }}"
+                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.data_warga.nik')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                    <i class="fa-solid fa-people-roof text-lg
+                        {{ request()->routeIs('admin.fitur.data_warga.nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+
+                    <span>NIK</span>
+                </a>
+            </li>
+            
+        </ul>
     </nav>
 
 </aside>
@@ -348,5 +400,13 @@
     monitoringMenuToggle.addEventListener('click', (e) => {
         e.preventDefault();
         monitoringSubMenu.classList.toggle('hidden');
+    });
+
+    const dataWargaMenuToggle = document.getElementById('dataWargaMenuToggle');
+    const dataWargaSubMenu = document.getElementById('dataWargaSubMenu');
+
+    dataWargaMenuToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        dataWargaSubMenu.classList.toggle('hidden');
     });
 </script>

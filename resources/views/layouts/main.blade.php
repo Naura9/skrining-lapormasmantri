@@ -25,7 +25,7 @@
 
     <div id="overlay" class="hidden fixed inset-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50"></div>
 
-    <main class="md:ml-64 pt-16 px-4">
+    <main class="md:ml-64 pt-12 px-4">
         @yield('content')
     </main>
 </body>

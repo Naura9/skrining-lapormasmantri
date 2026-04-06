@@ -11,6 +11,8 @@ class IdentitasAnggotaResource extends JsonResource
         return [
             'id' => $this->id,
             'keluarga_id' => $this->keluarga_id,
+            'nama_kelurahan' => $this->keluarga->unitRumah->kelurahan->nama_kelurahan,
+            'nama_posyandu' => $this->keluarga->unitRumah->posyandu->nama_posyandu,
 
             'no_kk' => optional($this->keluarga)->no_kk,
 

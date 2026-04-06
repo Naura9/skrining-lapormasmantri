@@ -11,15 +11,53 @@ use Throwable;
 
 class IdentitasAnggotaHelper extends Helper
 {
+    private $anggotaModel;
+
+    public function __construct()
+    {
+        $this->anggotaModel = new AnggotaKeluargaModel();
+    }
+
     public function getAll(array $filter, int $page = 1, int $perPage = 25)
     {
-        $query = AnggotaKeluargaModel::with('keluarga.kepalaKeluarga');
+        $query = AnggotaKeluargaModel::with([
+            'keluarga',
+            'keluarga.unitRumah.kelurahan',
+            'keluarga.unitRumah.posyandu',
+            'keluarga.kepalaKeluarga'
+        ]);
 
-        if (!empty($filter['no_kk'])) {
-            $query->whereHas('keluarga', function ($q) use ($filter) {
-                $q->where('no_kk', $filter['no_kk']);
+        if (!empty($filter['keyword'])) {
+            $keyword = $filter['keyword'];
+
+            $query->where(function ($q) use ($keyword) {
+                $q->where('nama', 'LIKE', "%$keyword%")
+                    ->orWhere('nik', 'LIKE', "%$keyword%")
+                    ->orWhereHas('keluarga', function ($q2) use ($keyword) {
+                        $q2->where('no_kk', 'LIKE', "%$keyword%");
+                    })
+                    ->orWhereHas('keluarga.unitRumah.kelurahan', function ($q3) use ($keyword) {
+                        $q3->where('nama_kelurahan', 'LIKE', "%$keyword%");
+                    })
+                    ->orWhereHas('keluarga.unitRumah.posyandu', function ($q4) use ($keyword) {
+                        $q4->where('nama_posyandu', 'LIKE', "%$keyword%");
+                    });
             });
         }
+
+        if (!empty($filter['kelurahan_id'])) {
+            $query->whereHas('keluarga.unitRumah.kelurahan', function ($q) use ($filter) {
+                $q->where('id', $filter['kelurahan_id']);
+            });
+        }
+
+        if (!empty($filter['posyandu_id'])) {
+            $query->whereHas('keluarga.unitRumah.posyandu', function ($q) use ($filter) {
+                $q->where('id', $filter['posyandu_id']);
+            });
+        }
+
+        $query->orderBy('created_at', 'desc');
 
         $data = $query->paginate($perPage, ['*'], 'page', $page);
 
@@ -31,11 +69,9 @@ class IdentitasAnggotaHelper extends Helper
 
     public function getById(string $id): array
     {
-        $unit = UnitModel::with([
-            'keluarga.kepalaKeluarga'
-        ])->find($id);
+        $anggota = $this->anggotaModel->getById($id);
 
-        if (!$unit) {
+        if (!$anggota) {
             return [
                 'status' => false,
                 'data' => null
@@ -44,7 +80,7 @@ class IdentitasAnggotaHelper extends Helper
 
         return [
             'status' => true,
-            'data' => $unit
+            'data' => $anggota
         ];
     }
 
@@ -63,12 +99,9 @@ class IdentitasAnggotaHelper extends Helper
                 ];
             }
 
-            // 🔥 CEK APAKAH NIK SUDAH ADA
             $existing = AnggotaKeluargaModel::where('nik', $payload['nik'])->first();
 
             if ($existing) {
-
-                // 🔥 UPDATE jika sudah ada
                 $existing->update([
                     'nama'               => $payload['nama'],
                     'tempat_lahir'       => $payload['tempat_lahir'],
@@ -88,7 +121,6 @@ class IdentitasAnggotaHelper extends Helper
                 ];
             }
 
-            // 🔥 CREATE jika belum ada
             $anggota = AnggotaKeluargaModel::create([
                 'keluarga_id'        => $keluarga->id,
                 'nama'               => $payload['nama'],
@@ -121,33 +153,15 @@ class IdentitasAnggotaHelper extends Helper
 
     public function update(array $payload, string $id): array
     {
-        DB::beginTransaction();
-
         try {
-            $anggota = AnggotaKeluargaModel::findOrFail($id);
+            $this->anggotaModel->edit($payload, $id);
 
-            $anggota->update([
-                'nama'               => $payload['nama'],
-                'nik'                => $payload['nik'],
-                'tempat_lahir'       => $payload['tempat_lahir'],
-                'tanggal_lahir'      => $payload['tanggal_lahir'],
-                'jenis_kelamin'      => $payload['jenis_kelamin'],
-                'hubungan_keluarga'  => $payload['hubungan_keluarga'],
-                'status_perkawinan'  => $payload['status_perkawinan'],
-                'pendidikan_terakhir' => $payload['pendidikan_terakhir'],
-                'pekerjaan'          => $payload['pekerjaan'],
-            ]);
-
-            DB::commit();
-
+            $anggota = $this->getById($id);
             return [
                 'status' => true,
-                'data' => $anggota
+                'data' => $anggota['data']
             ];
         } catch (Throwable $th) {
-
-            DB::rollBack();
-
             return [
                 'status' => false,
                 'error' => $th->getMessage()
@@ -160,18 +174,10 @@ class IdentitasAnggotaHelper extends Helper
         DB::beginTransaction();
 
         try {
-
-            $unit = UnitModel::findOrFail($id);
-
-            foreach ($unit->keluarga as $kel) {
-                AnggotaKeluargaModel::where('keluarga_id', $kel->id)->delete();
-                $kel->delete();
-            }
-
-            $unit->delete();
+            $anggota = AnggotaKeluargaModel::findOrFail($id);
+            $anggota->delete();
 
             DB::commit();
-
             return true;
         } catch (Throwable $th) {
             DB::rollBack();

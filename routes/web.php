@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\IdentitasAnggotaController;
+use App\Http\Controllers\Api\IdentitasKeluargaController;
 use App\Http\Controllers\Api\MonitoringController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +28,10 @@ Route::view('/monitoring-nik-per-kk', 'admin.fitur.monitoring.nik_per_kk')->name
 Route::view('/hasil-skrining', 'admin.fitur.monitoring.hasil_skrining')->name('admin.fitur.monitoring.hasil_skrining');
 Route::get('/download/hasil-skrining', [MonitoringController::class, 'exportHasilskrining'])->name('hasil_skrining.download');
 
+Route::view('/data-warga-kk', 'admin.fitur.data_warga.kk.index')->name('admin.fitur.data_warga.kk');
+Route::view('/data-warga-nik', 'admin.fitur.data_warga.nik.index')->name('admin.fitur.data_warga.nik');
+Route::post('/admin/fitur/data_warga/kk/import', [IdentitasKeluargaController::class, 'import_data_keluarga'])->name('data-warga.kk.import');
+Route::post('/admin/fitur/data_warga/nik/import', [IdentitasAnggotaController::class, 'import_anggota'])->name('data-warga.nik.import');
 
 //kader
 Route::view('/dashboard-kader', 'kader.dashboard_kader')->name('kader.dashboard_kader');
