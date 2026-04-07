@@ -6,10 +6,10 @@
 <section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Data Tenaga Kesehatan</h2>
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 flex-wrap">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 flex-wrap">
         <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <input id="searchInput" type="text"
-                placeholder="Pencarian"
+                placeholder="Cari berdasarkan nama..."
                 class="h-9 bg-white border border-[#00000033] rounded-lg px-3 text-sm
                    focus:outline-none focus:ring-2 focus:ring-[#61359C]/50 w-full sm:w-70">
 
@@ -17,7 +17,7 @@
                 id="kelurahanFilterDropdown"
                 label="Pilih Kelurahan"
                 :options="[]"
-                width="sm:w-48 h-9"
+                width="w-full sm:w-48 h-9"
                 data-dropdown="filter" />
 
             <button id="searchBtn"
@@ -36,8 +36,6 @@
                 <i class="fa-solid fa-file-excel"></i>
                 Import Excel
             </button>
-
-
             <button
                 class="h-9 flex items-center gap-2 bg-[#61359C] text-white
                    text-sm px-4 rounded-lg hover:bg-[#61359C]/80
@@ -48,9 +46,8 @@
         </div>
     </div>
 
-
     <div class="overflow-x-auto">
-        <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700">
+        <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700 whitespace-nowrap">
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>
                     <th class="px-3 py-2 border border-[#00000033] w-[5%]">No</th>
@@ -70,7 +67,7 @@
                 max-w-3xl flex flex-col relative">
 
             <div class="w-full py-3 px-4">
-                <h3 class="text-lg font-bold text-left">Detail Data Tenaga Kesehatan</h3>
+                <h3 class="text-lg font-bold text-left">Detail Tenaga Kesehatan</h3>
             </div>
 
             <div class="px-4 py-2 w-full space-y-1 text-sm">
@@ -113,7 +110,7 @@
                 <div class="flex justify-center mt-4 sm:mt-6">
                     <button
                         id="closeModalBtn"
-                        class="bg-[#61359C] text-white text-sm font-semibold px-20 sm:px-44 py-2 rounded-lg hover:bg-[#61359C]/80 transition">
+                        class="w-full bg-[#61359C] text-white text-sm font-semibold px-20 sm:px-44 py-2 rounded-lg hover:bg-[#61359C]/80 transition">
                         Tutup
                     </button>
                 </div>
@@ -124,7 +121,7 @@
 
 <x-modal id="nakesModalRef" size="md">
     <x-slot name="title">
-        <h3 id="nakesModalTitle" class="text-lg font-bold">Tambah Data Tenaga Kesehatan</h3>
+        <h3 id="nakesModalTitle" class="text-lg font-bold">Tambah Tenaga Kesehatan</h3>
     </x-slot>
 
     @include('admin.fitur.kelola_user.data_nakes.form')
@@ -135,7 +132,7 @@
             Batal
         </button>
         <button type="submit" id="nakesSaveBtn" form="formEdit"
-            class="w-full px-6 py-2 rounded-lg bg-[#0B6CF4] text-white font-medium shadow hover:opacity-90 transition">
+            class="w-full px-6 py-2 rounded-lg bg-[#61359C] text-white font-medium shadow hover:opacity-90 transition">
             Simpan
         </button>
     </x-slot>
@@ -216,7 +213,7 @@
                 renderTable(nakesUsers);
 
             } catch (error) {
-                console.error("Gagal memuat data tenaga kesehatan:", error);
+                showErrorToast.error("Gagal memuat data tenaga kesehatan:", error);
             }
         }
 
@@ -286,7 +283,7 @@
                             showSuccessToast("Data berhasil dihapus!");
                             await fetchNakes();
                         } catch (error) {
-                            console.error("Gagal menghapus data:", error);
+                            showErrorToast.error("Gagal menghapus data:", error);
                             showErrorToast("Terjadi kesalahan pada server!");
                         }
                     });
@@ -346,7 +343,7 @@
                     }
                 }
             } catch (err) {
-                console.error("Error:", err);
+                showErrorToast.error("Error:", err);
                 alert("Terjadi kesalahan pada server!");
             }
         });
@@ -380,7 +377,7 @@
             nakesModalRef.classList.add("flex");
 
             if (mode === "edit" && id) {
-                nakesModalTitle.textContent = "Edit Data Tenaga Kesehatan";
+                nakesModalTitle.textContent = "Edit Tenaga Kesehatan";
                 try {
                     const data = await fetch(`{{ url('api/users') }}/${id}`);
                     const json = await data.json();
@@ -391,10 +388,10 @@
                     formEdit.setAttribute('data-mode', 'edit');
                     formEdit.setAttribute('data-id', id);
                 } catch (err) {
-                    console.error("Gagal mengambil data nakes:", err);
+                    showErrorToast.error("Gagal mengambil data nakes:", err);
                 }
             } else {
-                nakesModalTitle.textContent = "Tambah Data Tenaga Kesehatan";
+                nakesModalTitle.textContent = "Tambah Tenaga Kesehatan";
                 setFormData(null);
                 formEdit.removeAttribute('data-id');
                 formEdit.setAttribute('data-mode', 'add');
@@ -455,10 +452,9 @@
                 );
 
             } catch (err) {
-                console.error("Gagal load kelurahan filter:", err);
+                showErrorToast.error("Gagal load kelurahan filter:", err);
             }
         }
-
 
         function renderKelurahanFilterDropdown() {
             const wrapper = document.getElementById('kelurahanFilterDropdown');

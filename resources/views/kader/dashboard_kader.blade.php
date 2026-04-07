@@ -7,11 +7,11 @@
     <div id="kaderCards" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
     <div id="detailTableContainer" class="mt-3 hidden overflow-x-auto">
-    <table id="detailTable" class="min-w-[700px] w-full border-collapse table-auto text-left">
-        <thead class="bg-gray-100" id="detailTableHead"></thead>
-        <tbody id="detailTableBody"></tbody>
-    </table>
-</div>
+        <table id="detailTable" class="min-w-[700px] w-full border-collapse table-auto text-left">
+            <thead class="bg-gray-100" id="detailTableHead"></thead>
+            <tbody id="detailTableBody"></tbody>
+        </table>
+    </div>
 </div>
 
 <div id="skriningDetailModal" class="fixed inset-0 bg-slate-950/30 hidden items-center justify-center z-50 px-4">
@@ -115,8 +115,11 @@
             tableContainer.classList.remove('hidden');
             tableBody.innerHTML = '';
 
-            tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            
+            tableContainer.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+
             if (type === 'kk') {
                 tableHead.innerHTML = `
                     <tr class="bg-blue-700 text-white text-center text-sm">

@@ -84,6 +84,32 @@
                 <div class="bg-white border border-[#61359C] rounded-2xl p-6 mb-4 space-y-6">
                     <div>
                         <label class="block text-sm font-semibold mb-1">
+                            NIK / Nomor KTP
+                        </label>
+                        <x-dropdown
+                            id="nikDropdown"
+                            label="Pilih NIK"
+                            :options="[]"
+                            width="w-full"
+                            :searchable="true"
+                            allowOther="true"
+                            otherLabel="+ Tambah NIK"
+                            otherPlaceholder="Ketik NIK manual..."
+                            data-dropdown="filter" />
+                        <input type="hidden" name="nik" id="selected_nik">
+                        <p class="text-red-500 text-xs mt-1 hidden" id="error-nik"></p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <input type="checkbox"
+                                id="tidak_punya_nik"
+                                class="w-4 h-4 accent-[#61359C]">
+                            <label for="tidak_punya_nik" class="text-sm text-gray-600">
+                                Tidak punya NIK / Nomor KTP
+                            </label>
+                        </div>
+                        <input type="hidden" name="anggota_id" id="selected_anggota_id">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">
                             Hubungan Keluarga
                         </label>
                         <x-dropdown
@@ -100,33 +126,13 @@
                             data-dropdown="filter" />
                         <p class="text-red-500 text-xs mt-1 hidden" id="error-hubungan_keluarga"></p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            NIK / Nomor KTP
-                        </label>
-                        <input type="text"
-                            id="nik"
-                            maxlength="16"
-                            inputmode="numeric"
-                            oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,16)"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                        <p class="text-red-500 text-xs mt-1 hidden" id="error-nik"></p>
-                        <div class="flex items-center gap-2 mt-2">
-                            <input type="checkbox"
-                                id="tidak_punya_nik"
-                                class="w-4 h-4 accent-[#61359C]">
-                            <label for="tidak_punya_nik" class="text-sm text-gray-600">
-                                Tidak punya NIK / Nomor KTP
-                            </label>
-                        </div>
-                    </div>
 
                     <div>
                         <label class="block text-sm font-semibold mb-1">
                             Nama Lengkap
                         </label>
                         <input type="text"
-                            id="nama_lengkap"
+                            id="nama"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
                         <p class="text-red-500 text-xs mt-1 hidden" id="error-nama"></p>
                     </div>
@@ -218,8 +224,6 @@
                             <p class="text-red-500 text-xs mt-1 hidden" id="error-status_perkawinan"></p>
                         </div>
                     </div>
-
-
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
                     <div class="flex gap-2">
@@ -319,24 +323,125 @@
                     'dropdown-item block w-full text-center px-4 py-1 text-sm text-gray-700 hover:bg-gray-100 transition';
                 btn.textContent = kk.no_kk;
 
-                btn.onclick = () => {
+                btn.onclick = async () => {
                     wrapper.querySelector('.dropdown-selected').textContent = kk.no_kk;
                     dropdown.classList.add('hidden');
 
                     const keluargaInput = document.getElementById('keluarga_id');
                     keluargaInput.value = kk.id;
 
-                    keluargaInput.dataset.kepala_nama =
-                        kk.kepala_keluarga?.nama || '';
-
-                    keluargaInput.dataset.kepala_nik =
-                        kk.kepala_keluarga?.nik || '';
-
+                    loadAnggotaByKk(kk.id);
                 };
 
                 dropdown.appendChild(btn);
 
             });
+        }
+
+        let anggotaKk = [];
+
+        async function loadAnggotaByKk(keluargaId) {
+            try {
+                const res = await fetch(`{{ url('api/identitas_anggota/by-keluarga') }}/${keluargaId}`);
+                const json = await res.json();
+
+                anggotaKk = json.data?.data || [];
+
+                renderNikDropdown();
+            } catch (e) {
+                console.error('Gagal load anggota:', e);
+            }
+        }
+
+        let isNikManual = false;
+
+        function renderNikDropdown() {
+            const wrapper = document.getElementById('nikDropdown');
+            const dropdown = wrapper.querySelector('.dropdown-menu');
+
+            const searchEl = dropdown.querySelector('input') ?
+                dropdown.querySelector('input').cloneNode(true) :
+                null;
+
+            dropdown.innerHTML = '';
+            if (searchEl) dropdown.appendChild(searchEl);
+
+            if (!anggotaKk.length) {
+                dropdown.innerHTML += `
+                    <div class="px-3 py-1 text-sm text-gray-400">Tidak ada NIK dalam KK ini</div>
+                `;
+                return;
+            }
+
+            anggotaKk.forEach(a => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = "dropdown-item block w-full text-sm px-3 py-1 hover:bg-gray-100";
+                btn.textContent = `${a.nik} - ${a.nama}`;
+
+                btn.onclick = () => {
+                    setDropdownLabel('nikDropdown', a.nik, 'Pilih NIK');
+                    document.getElementById('selected_nik').value = a.nik;
+                    document.getElementById('selected_anggota_id').value = a.id;
+
+                    const dropdownLabel = document.querySelector('#nikDropdown .dropdown-selected');
+                    if (dropdownLabel) dropdownLabel.dataset.nik = a.nik;
+
+                    autofillIdentitas(a);
+                    dropdown.classList.add('hidden');
+                };
+                dropdown.appendChild(btn);
+            });
+
+            const otherBtn = document.createElement('button');
+            otherBtn.type = 'button';
+            otherBtn.className = "dropdown-item block w-full text-center px-4 py-1 text-sm text-gray-700 hover:bg-gray-100 transition";
+            otherBtn.textContent = "Lainnya";
+            otherBtn.onclick = () => {
+                const wrapperOther = document.createElement('div');
+                wrapperOther.className = 'dropdown-other-wrapper mt-2 pt-3 border-t border-gray-200 px-3 pb-2';
+                wrapperOther.innerHTML = `
+                    <div class="text-xs text-gray-500 mb-1">Lainnya</div>
+                    <input type="text" id="manual_nik" class="dropdown-other w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50" placeholder="Ketik NIK manual...">
+                `;
+                dropdown.appendChild(wrapperOther);
+
+                wrapper.querySelector('.dropdown-selected').textContent = 'Lainnya';
+
+                const manualInput = wrapperOther.querySelector('#manual_nik');
+                manualInput.addEventListener('input', (e) => {
+                    document.getElementById('selected_nik').value = e.target.value.trim();
+                });
+            };
+            dropdown.appendChild(otherBtn);
+        }
+
+        function autofillIdentitas(a) {
+            const nama = document.getElementById('nama');
+            setTimeout(() => {
+                nama.value = a.nama || '';
+            }, 50);
+
+            const tempat = document.getElementById('tempat_lahir');
+            if (tempat) tempat.value = a.tempat_lahir || '';
+
+            const tanggal = document.getElementById('tanggal_lahir');
+            if (tanggal) tanggal.value = a.tanggal_lahir || '';
+
+            setDropdownLabel('hubunganDropdown', a.hubungan_keluarga, 'Pilih Hubungan Keluarga');
+
+            let jkLabel = '';
+            if (a.jenis_kelamin === 'L') jkLabel = 'Laki-laki';
+            else if (a.jenis_kelamin === 'P') jkLabel = 'Perempuan';
+            setDropdownLabel('jenisKelaminDropdown', jkLabel, 'Pilih Jenis Kelamin');
+
+            setDropdownLabel('pendidikanDropdown', a.pendidikan_terakhir || '', 'Pilih Pendidikan');
+            setDropdownLabel('pekerjaanDropdown', a.pekerjaan || '', 'Pilih Pekerjaan');
+            setDropdownLabel('statusDropdown', a.status_perkawinan || '', 'Pilih Status');
+
+            const nikInput = document.getElementById('selected_nik');
+            if (nikInput) nikInput.value = a.nik || '';
+            if (nikInput) nikInput.value = a.nik || '';
         }
 
         let siklusData = [];
@@ -548,7 +653,6 @@
 
             document.getElementById('judulSkrining').innerText = 'Skrining NIK';
             document.getElementById('labelTabIdentitas').innerText = 'Data Identitas';
-
         });
 
         async function fetchPertanyaan() {
@@ -870,7 +974,6 @@
             }
         });
 
-
         function getDropdownValue(id) {
             const wrapper = document.getElementById(id);
             if (!wrapper) return null;
@@ -908,8 +1011,8 @@
             const kepalaNama = keluargaInput.dataset.kepala_nama || '';
             const kepalaNik = keluargaInput.dataset.kepala_nik || '';
 
-            const namaInput = document.getElementById('nama_lengkap');
-            const nikInput = document.getElementById('nik');
+            const namaInput = document.getElementById('nama');
+            const nikInput = document.getElementById('selected_nik');
 
             if (hubungan === 'Kepala Keluarga') {
                 namaInput.value = kepalaNama;
@@ -925,7 +1028,6 @@
                 namaInput.removeAttribute('readonly');
                 nikInput.removeAttribute('readonly');
             }
-
         });
 
         observer.observe(hubunganLabel, {
@@ -935,13 +1037,36 @@
         observer.observe(hubunganLabel, {
             childList: true
         });
+
+        function syncSelectedNik() {
+            const manualNikInput = document.getElementById('manual_nik');
+            const selectedNikInput = document.getElementById('selected_nik');
+
+            if (!selectedNikInput) return;
+
+            if (manualNikInput) {
+                selectedNikInput.value = manualNikInput.value.trim();
+            } else {
+                const dropdownLabel = document.querySelector('#nikDropdown .dropdown-selected');
+                if (dropdownLabel && dropdownLabel.dataset.nik) {
+                    selectedNikInput.value = dropdownLabel.dataset.nik;
+                } else {
+                    console.log('Dropdown biasa, selected_nik tidak diubah');
+                }
+            }
+        }
+
         async function validateIdentitas() {
             resetErrorsTextOnly();
+            syncSelectedNik();
+
+            const anggotaId = document.getElementById('selected_anggota_id').value || null;
 
             const identitasPayload = {
+                id: anggotaId,
                 keluarga_id: document.getElementById('keluarga_id').value.trim(),
-                nik: document.getElementById('nik').value.trim(),
-                nama: document.getElementById('nama_lengkap').value.trim(),
+                nik: document.getElementById('selected_nik').value.trim(),
+                nama: document.getElementById('nama').value.trim(),
                 tempat_lahir: document.getElementById('tempat_lahir').value.trim(),
                 tanggal_lahir: document.getElementById('tanggal_lahir').value,
                 jenis_kelamin: mapJenisKelamin(
@@ -953,14 +1078,41 @@
                 pekerjaan: getDropdownValue('pekerjaanDropdown')
             };
 
-            const response = await fetch(`/api/identitas_anggota?validate_only=1`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                body: JSON.stringify(identitasPayload)
-            });
+            if (anggotaId) {
+                const response = await fetch(`/api/identitas_anggota`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify(identitasPayload)
+                });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    showErrors(result.errors || result.error);
+                    return false;
+                }
+
+                return true;
+            } else {
+                const response = await fetch(`/api/identitas_anggota?validate_only=1`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify(identitasPayload)
+                });
+                const result = await response.json();
+
+                if (response.status === 422) {
+                    showErrors(result.errors);
+                    return false;
+                }
+
+                return true;
+            }
 
             const result = await response.json();
 
@@ -1008,142 +1160,146 @@
                 });
         }
 
-
-
-
         const btnKirim = document.getElementById('btnKirim');
         btnKirim.addEventListener('click', async () => {
             resetErrorsTextOnly();
 
-            function scrollToFirstError() {
-                const firstError = document.querySelector(
-                    '#contentIdentitas .text-red-500:not(.hidden), #contentPertanyaan .text-red-500:not(.hidden)'
-                );
+            const anggotaIdInput = document.getElementById('selected_anggota_id');
+            let anggotaId = anggotaIdInput ? anggotaIdInput.value : null;
 
-                if (!firstError) return;
+            try {
+                function scrollToFirstError() {
+                    const firstError = document.querySelector(
+                        '#contentIdentitas .text-red-500:not(.hidden), #contentPertanyaan .text-red-500:not(.hidden)'
+                    );
 
-                if (firstError.closest('#contentIdentitas')) {
-                    tabIdentitas.click();
-                } else if (firstError.closest('#contentPertanyaan')) {
-                    tabPertanyaan.click();
-                }
+                    if (!firstError) return;
 
-                const fieldWrapper = firstError.closest('div');
-                const input = fieldWrapper?.querySelector('input, textarea, button');
-
-                firstError.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
-
-                setTimeout(() => {
-                    input?.focus();
-                }, 400);
-            }
-
-            let pertanyaanError = false;
-            const jawaban = [];
-
-            document.querySelectorAll('#pertanyaanContainer > div[data-pertanyaan-id]')
-                .forEach(wrapper => {
-
-                    const isRequired = wrapper.dataset.required === "1";
-                    const pertanyaanId = wrapper.getAttribute('data-pertanyaan-id');
-                    let value = null;
-
-                    const radio = wrapper.querySelector('input[type="radio"]:checked');
-                    if (radio) {
-                        value = radio.nextElementSibling?.innerText ?? null;
+                    if (firstError.closest('#contentIdentitas')) {
+                        tabIdentitas.click();
+                    } else if (firstError.closest('#contentPertanyaan')) {
+                        tabPertanyaan.click();
                     }
 
-                    const checkboxes = wrapper.querySelectorAll('input[type="checkbox"]');
-                    let values = [];
+                    const fieldWrapper = firstError.closest('div');
+                    const input = fieldWrapper?.querySelector('input, textarea, button');
 
-                    checkboxes.forEach(cb => {
-                        if (cb.checked) {
-                            if (cb.classList.contains('checkbox-option')) {
-                                values.push(cb.nextElementSibling?.innerText ?? '');
-                            }
-                            if (cb.classList.contains('checkbox-other')) {
-                                const otherInput = wrapper.querySelector('.other-input');
-                                if (otherInput && otherInput.value.trim()) {
-                                    values.push(otherInput.value.trim());
+                    firstError.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+
+                    setTimeout(() => {
+                        input?.focus();
+                    }, 400);
+                }
+
+                let pertanyaanError = false;
+                const jawaban = [];
+
+                document.querySelectorAll('#pertanyaanContainer > div[data-pertanyaan-id]')
+                    .forEach(wrapper => {
+
+                        const isRequired = wrapper.dataset.required === "1";
+                        const pertanyaanId = wrapper.getAttribute('data-pertanyaan-id');
+                        let value = null;
+
+                        const radio = wrapper.querySelector('input[type="radio"]:checked');
+                        if (radio) {
+                            value = radio.nextElementSibling?.innerText ?? null;
+                        }
+
+                        const checkboxes = wrapper.querySelectorAll('input[type="checkbox"]');
+                        let values = [];
+
+                        checkboxes.forEach(cb => {
+                            if (cb.checked) {
+                                if (cb.classList.contains('checkbox-option')) {
+                                    values.push(cb.nextElementSibling?.innerText ?? '');
+                                }
+                                if (cb.classList.contains('checkbox-other')) {
+                                    const otherInput = wrapper.querySelector('.other-input');
+                                    if (otherInput && otherInput.value.trim()) {
+                                        values.push(otherInput.value.trim());
+                                    }
                                 }
                             }
+                        });
+
+                        const textInput = wrapper.querySelector('input[type="text"]');
+                        const textarea = wrapper.querySelector('textarea');
+
+                        if (values.length) {
+                            value = values.join(', ');
+                        } else if (textInput && textInput.value.trim()) {
+                            value = textInput.value.trim();
+                        } else if (textarea && textarea.value.trim()) {
+                            value = textarea.value.trim();
+                        }
+
+                        const dateInput = wrapper.querySelector('input[type="date"]');
+                        if (dateInput && dateInput.value) {
+                            value = dateInput.value;
+                        }
+
+                        const dropdownSelected = wrapper.querySelector('.dropdown-selected');
+                        if (dropdownSelected && dropdownSelected.innerText !== 'Pilih Opsi') {
+                            value = dropdownSelected.innerText;
+                        }
+
+                        if (isRequired && !value) {
+                            pertanyaanError = true;
+
+                            wrapper.classList.add('border-red-500');
+                            wrapper.classList.remove('border-gray-200');
+
+                            const input = wrapper.querySelector('input, textarea, button, .dropdown-selected');
+                            if (input) input.focus();
+                        } else {
+                            wrapper.classList.remove('border-red-500');
+                            wrapper.classList.add('border-gray-200');
+                        }
+
+                        if (value !== null) {
+                            jawaban.push({
+                                pertanyaan_id: pertanyaanId,
+                                anggota_keluarga_id: null,
+                                value_jawaban: value
+                            });
                         }
                     });
 
-                    const textInput = wrapper.querySelector('input[type="text"]');
-                    const textarea = wrapper.querySelector('textarea');
+                let hasError = pertanyaanError;
 
-                    if (values.length) {
-                        value = values.join(', ');
-                    } else if (textInput && textInput.value.trim()) {
-                        value = textInput.value.trim();
-                    } else if (textarea && textarea.value.trim()) {
-                        value = textarea.value.trim();
-                    }
-
-                    const dateInput = wrapper.querySelector('input[type="date"]');
-                    if (dateInput && dateInput.value) {
-                        value = dateInput.value;
-                    }
-
-                    const dropdownSelected = wrapper.querySelector('.dropdown-selected');
-                    if (dropdownSelected && dropdownSelected.innerText !== 'Pilih Opsi') {
-                        value = dropdownSelected.innerText;
-                    }
-
-                    if (isRequired && !value) {
-                        pertanyaanError = true;
-
-                        wrapper.classList.add('border-red-500');
-                        wrapper.classList.remove('border-gray-200');
-
-                        const input = wrapper.querySelector('input, textarea, button, .dropdown-selected');
-                        if (input) input.focus();
-                    } else {
-                        wrapper.classList.remove('border-red-500');
-                        wrapper.classList.add('border-gray-200');
-                    }
-
-                    if (value !== null) {
-                        jawaban.push({
-                            pertanyaan_id: pertanyaanId,
-                            anggota_keluarga_id: null,
-                            value_jawaban: value
-                        });
-                    }
+                document.querySelectorAll('#contentIdentitas .text-red-500:not(.hidden)').forEach(el => {
+                    hasError = true;
                 });
 
-            let hasError = pertanyaanError;
-
-            document.querySelectorAll('#contentIdentitas .text-red-500:not(.hidden)').forEach(el => {
-                hasError = true;
-            });
-
-            if (hasError) {
-                scrollToFirstError();
-                return;
-            }
-            try {
+                if (hasError) {
+                    scrollToFirstError();
+                    return;
+                }
                 const identitasPayload = {
+                    id: anggotaId || null,
                     keluarga_id: document.getElementById('keluarga_id').value,
-                    nik: document.getElementById('nik').value,
-                    nama: document.getElementById('nama_lengkap').value,
+                    nik: document.getElementById('selected_nik').value,
+                    nama: document.getElementById('nama').value,
                     tempat_lahir: document.getElementById('tempat_lahir').value,
                     tanggal_lahir: document.getElementById('tanggal_lahir').value,
-                    jenis_kelamin: mapJenisKelamin(
-                        getDropdownValue('jenisKelaminDropdown')
-                    ),
+                    jenis_kelamin: mapJenisKelamin(getDropdownValue('jenisKelaminDropdown')),
                     pendidikan_terakhir: getDropdownValue('pendidikanDropdown'),
                     hubungan_keluarga: getDropdownValue('hubunganDropdown'),
                     status_perkawinan: getDropdownValue('statusDropdown'),
                     pekerjaan: getDropdownValue('pekerjaanDropdown')
                 };
+                let method = 'POST';
+                let url = '/api/identitas_anggota';
+                if (anggotaId) {
+                    method = 'PUT';
+                }
 
-                const identitasResponse = await fetch(`/api/identitas_anggota`, {
-                    method: "POST",
+                const identitasResponse = await fetch(url, {
+                    method: method,
                     headers: {
                         "Content-Type": "application/json",
                         "X-CSRF-TOKEN": "{{ csrf_token() }}"
@@ -1163,7 +1319,7 @@
                     return;
                 }
 
-                const anggotaId = identitasResult.data?.id;
+                anggotaId = identitasResult.data?.id;
 
                 if (!anggotaId) {
                     showErrorToast("ID anggota tidak ditemukan");
@@ -1208,6 +1364,7 @@
                 } else {
                     showErrorToast("Gagal menyimpan skrining");
                 }
+
 
             } catch (error) {
                 console.error(error);
@@ -1260,27 +1417,36 @@
             });
         }
 
-        const nikInput = document.getElementById('nik');
         const tidakPunyaNik = document.getElementById('tidak_punya_nik');
+        const nikDropdown = document.getElementById('nikDropdown');
+        const selectedNik = document.getElementById('selected_nik');
 
-        tidakPunyaNik.addEventListener('change', function() {
-            if (this.checked) {
-                nikInput.value = '0'.repeat(16);
+        tidakPunyaNik.addEventListener('change', () => {
+            if (tidakPunyaNik.checked) {
+                const zeroNik = '0'.repeat(16);
+                selectedNik.value = zeroNik;
+                setDropdownLabel('nikDropdown', zeroNik, 'Pilih NIK');
 
-                nikInput.setAttribute('readonly', true);
-                nikInput.classList.add('bg-gray-100', 'cursor-not-allowed');
-
-                const errorNik = document.getElementById('error-nik');
-                if (errorNik) {
-                    errorNik.textContent = '';
-                    errorNik.classList.add('hidden');
-                }
-
+                document.getElementById('nama').value = '';
+                document.getElementById('tempat_lahir').value = '';
+                document.getElementById('tanggal_lahir').value = '';
+                setDropdownLabel('hubunganDropdown', '', 'Pilih Hubungan Keluarga');
+                setDropdownLabel('jenisKelaminDropdown', '', 'Pilih Jenis Kelamin');
+                setDropdownLabel('pendidikanDropdown', '', 'Pilih Pendidikan');
+                setDropdownLabel('pekerjaanDropdown', '', 'Pilih Pekerjaan');
+                setDropdownLabel('statusDropdown', '', 'Pilih Status');
             } else {
-                nikInput.value = '';
+                selectedNik.value = '';
+                setDropdownLabel('nikDropdown', '', 'Pilih NIK');
 
-                nikInput.removeAttribute('readonly');
-                nikInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                document.getElementById('nama').value = '';
+                document.getElementById('tempat_lahir').value = '';
+                document.getElementById('tanggal_lahir').value = '';
+                setDropdownLabel('hubunganDropdown', '', 'Pilih Hubungan Keluarga');
+                setDropdownLabel('jenisKelaminDropdown', '', 'Pilih Jenis Kelamin');
+                setDropdownLabel('pendidikanDropdown', '', 'Pilih Pendidikan');
+                setDropdownLabel('pekerjaanDropdown', '', 'Pilih Pekerjaan');
+                setDropdownLabel('statusDropdown', '', 'Pilih Status');
             }
         });
 

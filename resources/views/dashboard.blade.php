@@ -4,17 +4,24 @@
 
 @section('content')
 <div class="flex flex-col gap-4 w-full max-w-3xl mx-auto text-base">
-    <div class="flex gap-3 w-full mb-3">
+    <div class="grid grid-cols-2 gap-3 mb-3">
         <button id="btnSkriningKK"
-            class="flex-1 h-10 bg-[#61359C] text-white font-semibold rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200">
-            Skrining KK
+            class="h-14 rounded-full bg-[#61359C] text-white border-2 border-[#61359C]
+           flex items-center justify-center gap-3 px-4
+           hover:bg-[#4B1F8B] transition-all">
+            <i class="fa-solid fa-users text-xl"></i>
+            <span class="text-sm font-semibold">Skrining KK</span>
         </button>
+
         <button id="btnSkriningNIK"
-            class="flex-1 h-10 bg-[#61359C] text-white font-semibold rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200">
-            Skrining NIK
+            class="h-14 rounded-full bg-white text-[#61359C] border-2 border-[#61359C]/40
+           flex items-center justify-center gap-3 px-4
+           hover:bg-[#F4E8FF] transition-all">
+            <i class="fa-solid fa-user text-xl"></i>
+            <span class="text-sm font-semibold">Skrining NIK</span>
         </button>
     </div>
-
+    
     <x-dropdown
         id="nikCategoryDropdown"
         label="Pilih Siklus"
@@ -45,7 +52,7 @@
             data-dropdown="filter" />
 
         <button id="searchBtn"
-            class="h-10 px-4 bg-[#61359C] text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200 w-full sm:w-auto flex items-center justify-center">
+            class="h-9 px-4 bg-[#61359C] text-white text-sm rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200 w-full sm:w-auto flex items-center justify-center">
             <i class="fa-solid fa-magnifying-glass mr-2"></i> Cari
         </button>
     </div>
@@ -68,8 +75,8 @@
 
 <div id="skriningDetailModal" class="fixed inset-0 bg-slate-950/30 hidden items-center justify-center z-50 px-4">
     <div class="bg-white rounded-xl shadow-lg w-full sm:w-11/12 md:w-10/12 lg:w-5/12 xl:w-4/12 max-w-3xl flex flex-col relative max-h-[90vh]">
-        <div class="w-full py-3 px-4">
-            <h3 id="skriningDetailModalTitle" class="text-lg font-bold">Detail</h3>
+        <div class="w-full px-4">
+            <h3 id="skriningDetailModalTitle" class="text-lg font-bold mt-2">Detail</h3>
         </div>
 
         <div id="skriningDetailBody" class="px-4 py-4 w-full space-y-2 text-sm overflow-y-auto"></div>
@@ -108,15 +115,49 @@
         function setActiveButton(activeId) {
             ['btnSkriningKK', 'btnSkriningNIK'].forEach(id => {
                 const btn = document.getElementById(id);
+
+                const icon = btn.querySelector("i");
+                const label = btn.querySelector("span");
+
                 if (id === activeId) {
-                    btn.classList.add('bg-[#61359C]');
-                    btn.classList.remove('bg-[#61359C]/70', 'hover:bg-[#4B1F8B]');
+                    // ACTIVE
+                    btn.classList.remove(
+                        'bg-white',
+                        'text-[#61359C]',
+                        'border-[#61359C]/40',
+                        'hover:bg-[#F4E8FF]'
+                    );
+                    btn.classList.add(
+                        'bg-[#61359C]',
+                        'text-white',
+                        'border-[#61359C]',
+                        'hover:bg-[#4B1F8B]'
+                    );
+
+                    icon.classList.remove('text-[#61359C]');
+                    icon.classList.add('text-white');
+
                 } else {
-                    btn.classList.remove('bg-[#61359C]');
-                    btn.classList.add('bg-[#61359C]/70', 'hover:bg-[#4B1F8B]');
+                    // NON-ACTIVE
+                    btn.classList.remove(
+                        'bg-[#61359C]',
+                        'text-white',
+                        'border-[#61359C]',
+                        'hover:bg-[#4B1F8B]'
+                    );
+                    btn.classList.add(
+                        'bg-white',
+                        'text-[#61359C]',
+                        'border-[#61359C]/40',
+                        'hover:bg-[#F4E8FF]'
+                    );
+
+                    icon.classList.remove('text-white');
+                    icon.classList.add('text-[#61359C]');
                 }
             });
 
+            // Disable dropdown jika mode NIK
             if (activeId === 'btnSkriningNIK') {
                 setDropdownDisabled('kelurahanFilterDropdown', true);
                 setDropdownDisabled('posyanduFilterDropdown', true);
@@ -407,7 +448,7 @@
                     tableContainer.appendChild(title);
 
                     const table = document.createElement('table');
-                    table.className = 'min-w-full border border-gray-200 mb-4 text-sm';
+                    table.className = 'min-w-full border border-gray-200 mb-4 text-sm  whitespace-nowrap';
 
                     const thead = document.createElement('thead');
                     const tbody = document.createElement('tbody');
@@ -483,9 +524,10 @@
             skriningDetailBody.innerHTML = '';
 
             const createRow = (label, value) => `
-                <div class="flex mb-1">
-                    <div class="w-35 font-semibold">${label}</div>
-                    <div>: ${value ?? '-'}</div>
+                <div class="grid grid-cols-[120px_10px_1fr] items-start mb-1">
+                    <div class="font-semibold">${label}</div>
+                    <div>:</div>
+                    <div>${value ?? '-'}</div>
                 </div>
             `;
 
@@ -500,32 +542,47 @@
                 data.kk_di_unit.forEach((kk, index) => {
                     const hasAlamatKTP = kk.alamat_ktp && kk.alamat_ktp.trim() !== '';
                     const alamatRow = hasAlamatKTP ?
-                        `<div class="flex mb-1">
-                                <div class="w-30 font-semibold">Alamat KTP</div>
-                                <div>: ${kk.alamat_ktp}${kk.rt_ktp ? ', RT ' + kk.rt_ktp : ''}${kk.rw_ktp ? ' / RW ' + kk.rw_ktp : ''}</div>
+                        `
+                        <div class="grid grid-cols-[120px_10px_1fr] items-start mb-1">
+                            <div class="font-semibold">Alamat KTP</div>
+                            <div>:</div>
+                            <div>
+                                ${kk.alamat_ktp}
+                                ${kk.rt_ktp ? ', RT ' + kk.rt_ktp : ''}
+                                ${kk.rw_ktp ? ' / RW ' + kk.rw_ktp : ''}
+                            </div>
                         </div>` :
                         '';
 
                     skriningDetailBody.innerHTML += `
-                        <div class="mt-3 mb-2 p-2 border border-gray-200 rounded bg-gray-50 relative">
+                        <div class="mt-3 mb-2 p-2 border border-gray-200 rounded bg-gray-50">
+                            
                             ${hasAlamatKTP ? `
-                                <span class="absolute top-2 right-2 text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full">
+                                <span class="block text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full whitespace-nowrap mb-2">
                                     Luar Wilayah
                                 </span>
                             ` : ''}
-                            <div class="flex mb-1">
-                                <div class="w-30 font-semibold">No KK</div>
-                                <div>: ${kk.no_kk}</div>
+
+                            <div class="grid grid-cols-[120px_10px_1fr] items-start mb-1">
+                                <div class="font-semibold">No KK</div>
+                                <div>:</div>
+                                <div>${kk.no_kk}</div>
                             </div>
-                            <div class="flex mb-1">
-                                <div class="w-30 font-semibold">Kepala Keluarga</div>
-                                <div>: ${kk.kepala_keluarga}</div>
+
+                            <div class="grid grid-cols-[120px_10px_1fr] items-start mb-1">
+                                <div class="font-semibold">Kepala Keluarga</div>
+                                <div>:</div>
+                                <div>${kk.kepala_keluarga}</div>
                             </div>
-                            <div class="flex mb-1">
-                                <div class="w-30 font-semibold">No Telepon</div>
-                                <div>: ${kk.no_telepon}</div>
+
+                            <div class="grid grid-cols-[120px_10px_1fr] items-start mb-1">
+                                <div class="font-semibold">No Telepon</div>
+                                <div>:</div>
+                                <div>${kk.no_telepon}</div>
                             </div>
+
                             ${alamatRow}
+
                         </div>
                     `;
                 });

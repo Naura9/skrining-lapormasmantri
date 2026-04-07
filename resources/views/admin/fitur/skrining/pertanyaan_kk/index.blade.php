@@ -54,7 +54,7 @@
             Batal
         </button>
         <button type="submit" id="pertanyaanSaveBtn" form="formEditPertanyaan"
-            class="w-full px-6 py-2 rounded-lg bg-[#0B6CF4] text-white font-medium shadow hover:opacity-90 transition">
+            class="w-full px-6 py-2 rounded-lg bg-[#61359C] text-white font-medium shadow hover:opacity-90 transition">
             Simpan
         </button>
     </x-slot>
@@ -73,7 +73,7 @@
             Batal
         </button>
         <button type="submit" id="sectionSaveBtn" form="formEditSection"
-            class="w-full px-6 py-2 rounded-lg bg-[#0B6CF4] text-white font-medium shadow hover:opacity-90 transition">
+            class="w-full px-6 py-2 rounded-lg bg-[#61359C] text-white font-medium shadow hover:opacity-90 transition">
             Simpan
         </button>
     </x-slot>

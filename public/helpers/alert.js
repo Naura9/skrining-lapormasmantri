@@ -103,7 +103,7 @@ function showDeleteConfirmToast(title, onConfirm) {
         <i class="fa-solid fa-trash text-6xl sm:text-7xl mb-5"></i>
         <div class="font-semibold text-base sm:text-lg text-center mb-4">${title}</div>
 
-        <div class="flex flex-col sm:flex-row gap-1 w-full justify-center">
+        <div class="flex flex-row gap-1 w-full justify-center">
           <button id="btnConfirmDelete" 
                   class="w-full sm:w-[100px] py-1 bg-[#0B6CF4] text-white rounded-lg font-semibold hover:bg-blue-700 transition mx-auto">
             Ya

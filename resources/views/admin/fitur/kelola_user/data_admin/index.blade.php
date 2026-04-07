@@ -6,12 +6,12 @@
 <section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Data Admin</h2>
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-4 mb-3 flex-wrap">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-3 flex-wrap">
-            <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-center sm:justify-end gap-4 flex-wrap">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5 flex-wrap">
+            <div class="flex items-center gap-3 w-full lg:w-auto justify-center sm:justify-end">
                 <button
                     class="flex items-center gap-2 bg-[#61359C] text-white text-sm px-4 py-2 rounded-lg
-                       hover:bg-[#61359C]/80 transition w-full sm:w-auto justify-center">
+                       hover:bg-[#61359C]/80 transition sm:w-auto justify-center">
                     <i class="fa-solid fa-plus"></i>
                     Tambah
                 </button>
@@ -20,15 +20,15 @@
     </div>
 
     <div class="overflow-x-auto">
-        <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700">
+        <table class="min-w-full table-fixed border border-[#00000033] text-sm text-left text-gray-700  whitespace-nowrap">
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>
                     <th class="px-3 py-2 border border-[#00000033] w-[5%]">No</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[30%]">Nama</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[35%]">Nama</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[15%]">Username</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[15%]">NIK</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[15%]">No Telepon</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[10%]">Jenis Kelamin</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[5%]">Jenis Kelamin</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[10%]">Aksi</th>
                 </tr>
             </thead>
@@ -50,7 +50,7 @@
             Batal
         </button>
         <button type="submit" id="adminSaveBtn" form="formEdit"
-            class="w-full px-6 py-2 rounded-lg bg-[#0B6CF4] text-white font-medium shadow hover:opacity-90 transition">
+            class="w-full px-6 py-2 rounded-lg bg-[#61359C] text-white font-medium shadow hover:opacity-90 transition">
             Simpan
         </button>
     </x-slot>
@@ -82,7 +82,7 @@
 
                 renderTable(adminUsers);
             } catch (error) {
-                console.error("Gagal memuat data admin:", error);
+                showErrorToast.error("Gagal memuat data admin:", error);
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500 py-4">Gagal memuat data</td></tr>`;
             }
         }
@@ -145,7 +145,7 @@
                             showSuccessToast("Data berhasil dihapus!");
                             await fetchAdmin();
                         } catch (error) {
-                            console.error("Gagal menghapus data:", error);
+                            showErrorToast.error("Gagal menghapus data:", error);
                             showErrorToast("Terjadi kesalahan pada server!");
                         }
                     });
@@ -205,7 +205,7 @@
                     }
                 }
             } catch (err) {
-                console.error("Error:", err);
+                showErrorToast.error("Error:", err);
                 alert("Terjadi kesalahan pada server!");
             }
         });
@@ -226,7 +226,7 @@
                     formEdit.setAttribute('data-mode', 'edit');
                     formEdit.setAttribute('data-id', id);
                 } catch (err) {
-                    console.error("Gagal mengambil data admin:", err);
+                    showErrorToast.error("Gagal mengambil data admin:", err);
                 }
             } else {
                 adminModalTitle.textContent = "Tambah Data Admin";

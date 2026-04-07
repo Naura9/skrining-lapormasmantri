@@ -167,7 +167,6 @@
             formEdit.reset();
 
             document.getElementById('jenis_kelamin').value = '';
-            document.getElementById('status').value = '';
             document.getElementById('kelurahan_id').value = '';
 
             setDropdownLabel('jenisKelaminDropdown', null, 'Pilih Jenis Kelamin');

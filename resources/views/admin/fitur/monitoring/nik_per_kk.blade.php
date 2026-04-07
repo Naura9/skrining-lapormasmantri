@@ -8,7 +8,6 @@
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-center gap-4 mb-5 flex-wrap">
         <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-
             <x-dropdown
                 id="kelurahanFilterDropdown"
                 label="Pilih Kelurahan"

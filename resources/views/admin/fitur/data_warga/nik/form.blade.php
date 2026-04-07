@@ -8,6 +8,7 @@
                 id="kkDropdown"
                 label="Pilih Nomor KK"
                 :options="[]"
+                searchable="true"
                 width="w-full"
                 data-dropdown="filter" />
             <p class="text-red-500 text-xs mt-1 hidden" data-key="kelurga_id"></p>
@@ -155,6 +156,17 @@
 </form>
 
 <script>
+    function filterDropdownInput(inputEl) {
+        const keyword = inputEl.value.toLowerCase();
+        const menu = inputEl.closest('.dropdown-menu');
+        const items = menu.querySelectorAll('.dropdown-item');
+
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(keyword) ? 'block' : 'none';
+        });
+    }
+
     function setDropdownLabel(id, text, fallback) {
         const el = document.getElementById(id);
         if (!el) return;
@@ -201,7 +213,13 @@
             .getElementById('kkDropdown')
             .querySelector('.dropdown-menu');
 
-        dropdown.innerHTML = '';
+        dropdown.innerHTML = `
+        <input type="text"
+            placeholder="Cari Nomor KK..."
+            class="dropdown-search w-full px-3 py-2 mb-2 text-sm border border-gray-300 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+            onkeyup="filterDropdownInput(this)">
+    `;
 
         kkData.forEach(k => {
             const btn = document.createElement('button');

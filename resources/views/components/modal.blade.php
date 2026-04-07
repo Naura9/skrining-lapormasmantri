@@ -32,7 +32,7 @@ $widthClass = match($size) {
 
         <!-- Footer -->
         @isset($footer)
-        <div class="px-4 py-4 flex flex-col sm:flex-row justify-end gap-2">
+        <div class="px-4 py-4 flex flex-row justify-end gap-2">
             {{ $footer }}
         </div>
         @endisset

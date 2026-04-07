@@ -134,6 +134,15 @@ class IdentitasAnggotaController extends Controller
         ]);
     }
 
+    public function getByKeluarga($keluargaId)
+    {
+        $anggota = AnggotaKeluargaModel::where('keluarga_id', $keluargaId)->get();
+
+        return response()->success([
+            'data' => IdentitasAnggotaResource::collection($anggota)
+        ]);
+    }
+
     public function import_anggota(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -195,7 +204,7 @@ class IdentitasAnggotaController extends Controller
         $nikList = [];
 
         foreach ($data as $row => $value) {
-            if ($row == 1) continue; 
+            if ($row == 1) continue;
 
             if (
                 empty($value['A']) ||

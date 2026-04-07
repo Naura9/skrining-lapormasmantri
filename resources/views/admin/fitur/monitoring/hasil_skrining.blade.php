@@ -233,34 +233,43 @@
                     const firstKK = unit.keluarga?.[0];
                     let kkTableRows = "";
 
-                    firstKK?.skrining?.forEach(skr => {
-                        if (skr.target_skrining !== "kk") return;
+                    if (!firstKK?.skrining || !firstKK.skrining.some(skr => skr.target_skrining === "kk")) {
+                        kkTableRows = `
+                            <tr>
+                                <td colspan="3" class="text-center px-3 py-2 border border-[#00000033]">
+                                    Belum melakukan skrining KK
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        firstKK.skrining.forEach(skr => {
+                            if (skr.target_skrining !== "kk") return;
 
-                        let lastSection = null;
+                            let lastSection = null;
 
-                        skr.pertanyaan?.forEach((p, i) => {
+                            skr.pertanyaan?.forEach((p, i) => {
 
-                            if (p.section !== lastSection) {
-                                kkTableRows += `
+                                if (p.section !== lastSection) {
+                                    kkTableRows += `
                                     <tr class="bg-gray-50">
                                         <td colspan="3" class="px-3 py-2 font-semibold border-t">
                                             ${p.section ?? "-"}
                                         </td>
                                     </tr>
                                 `;
-                                lastSection = p.section;
-                            }
+                                    lastSection = p.section;
+                                }
 
-                            kkTableRows += `
+                                kkTableRows += `
                                 <tr>
                                     <td class="border border-[#00000033] px-3 py-2 text-center w-[40px]">${i + 1}</td>
                                     <td class="border border-[#00000033] px-3 py-2">${p.pertanyaan ?? "-"}</td>
                                     <td class="border border-[#00000033] px-3 py-2">${p.jawaban ?? "-"}</td>
                                 </tr>
                             `;
+                            });
                         });
-                    });
-
+                    };
                     detailBody.innerHTML += `
                         <div class="overflow-hidden mt-3">
                             <div class="flex items-center justify-between cursor-pointer toggle-rumah
@@ -336,42 +345,42 @@
                                                     
                                             <div id="agt-${index}-${sIndex}-${aIndex}" class="hidden">
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-1 text-sm mt-2 mb-2 bg-gray-50 p-2 rounded">
-                                                    <div class="grid grid-cols-[120px_1fr]">
+                                                    <div class="grid grid-cols-[125px_1fr]">
                                                         <span class="font-semibold">NIK</span>
                                                         <span>: ${detailAgt?.nik ?? '-'}</span>
                                                     </div>
 
-                                                    <div class="grid grid-cols-[120px_1fr]">
+                                                    <div class="grid grid-cols-[125px_1fr]">
                                                         <span class="font-semibold">Jenis Kelamin</span>
                                                         <span>: ${detailAgt?.jenis_kelamin ?? '-'}</span>
                                                     </div>
 
-                                                    <div class="grid grid-cols-[120px_1fr]">
+                                                    <div class="grid grid-cols-[125px_1fr]">
                                                         <span class="font-semibold">Tanggal Lahir</span>
                                                         <span>: ${detailAgt?.tanggal_lahir ?? '-'}</span>
                                                     </div>
 
-                                                    <div class="grid grid-cols-[120px_1fr]">
+                                                    <div class="grid grid-cols-[125px_1fr]">
                                                         <span class="font-semibold">Pekerjaan</span>
                                                         <span>: ${detailAgt?.pekerjaan ?? '-'}</span>
                                                     </div>
                                                     
-                                                    <div class="grid grid-cols-[120px_1fr]">
+                                                    <div class="grid grid-cols-[125px_1fr]">
                                                         <span class="font-semibold">Tempat Lahir</span>
                                                         <span>: ${detailAgt?.tempat_lahir ?? '-'}</span>
                                                     </div>
 
-                                                    <div class="grid grid-cols-[120px_1fr]">
+                                                    <div class="grid grid-cols-[125px_1fr]">
                                                         <span class="font-semibold">Status Perkawinan</span>
                                                         <span>: ${detailAgt?.status_perkawinan ?? '-'}</span>
                                                     </div>
 
-                                                    <div class="grid grid-cols-[120px_1fr]">
+                                                    <div class="grid grid-cols-[125px_1fr]">
                                                         <span class="font-semibold">Hubungan Keluarga</span>
                                                         <span>: ${detailAgt?.hubungan_keluarga ?? '-'}</span>
                                                     </div>
 
-                                                    <div class="grid grid-cols-[120px_1fr]">
+                                                    <div class="grid grid-cols-[125px_1fr]">
                                                         <span class="font-semibold">Pendidikan Terakhir</span>
                                                         <span>: ${detailAgt?.pendidikan_terakhir ?? '-'}</span>
                                                     </div>
@@ -486,7 +495,6 @@
                 });
             });
         }
-
 
         function formatTanggal(tgl) {
             if (!tgl) return "-";
