@@ -32,7 +32,7 @@ class KategoriModel extends Model implements CrudInterface
         }
 
         $total = $user->count();
-        $sort = $sort ?: 'created_at ASC';
+        $sort = $sort ?: 'created_at DESC';
         $list = $user->skip($skip)->take($itemPerPage)->orderByRaw($sort)->get();
 
         return [

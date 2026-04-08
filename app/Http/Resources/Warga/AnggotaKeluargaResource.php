@@ -10,6 +10,7 @@ class AnggotaKeluargaResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'kelurahan' => $this->keluarga->unit->kelurahan->nama_kelurahan,
             'keluarga_id' => $this->keluarga_id,
 
             'nama' => $this->nama,

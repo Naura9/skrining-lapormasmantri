@@ -3,14 +3,14 @@
 @section('title', 'Skrining KK')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
+<section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Skrining KK</h2>
 
-    <div class="mb-8">
+    <div class="mb-4">
         <div class="flex border-b-4 border-[#61359C]">
             <button id="tabIdentitas"
                 class="tab-btn relative flex-1 text-center py-2 text-sm font-bold text-[#61359C]">
-                Data Identitas Keluarga
+                Identitas Keluarga
                 <span class="absolute left-0 bottom-0 w-full h-[4px] bg-[#61359C]/30 rounded-t"></span>
             </button>
 
@@ -24,7 +24,7 @@
 
     <form id="formIdentitas">
         <div id="contentIdentitas">
-            <div class="bg-white border border-[#61359C] rounded-2xl p-6 mb-4">
+            <div class="bg-white border border-[#61359C] rounded-2xl p-4 mb-4">
                 <div id="kkContainer" class="space-y-8">
                     <div class="bg-white mb-4">
                         <div class="text-left">
@@ -103,7 +103,7 @@
                     </div>
 
                     <div class="border-t-2 border-[#00000033] my-6"></div>
-                    <div class="kk-item border border-gray-300 rounded-xl p-6 relative bg-white">
+                    <div class="kk-item border border-gray-300 rounded-xl p-4 relative bg-white">
                         <div class="mb-4">
                             <div class="flex items-start gap-2">
                                 <input type="checkbox" class="kk-luar-wilayah mt-1 w-4 h-4 accent-[#61359C]">
@@ -201,7 +201,7 @@
                             class="btn-remove hidden absolute top-4 right-4
                             flex items-center gap-1
                             bg-red-50 text-red-600
-                            px-3 py-1.5 rounded-lg
+                            px-3 py-1 rounded-lg
                             hover:bg-red-100
                             transition text-sm font-semibold">
                             <i class="fa-solid fa-trash"></i>
@@ -209,7 +209,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="mt-6">
+                <div class="mt-4">
                     <button type="button"
                         id="btnAddKK"
                         class="flex items-center gap-2 

@@ -8,9 +8,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <i class="fa-solid fa-bell"></i>
-            <i class="fa-solid fa-user-circle text-xl"></i>
+            <i class="fa-solid fa-user-circle text-2xl"></i>
         </div>
-
     </div>
 </header>

@@ -16,6 +16,7 @@ class AnggotaKeluargaModel extends Model implements CrudInterface
 
     protected $table = "m_anggota_keluarga";
     protected $fillable = [
+        'id',
         'keluarga_id',
         'nama',
         'nik',

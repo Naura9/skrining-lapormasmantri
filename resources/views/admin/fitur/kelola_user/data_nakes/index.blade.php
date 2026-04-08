@@ -3,7 +3,7 @@
 @section('title', 'Data Tenaga Kesehatan')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
+<section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Data Tenaga Kesehatan</h2>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 flex-wrap">

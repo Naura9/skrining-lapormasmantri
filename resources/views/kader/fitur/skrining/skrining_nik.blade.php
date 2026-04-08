@@ -3,10 +3,10 @@
 @section('title', 'Skrining NIK')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
-    <h2 id="judulSkrining"
-        class="text-2xl font-bold mb-6 text-center sm:text-left">
+<section class="p-2 mb-10">
+    <h2 id="judulSkrining" class="text-2xl font-bold mb-5 text-center sm:text-left">
         Skrining NIK
+        <span id="judulSiklus" class="block text-base font-semibold text-gray-500 mt-1"></span>
     </h2>
 
     <div id="contentAwal" class="bg-white border border-[#61359C] rounded-2xl p-6 mb-6">
@@ -50,11 +50,11 @@
         </div>
     </div>
     <div id="skriningSection" class="hidden">
-        <div class="mb-8">
+        <div class="mb-4">
             <div class="flex border-b-4 border-[#61359C]">
                 <button id="tabIdentitas"
                     class="tab-btn relative flex-1 text-center py-2 text-sm font-bold text-[#61359C]">
-                    <span id="labelTabIdentitas">Data Identitas</span>
+                    <span> Data Identitas</span>
                     <span class="tab-underline absolute left-0 bottom-0 w-full h-[4px] rounded-t"></span>
                 </button>
 
@@ -453,10 +453,12 @@
 
                 const allData = json.data.list || [];
 
-                siklusData = allData.filter(item =>
-                    item.target_skrining &&
-                    item.target_skrining.toLowerCase() === 'nik'
-                );
+                siklusData = allData
+                    .filter(item =>
+                        item.target_skrining &&
+                        item.target_skrining.toLowerCase() === 'nik'
+                    )
+                    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
                 renderSiklusDropdown();
 
@@ -555,11 +557,9 @@
             if (hasError) return;
 
             if (namaSiklus) {
-                document.getElementById('judulSkrining').innerText =
-                    `Skrining NIK (${namaSiklus})`;
-
-                document.getElementById('labelTabIdentitas').innerText =
-                    `Data Identitas ${namaSiklus}`;
+                document.getElementById('judulSiklus').innerText = `(${namaSiklus})`;
+            } else {
+                document.getElementById('judulSiklus').innerText = '';
             }
 
             contentAwal.classList.add('hidden');
@@ -652,7 +652,6 @@
             document.getElementById('pertanyaanContainer').innerHTML = '';
 
             document.getElementById('judulSkrining').innerText = 'Skrining NIK';
-            document.getElementById('labelTabIdentitas').innerText = 'Data Identitas';
         });
 
         async function fetchPertanyaan() {

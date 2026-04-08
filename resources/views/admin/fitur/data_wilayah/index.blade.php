@@ -3,18 +3,16 @@
 @section('title', 'Data Wilayah')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
+<section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Data Wilayah</h2>
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
-        <div class="flex flex-col sm:flex-row items-stretch gap-4 mb-3 w-full sm:w-auto">
-            <div class="relative w-full sm:w-56">
-                <x-dropdown
-                    label="Urutkan Jumlah Posyandu"
-                    :options="['Terbanyak → Terkecil', 'Terkecil → Terbanyak']"
-                    width="w-full sm:w-56"
-                    data-dropdown="filter" />
-            </div>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 flex-wrap">
+        <div class="relative w-full sm:w-56">
+            <x-dropdown
+                label="Urutkan Jumlah Posyandu"
+                :options="['Terbanyak → Terkecil', 'Terkecil → Terbanyak']"
+                width="w-full sm:w-56"
+                data-dropdown="filter" />
         </div>
 
         <div class="flex justify-end w-full sm:w-auto">
@@ -26,12 +24,10 @@
                 Tambah
             </button>
         </div>
-
     </div>
-
-
-    <div class="overflow-x-auto px-25">
-        <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700">
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700 whitespace-nowrap">
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>
                     <th class="px-3 py-2 border border-[#00000033] w-[5%] text-center">No</th>
@@ -55,7 +51,7 @@
             <div class="px-4 py-2">
                 <table class="w-full border-collapse text-sm">
                     <thead>
-                        <tr class="bg-gray-100">
+                        <tr class="bg-gray-100 font-medium">
                             <th class="px-2 py-1 border border-[#00000033] w-[20%] text-center">No</th>
                             <th class="px-2 py-1 border border-[#00000033]">Posyandu</th>
                         </tr>
@@ -64,9 +60,9 @@
                     </tbody>
                 </table>
 
-                <div class="flex justify-center mt-5">
+                <div class="mt-5">
                     <button id="closeModalBtn"
-                        class="bg-[#61359C] text-white text-sm font-semibold px-33 py-1 rounded hover:bg-[#61359C]/60 transition">
+                        class="w-full bg-[#61359C] text-white text-sm font-semibold py-1 rounded hover:bg-[#61359C]/60 transition">
                         Tutup
                     </button>
                 </div>
@@ -84,7 +80,7 @@
 
     <x-slot name="footer">
         <button type="button" id="kelurahanCancelBtn"
-            class="w-full px-6 py-2 rounded-lg bg-[#E71D1D] text-white font-medium shadow hover:opacity-90 transition">
+            class="w-full px-6 py-2 rounded-lg bg-gray-400 text-white font-medium shadow hover:opacity-90 transition">
             Batal
         </button>
         <button type="submit" id="kelurahanSaveBtn" form="formEdit"

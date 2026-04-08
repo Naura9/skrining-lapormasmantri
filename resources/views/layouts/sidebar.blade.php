@@ -12,24 +12,24 @@
 
     <nav class="flex-1 overflow-y-auto px-2 py-6 space-y-2">
         <a href="{{ route('dashboard') }}"
-            class="group flex items-center gap-2 px-2 py-2.5 rounded-lg transition
+            class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
             {{ request()->routeIs('dashboard') 
                 ? 'bg-[#61359C]/65 text-white font-semibold' 
                 : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
 
-            <i class="fa-solid fa-house text-lg 
+            <i class="fa-solid fa-house text-lg w-5 text-center
                 {{ request()->routeIs('dashboard') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
             </i>
             <span>Dashboard</span>
         </a>
 
         <a href="{{ route('kader.dashboard_kader') }}"
-            class="group flex items-center gap-2 px-2 py-2.5 rounded-lg transition
+            class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
             {{ request()->routeIs('kader.dashboard_kader') 
                 ? 'bg-[#61359C]/65 text-white font-semibold' 
                 : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
 
-            <i class="fa-solid fa-house text-lg 
+            <i class="fa-solid fa-house text-lg w-5 text-center
                 {{ request()->routeIs('kader.dashboard_kader') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
             </i>
             <span>Dashboard Kader</span>
@@ -45,11 +45,11 @@
         @endphp
 
         <a href="#" id="kelolaUserMenuToggle"
-            class="group flex items-center justify-between gap-1.5 px-2 py-2.5 rounded-lg transition font-semibold
+            class="group flex items-center justify-between gap-3 px-2 py-2.5 rounded-lg transition font-semibold
                 {{ $isKelolaUserActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-            <div class="flex items-center gap-1.5">
-                <i class="fa-solid fa-users-gear text-lg
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-users-gear text-lg w-5 text-center
                     {{ $isKelolaUserActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                 </i>
                 <span>Kelola User</span>
@@ -59,12 +59,12 @@
         <ul id="kelolaUserSubMenu" class="pl-5 mt-1 space-y-1 {{ $isKelolaUserActive ? 'block' : 'hidden' }}">
             <li>
                 <a href="{{ route('admin.fitur.kelola_user.data_admin') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.kelola_user.data_admin')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-user-shield text-lg
+                    <i class="fa-solid fa-user-shield text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.kelola_user.data_admin') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
@@ -73,12 +73,12 @@
             </li>
             <li>
                 <a href="{{ route('admin.fitur.kelola_user.data_kader') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.kelola_user.data_kader')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-user-group text-lg
+                    <i class="fa-solid fa-user-group text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.kelola_user.data_kader') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
@@ -87,16 +87,16 @@
             </li>
             <li>
                 <a href="{{ route('admin.fitur.kelola_user.data_nakes') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.kelola_user.data_nakes')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-user-doctor text-lg
+                    <i class="fa-solid fa-user-doctor text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.kelola_user.data_nakes') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
-                    <span class="ml-2">Tenaga Kesehatan</span>
+                    <span>Tenaga Kesehatan</span>
                 </a>
             </li>
         </ul>
@@ -112,26 +112,26 @@
         @endphp
 
         <a href="#" id="skriningMenuToggle"
-            class="group flex items-center justify-between gap-1.5 px-2 py-2.5 rounded-lg transition font-semibold
+            class="group flex items-center justify-between gap-3 px-2 py-2.5 rounded-lg transition font-semibold
                 {{ $isSkriningActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-            <div class="flex items-center gap-1.5">
-                <i class="fa-solid fa-file-pen text-lg transition
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-file-pen text-lg transition w-5 text-center
                     {{ $isSkriningActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                 </i>
-                <span class="ml-0.5">Skrining</span>
+                <span>Skrining</span>
             </div>
         </a>
 
         <ul id="skriningSubMenu" class="pl-5 mt-1 space-y-1 {{ $isSkriningActive ? 'block' : 'hidden' }}">
             <li>
                 <a href="{{ route('admin.fitur.skrining.kategori') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.skrining.kategori')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-tags text-lg
+                    <i class="fa-solid fa-tags text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.skrining.kategori') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
@@ -140,12 +140,12 @@
             </li>
             <li>
                 <a href="{{ route('admin.fitur.skrining.pertanyaan_kk') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.skrining.pertanyaan_kk')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-people-group text-lg
+                    <i class="fa-solid fa-people-roof text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.skrining.pertanyaan_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
@@ -154,12 +154,12 @@
             </li>
             <li>
                 <a href="{{ route('admin.fitur.skrining.pertanyaan_nik') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.skrining.pertanyaan_nik')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-user text-lg
+                    <i class="fa-solid fa-user text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.skrining.pertanyaan_nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
@@ -168,12 +168,12 @@
             </li>
             <li>
                 <a href="{{ route('admin.fitur.monitoring.hasil_skrining') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.monitoring.hasil_skrining')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-user text-lg
+                    <i class="fa-solid fa-file-lines text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.monitoring.hasil_skrining') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
@@ -183,12 +183,12 @@
         </ul>
 
         <a href="{{ route('admin.fitur.data_wilayah') }}"
-            class="group flex items-center gap-2 px-2 py-2.5 rounded-lg transition
+            class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
             {{ request()->routeIs('admin.fitur.data_wilayah') 
                 ? 'bg-[#61359C]/65 text-white font-semibold' 
                 : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
 
-            <i class="fa-solid fa-map-location-dot text-lg
+            <i class="fa-solid fa-map-location-dot text-lg w-5 text-center
             {{ request()->routeIs('admin.fitur.data_wilayah') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
             </i>
             <span>Data Wilayah</span>
@@ -204,26 +204,26 @@
         @endphp
 
         <a href="#" id="kaderSkriningMenuToggle"
-            class="group flex items-center justify-between gap-1.5 px-2 py-2.5 rounded-lg transition font-semibold
+            class="group flex items-center justify-between gap-3 px-2 py-2.5 rounded-lg transition font-semibold
                 {{ $isKaderSkriningActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-            <div class="flex items-center gap-1.5">
-                <i class="fa-solid fa-file-pen text-lg transition
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-file-pen text-lg transition w-5 text-center
                     {{ $isKaderSkriningActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                 </i>
-                <span class="ml-0.5">Skrining</span>
+                <span>Skrining</span>
             </div>
         </a>
 
         <ul id="kaderSkriningSubMenu" class="pl-5 mt-1 space-y-1 {{ $isKaderSkriningActive ? 'block' : 'hidden' }}">
             <li>
-                <a href="{{ route('kader.fitur.skrining_kk') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                <a href="{{ route('kader.fitur.skrining_kk') }}" 
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('kader.fitur.skrining_kk')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-people-group text-lg
+                    <i class="fa-solid fa-people-roof text-lg w-5 text-center
                         {{ request()->routeIs('kader.fitur.skrining_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
@@ -232,12 +232,12 @@
             </li>
             <li>
                 <a href="{{ route('kader.fitur.skrining_nik') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('kader.fitur.skrining_nik')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-user text-lg
+                    <i class="fa-solid fa-user text-lg w-5 text-center
                         {{ request()->routeIs('kader.fitur.skrining_nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
@@ -247,12 +247,12 @@
         </ul>
 
         <a href="{{ route('admin.fitur.monitoring.kader') }}"
-            class="group flex items-center gap-2 px-2 py-2.5 rounded-lg transition
+            class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
             {{ request()->routeIs('admin.fitur.monitoring.kader') 
                 ? 'bg-[#61359C]/65 text-white font-semibold' 
                 : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
 
-            <i class="fa-solid fa-user-group text-lg
+            <i class="fa-solid fa-user-group text-lg w-5 text-center
             {{ request()->routeIs('admin.fitur.monitoring.kader') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
             </i>
             <span>Monitoring Kader</span>
@@ -267,26 +267,26 @@
         @endphp
 
         <a href="#" id="monitoringMenuToggle"
-            class="group flex items-center justify-between gap-1.5 px-2 py-2.5 rounded-lg transition font-semibold
+            class="group flex items-center justify-between gap-3 px-2 py-2.5 rounded-lg transition font-semibold
                 {{ $isMonitoringActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-            <div class="flex items-center gap-1.5">
-                <i class="fa-solid fa-chart-simple text-lg transition
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-chart-simple text-lg transition w-5 text-center
                     {{ $isMonitoringActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                 </i>
-                <span class="ml-0.5">Monitoring</span>
+                <span>Monitoring</span>
             </div>
         </a>
 
         <ul id="monitoringSubMenu" class="pl-5 mt-1 space-y-1 {{ $isMonitoringActive ? 'block' : 'hidden' }}">
             <li>
                 <a href="{{ route('admin.fitur.monitoring.nik_per_kk') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                 {{ request()->routeIs('admin.fitur.monitoring.nik_per_kk')
                 ? 'bg-[#61359C]/65 text-white'
                 : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-people-group text-lg
+                    <i class="fa-solid fa-people-group text-lg w-5 text-center
                 {{ request()->routeIs('admin.fitur.monitoring.nik_per_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
                     <span>NIK Per KK</span>
@@ -294,12 +294,12 @@
             </li>
             <li>
                 <a href="{{ route('admin.fitur.monitoring.nik_per_siklus') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                 {{ request()->routeIs('admin.fitur.monitoring.nik_per_siklus')
                     ? 'bg-[#61359C]/65 text-white'
                     : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-circle-notch text-lg
+                    <i class="fa-solid fa-circle-notch text-lg w-5 text-center
                 {{ request()->routeIs('admin.fitur.monitoring.nik_per_siklus') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
                     <span>NIK Per Siklus</span>
@@ -316,26 +316,26 @@
         @endphp
 
         <a href="#" id="dataWargaMenuToggle"
-            class="group flex items-center justify-between gap-1.5 px-2 py-2.5 rounded-lg transition font-semibold
+            class="group flex items-center justify-between gap-3 px-2 py-2.5 rounded-lg transition font-semibold
                 {{ $isDataWargaActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-            <div class="flex items-center gap-1.5">
-                <i class="fa-solid fa-address-book text-lg transition
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-address-book text-lg transition w-5 text-center
                     {{ $isDataWargaActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                 </i>
-                <span class="ml-0.5">Data Warga</span>
+                <span>Data Warga</span>
             </div>
         </a>
 
         <ul id="dataWargaSubMenu" class="pl-5 mt-1 space-y-1 {{ $isDataWargaActive ? 'block' : 'hidden' }}">
             <li>
                 <a href="{{ route('admin.fitur.data_warga.kk') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.data_warga.kk')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-people-roof text-lg
+                    <i class="fa-solid fa-people-roof text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.data_warga.kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 
@@ -344,12 +344,12 @@
             </li>
             <li>
                 <a href="{{ route('admin.fitur.data_warga.nik') }}"
-                    class="group flex items-center gap-1.5 px-2 py-2 rounded-lg transition font-semibold
+                    class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('admin.fitur.data_warga.nik')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                    <i class="fa-solid fa-people-roof text-lg
+                    <i class="fa-solid fa-user text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.data_warga.nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
 

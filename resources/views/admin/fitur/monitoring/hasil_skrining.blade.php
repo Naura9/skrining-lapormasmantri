@@ -3,13 +3,13 @@
 @section('title', 'Hasil Skrining')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
+<section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Hasil Skrining</h2>
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-center gap-4 mb-5 flex-wrap">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 flex-wrap">
         <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <input id="searchInput" type="text"
-                placeholder="Cari nama, No KK, atau NIK..."
+                placeholder="Cari berdasarkan nama, No KK, atau NIK..."
                 class="h-9 bg-white border border-[#00000033] rounded-lg px-3 text-sm
                    focus:outline-none focus:ring-2 focus:ring-[#61359C]/50 w-full sm:w-70">
 
@@ -17,14 +17,14 @@
                 id="kelurahanFilterDropdown"
                 label="Pilih Kelurahan"
                 :options="[]"
-                width="sm:w-48 h-9"
+                width="w-full sm:w-48 h-9"
                 data-dropdown="filter" />
 
             <x-dropdown
                 id="posyanduFilterDropdown"
                 label="Pilih Posyandu"
                 :options="[]"
-                width="sm:w-48 h-9"
+                width="w-full sm:w-48 h-9"
                 data-dropdown="filter" />
 
             <button id="searchBtn"
@@ -33,6 +33,8 @@
                    hover:bg-[#61359C]/80 transition w-full sm:w-auto">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </button>
+        </div>
+                <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
 
             <button id="downloadSkriningBtn"
                 class="h-9 flex items-center gap-2 bg-[#61359C] text-white
@@ -45,6 +47,7 @@
             <input type="hidden" id="kelurahan_id" value="">
             <input type="hidden" id="posyandu_id" value="">
         </div>
+        </div>
     </div>
 
     <div class="overflow-x-auto">
@@ -55,7 +58,7 @@
                     <th class="px-3 py-2 border border-[#00000033] w-[15%]">Kelurahan</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[15%]">Posyandu</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[15%]">Nama Kader</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[35%] text-center">Alamat</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[35%] text-left break-words">Alamat</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[10%] text-center">Aksi</th>
                 </tr>
             </thead>
@@ -146,7 +149,7 @@
                     <td class="border border-[#00000033] px-3 py-2">${unit.kelurahan ?? "-"}</td>
                     <td class="border border-[#00000033] px-3 py-2">${unit.posyandu ?? "-"}</td>
                     <td class="border border-[#00000033] px-3 py-2">${item.nama_kader}</td>
-                    <td class="border border-[#00000033] px-3 py-2 text-center">${unit.alamat_unit ?? "-"}</td>
+                    <td class="border border-[#00000033] px-3 py-2 max-w-xs break-words">${unit.alamat_unit ?? "-"}</td>
                     <td class="border border-[#00000033] px-3 py-2 text-center">
                         <div class="flex justify-center gap-1">
                             <button
@@ -184,18 +187,16 @@
 
                     const detailBody = document.getElementById("modal-detail-body");
 
-
                     const tanggal = unit.tanggal_skrining_kk ?? '-';
 
                     detailBody.innerHTML = `
                         <div class="space-y-2 text-sm">
-
                             <div class="grid grid-cols-[120px_1fr]">
-                                    <span class="font-semibold">Tanggal Skrining</span>
-                                    <span>: ${tanggal}</span>
-                                </div>
+                                <span class="font-semibold">Tanggal Skrining</span>
+                                <span>: ${tanggal}</span>
+                            </div>
 
-                            <div class="grid grid-cols-2 space-y-1 mt-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 mt-3 gap-y-1">
                                 <div class="grid grid-cols-[120px_1fr]">
                                     <span class="font-semibold">Nama Kader</span>
                                     <span>: ${item.nama_kader}</span>
@@ -226,10 +227,9 @@
                                     <span>: ${unit.rt_unit ?? '-'} / ${unit.rw_unit ?? '-'}</span>
                                 </div>
                             </div>
-
                             <div class="border-t border-gray-300 my-2"></div>
-                        `;
-
+                        </div>
+                    `;
                     const firstKK = unit.keluarga?.[0];
                     let kkTableRows = "";
 
@@ -426,19 +426,22 @@
                                 <div class="flex items-center justify-between cursor-pointer
                                     font-semibold text-[#61359C] bg-[#61359C]/22 px-2 py-1 rounded-lg"
                                     data-target="kk-${index}">
+                                    
                                     <div class="flex items-center justify-between w-full">
                                         <span>KK ${index + 1}</span>
+
                                         ${kk.is_luar_wilayah 
                                             ? `<span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full mr-3">
                                                 Luar Wilayah
                                             </span>` 
                                             : ''}
                                     </div>
+
                                     <i class="fa-solid fa-chevron-down transition-transform duration-200"></i>
                                 </div>
 
-                                <div id="kk-${index}" class="hidden mt-2 space-y-2 px-2">
-                                    <div class="grid grid-cols-2 gap-y-1 mt-2">
+                                <div id="kk-${index}" class="hidden mt-2 space-y-3 px-2">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 mt-2 gap-y-1">
                                         <div class="grid grid-cols-[120px_1fr]">
                                             <span class="font-semibold">No KK</span>
                                             <span>: ${kk.no_kk}</span>
@@ -471,11 +474,10 @@
                                             </div>
                                         ` : ''}
                                     </div>
-
                                     ${skriningHtml}
-
                                 </div>
-                            </div>`;
+                            </div>
+                        `;
                     });
 
                     setTimeout(() => {

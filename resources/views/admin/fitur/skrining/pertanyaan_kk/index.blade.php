@@ -3,14 +3,14 @@
 @section('title', 'Pertanyaan Skrining KK')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
+<section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Pertanyaan Skrining KK</h2>
 
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-3">
+    <div class="flex flex-row sm:flex-row items-center justify-between gap-4 mb-5">
         <button
             id="btnTambahPertanyaan"
             class="flex items-center gap-2 bg-[#61359C] text-white text-sm px-4 py-2 rounded-lg
-               hover:bg-[#61359C]/80 transition w-full sm:w-auto justify-center">
+               hover:bg-[#61359C]/80 transition w-1/2 sm:w-auto justify-center">
             <i class="fa-solid fa-plus"></i>
             Tambah
         </button>
@@ -18,13 +18,12 @@
         <button
             id="btnToggleEditMode"
             class="flex items-center gap-2 bg-yellow-500 text-white text-sm px-4 py-2 rounded-lg
-               hover:bg-yellow-600 transition w-full sm:w-auto justify-center">
+               hover:bg-yellow-600 transition w-1/2 sm:w-auto justify-center">
             <i class="fa-solid fa-pen"></i>
             <span>Edit</span>
         </button>
     </div>
-
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto w-full">
         <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700">
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>
@@ -335,7 +334,6 @@
             const sectionEntries = Object.entries(grouped);
 
             sectionEntries.forEach(([sectionId, section], index) => {
-
                 const sectionRow = document.createElement("tr");
                 sectionRow.classList.add("section-row");
                 sectionRow.dataset.sectionId = sectionId;
@@ -349,17 +347,17 @@
 
                     ${editMode ? `
                         <td class="border border-[#00000033] text-center align-middle px-3 py-3">
-                            <div class="flex items-center justify-center gap-4">
-                                <div class="flex flex-col gap-2">
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 w-full">
+                                <div class="flex flex-row sm:flex-col gap-2">
                                     <button 
-                                        class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition 
+                                        class="w-6 h-6 flex items-center justify-center shrink-0 hover:bg-gray-100 transition 
                                         ${index === 0 ? 'opacity-40 cursor-not-allowed' : ''}"
                                         ${index === 0 ? '' : `onclick="moveSection('${sectionId}','up')"`}>
                                         <i class="fa-solid fa-circle-arrow-up text-xl text-gray-600"></i>
                                     </button>
 
                                     <button 
-                                        class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition 
+                                        class="w-6 h-6 flex items-center justify-center shrink-0 hover:bg-gray-100 transition 
                                         ${index === sectionEntries.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}"
                                         ${index === sectionEntries.length - 1 ? '' : `onclick="moveSection('${sectionId}','down')"`}>
                                         <i class="fa-solid fa-circle-arrow-down text-xl text-gray-600"></i>
@@ -368,18 +366,17 @@
 
                                 <div class="flex items-center gap-2">
                                     <button 
-                                        class="px-3 py-1 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 transition"
+                                        class="px-3 py-1 text-xs rounded shrink-0 bg-yellow-500 text-white hover:bg-yellow-600 transition"
                                         onclick="openSectionModal('edit','${sectionId}')">
                                         Edit            
                                     </button>
 
                                     <button 
-                                        class="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-section-btn"
+                                        class="px-3 py-1 text-xs rounded shrink-0 bg-red-600 text-white hover:bg-red-700 transition delete-section-btn"
                                         data-id="${sectionId}">
                                         Hapus
                                     </button>
                                 </div>
-
                             </div>
                         </td>
                     ` : ''}
@@ -424,12 +421,11 @@
 
                             ${editMode ? `
                                 <td rowspan="2" class="border border-[#00000033] text-center align-middle px-3 py-3">
-                                    <div class="flex items-center justify-center gap-4">
-
-                                        <div class="flex flex-col gap-2">
+                                    <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 w-full">
+                                        <div class="flex flex-row sm:flex-col items-center justify-center gap-2">
                                             <button
                                                 ${isFirst ? "disabled" : ""}
-                                                class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition
+                                                class="w-6 h-6 shrink-0 flex items-center justify-center hover:bg-gray-100 transition
                                                     ${isFirst ? 'opacity-40 cursor-not-allowed hover:bg-transparent' : ''}"
                                                 onclick="movePertanyaan('${item.id}','${sectionId}','up')">
                                                 <i class="fa-solid fa-circle-arrow-up text-xl text-gray-600"></i>
@@ -437,7 +433,7 @@
 
                                             <button
                                                 ${isLast ? "disabled" : ""}
-                                                class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition
+                                                class="w-6 h-6 shrink-0 flex items-center justify-center hover:bg-gray-100 transition
                                                     ${isLast ? 'opacity-40 cursor-not-allowed hover:bg-transparent' : ''}"
                                                 onclick="movePertanyaan('${item.id}','${sectionId}','down')">
                                                 <i class="fa-solid fa-circle-arrow-down text-xl text-gray-600"></i>
@@ -446,18 +442,17 @@
 
                                         <div class="flex items-center gap-2">
                                             <button 
-                                                class="px-3 py-1 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 transition"
+                                                class="px-3 py-1 shrink-0 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 transition"
                                                 onclick="openPertanyaanModal('edit','${item.id}')">
                                                 Edit            
                                             </button>
 
                                             <button 
-                                                class="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-pertanyaan-btn"
+                                                class="px-3 py-1 shrink-0 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-pertanyaan-btn"
                                                 data-id="${item.id}">
                                                 Hapus
                                             </button>
                                         </div>
-
                                     </div>
                                 </td>
                             ` : ''}

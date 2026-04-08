@@ -61,7 +61,7 @@
                         <div class="flex w-full z-10 p-4">
                             <div class="w-1/2 flex items-center justify-center">
                                 <div class="bg-blue-100 text-blue-600 rounded-full p-4 text-5xl shadow-inner">
-                                    <i class="fas fa-users"></i>
+                                    <i class="fas fa-people-roof"></i>
                                 </div>
                             </div>
                             <div class="w-1/2 flex flex-col items-center justify-center">

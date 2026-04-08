@@ -3,11 +3,11 @@
 @section('title', 'Monitoring Kader')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
+<section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Monitoring Kader</h2>
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-center gap-4 mb-5 flex-wrap">
-        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+    <div class="flex flex-col sm:flex-row sm:items-start justify-start gap-4 mb-5 flex-wrap">
+        <div class="flex flex-col sm:flex-row items-start gap-3 w-full sm:w-auto">
             <input id="searchInput" type="text"
                 placeholder="Cari berdasarkan nama kader..."
                 class="h-9 bg-white border border-[#00000033] rounded-lg px-3 text-sm
@@ -17,14 +17,14 @@
                 id="kelurahanFilterDropdown"
                 label="Pilih Kelurahan"
                 :options="[]"
-                width="sm:w-48 h-9"
+                width="w-full sm:w-48 h-9"
                 data-dropdown="filter" />
 
             <x-dropdown
                 id="posyanduFilterDropdown"
                 label="Pilih Posyandu"
                 :options="[]"
-                width="sm:w-48 h-9"
+                width="w-full sm:w-48 h-9"
                 data-dropdown="filter" />
 
             <button id="searchBtn"

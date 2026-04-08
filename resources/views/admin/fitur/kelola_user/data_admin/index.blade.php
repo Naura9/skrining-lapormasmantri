@@ -3,7 +3,7 @@
 @section('title', 'Data Admin')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
+<section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Data Admin</h2>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-center sm:justify-end gap-4 flex-wrap">
@@ -20,7 +20,7 @@
     </div>
 
     <div class="overflow-x-auto">
-        <table class="min-w-full table-fixed border border-[#00000033] text-sm text-left text-gray-700  whitespace-nowrap">
+        <table class="min-w-full table-fixed border border-[#00000033] text-sm text-left text-gray-700 whitespace-nowrap">
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>
                     <th class="px-3 py-2 border border-[#00000033] w-[5%]">No</th>

@@ -12,6 +12,7 @@ class KategoriResource extends JsonResource
             'id' => $this->id,
             'nama_kategori' => $this->nama_kategori,
             'target_skrining' => $this->target_skrining,
+            'created_at' => $this->created_at,
         ];
     }
 }

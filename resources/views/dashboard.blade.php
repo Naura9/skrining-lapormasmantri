@@ -9,7 +9,7 @@
             class="h-14 rounded-full bg-[#61359C] text-white border-2 border-[#61359C]
            flex items-center justify-center gap-3 px-4
            hover:bg-[#4B1F8B] transition-all">
-            <i class="fa-solid fa-users text-xl"></i>
+            <i class="fa-solid fa-people-roof text-xl"></i>
             <span class="text-sm font-semibold">Skrining KK</span>
         </button>
 

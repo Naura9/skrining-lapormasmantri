@@ -3,7 +3,7 @@
 @section('title', 'Edit Hasil Skrining')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
+<section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Edit Hasil Skrining</h2>
 
     <div class="bg-white border border-[#00000033] rounded-xl shadow-sm p-6">

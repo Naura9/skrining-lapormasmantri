@@ -3,7 +3,7 @@
 @section('title', 'Monitoring NIK Per Siklus')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
+<section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Monitoring NIK Per Siklus</h2>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-center gap-4 mb-5 flex-wrap">
@@ -12,21 +12,21 @@
                 id="siklusDropdown"
                 label="Pilih Siklus"
                 :options="[]"
-                width="sm:w-48 h-9"
+                width="w-full sm:w-48 h-9"
                 data-dropdown="filter" />
 
             <x-dropdown
                 id="kelurahanFilterDropdown"
                 label="Pilih Kelurahan"
                 :options="[]"
-                width="sm:w-48 h-9"
+                width="w-full sm:w-48 h-9"
                 data-dropdown="filter" />
 
             <x-dropdown
                 id="urutDropdown"
                 label="Urutkan dari"
                 :options="['Terbanyak → Terkecil', 'Terkecil → Terbanyak']"
-                width="sm:w-48 h-9"
+                width="w-full sm:w-48 h-9"
                 data-dropdown="filter" />
 
             <button id="searchBtn"
@@ -42,7 +42,7 @@
         </div>
     </div>
 
-    <div class="overflow-x-auto px-30">
+    <div class="overflow-x-auto">
         <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700">
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>
@@ -127,10 +127,9 @@
                 const json = await res.json();
 
                 const allData = json.data.list || [];
-                siklusData = allData.filter(item =>
-                    item.target_skrining &&
-                    item.target_skrining.toLowerCase() === 'nik'
-                );
+                siklusData = allData
+                    .filter(item => item.target_skrining?.toLowerCase() === 'nik')
+                    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
                 renderSiklusDropdown();
 

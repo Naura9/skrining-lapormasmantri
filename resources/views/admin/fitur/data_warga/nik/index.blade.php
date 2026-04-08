@@ -3,7 +3,7 @@
 @section('title', 'Data Anggota Keluarga (NIK)')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
+<section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-10 text-center sm:text-left">Data Anggota Keluarga (NIK)</h2>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 flex-wrap">
@@ -310,7 +310,7 @@
                 btn.addEventListener("click", async () => {
                     const id = btn.dataset.id;
 
-                    showDeleteConfirmToast("Hapus data ini?", async () => {
+                    showDeleteConfirmToast("Apakah Anda yakin ingin menghapus data ini?", async () => {
                         await fetch(`{{ url('api/identitas_anggota') }}/${id}`, {
                             method: "DELETE",
                             headers: {

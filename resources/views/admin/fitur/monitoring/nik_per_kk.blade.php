@@ -3,23 +3,23 @@
 @section('title', 'Monitoring NIK Per KK')
 
 @section('content')
-<section class="px-4 sm:px-4 lg:px-6 py-2 mb-10">
+<section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Monitoring NIK per KK</h2>
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-center gap-4 mb-5 flex-wrap">
-        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+    <div class="flex flex-col sm:flex-row sm:items-start justify-start gap-4 mb-5 flex-wrap">
+        <div class="flex flex-col sm:flex-row items-start gap-3 w-full sm:w-auto">
             <x-dropdown
                 id="kelurahanFilterDropdown"
                 label="Pilih Kelurahan"
                 :options="[]"
-                width="sm:w-48 h-9"
+                width="w-full sm:w-48 h-9"
                 data-dropdown="filter" />
 
             <x-dropdown
                 id="posyanduFilterDropdown"
                 label="Pilih Posyandu"
                 :options="[]"
-                width="sm:w-48 h-9"
+                width="w-full sm:w-48 h-9"
                 data-dropdown="filter" />
 
             <button id="searchBtn"
@@ -52,27 +52,23 @@
     </div>
 
     <div id="modal" class="fixed inset-0 bg-slate-950/30 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg w-11/12 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-6/12 relative py-2">
-            <div class="px-4 py-2">
-                <h2 class="text-lg font-bold">
-                    Detail
-                </h2>
+        <div class="bg-white rounded-xl shadow-lg w-11/12 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-6/12 relative py-2
+                max-h-[90vh] flex flex-col">
+            <div class="px-4 py-2 flex-shrink-0">
+                <h2 class="text-lg font-bold">Detail</h2>
             </div>
 
-            <div class="px-4 py-3 max-h-[70vh] overflow-y-auto">
-                <div id="modal-detail-body" class="space-y-3 text-sm"></div>
+            <div class="px-4 py-3 overflow-y-auto flex-1 space-y-3 text-sm">
+                <div id="modal-detail-body"></div>
+                <div id="anggota-detail-container"></div>
             </div>
 
-            <div id="anggota-detail-container" class="px-4 py-3 max-h-[50vh] overflow-y-auto"></div>
-
-
-            <div class="flex justify-center p-3">
+            <div class="flex justify-center p-3 flex-shrink-0">
                 <button id="closeModalBtn"
                     class="bg-[#61359C] text-white text-sm font-semibold w-full py-1 rounded hover:bg-[#61359C]/80 transition">
                     Tutup
                 </button>
             </div>
-
         </div>
     </div>
 </section>
@@ -118,7 +114,7 @@
             list.forEach((item, index) => {
                 item.keluarga.forEach((kk, kkIndex) => {
                     const tr = document.createElement("tr");
-                    tr.className = "hover:bg-gray-50";
+                    tr.className = "hover:bg-gray-50 ";
 
                     tr.innerHTML = `
                         <td class="border border-[#00000033] text-center px-3 py-2">${index + 1}</td>
@@ -154,71 +150,78 @@
 
                     const detailBody = document.getElementById("modal-detail-body");
                     detailBody.innerHTML = `
-                        <div class="text-sm">
-                            <div class="flex justify-between items-center">
-                                <span></span>
-                                ${kkData.is_luar_wilayah 
-                                    ? `<span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full">Luar Wilayah</span>` 
-                                    : ''}
-                            </div>
-
-                            <div class="grid grid-cols-[120px_1fr_120px_1fr] gap-2">
+                        <div class="space-y-2 text-sm">
+                            <div class="grid grid-cols-[120px_1fr]">
                                 <span class="font-semibold">Jumlah NIK</span>
                                 <span>: ${kkData.anggota?.length ?? 0}</span>
-                                <span></span><span></span>
                             </div>
 
-                            <div class="grid grid-cols-[120px_1fr_120px_1fr] gap-2 mt-2">
-                                <span class="font-semibold">No KK</span><span>: ${kkData.no_kk}</span>
-                                <span class="font-semibold">Kelurahan</span><span>: ${kkData.kelurahan ?? '-'}</span>
-                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 mt-3 gap-y-1">
+                                <div class="grid grid-cols-[120px_1fr]">
+                                    <span class="font-semibold">No KK</span>
+                                    <span>: ${kkData.no_kk}</span>
+                                </div>
 
-                            <div class="grid grid-cols-[120px_1fr_120px_1fr] gap-2">
-                                <span class="font-semibold">Kepala Keluarga</span><span>: ${kkData.kepala_keluarga ?? '-'}</span>
-                                <span class="font-semibold">Posyandu</span><span>: ${kkData.posyandu ?? '-'}</span>
-                            </div>
+                                <div class="grid grid-cols-[120px_1fr]">
+                                    <span class="font-semibold">Kelurahan</span>
+                                    <span>: ${kkData.kelurahan ?? '-'}</span>
+                                </div>
 
-                            <div class="grid grid-cols-[120px_1fr_120px_1fr] gap-2 mt-2">
-                                <span class="font-semibold">Alamat</span><span>: ${kkData.alamat ?? '-'}</span>
-                                <span></span><span></span>
-                            </div>
+                                <div class="grid grid-cols-[120px_1fr]">
+                                    <span class="font-semibold">Kepala Keluarga</span>
+                                    <span>: ${kkData.kepala_keluarga ?? '-'}</span>
+                                </div>
 
-                            <div class="grid grid-cols-[120px_1fr_120px_1fr] gap-2">
-                                <span class="font-semibold">RT / RW</span><span>: ${kkData.rt ?? '-'} / ${kkData.rw ?? '-'}</span>
-                                <span></span><span></span>
+                                <div class="grid grid-cols-[120px_1fr]">
+                                    <span class="font-semibold">Posyandu</span>
+                                    <span>: ${kkData.posyandu ?? '-'}</span>
+                                </div>
+
+                                <div class="grid grid-cols-[120px_1fr]">
+                                    <span class="font-semibold">Alamat</span>
+                                    <span>: ${kkData.alamat ?? '-'}</span>
+                                </div>
+
+                                <div class="grid grid-cols-[120px_1fr]">
+                                    <span class="font-semibold">RT / RW</span>
+                                    <span>: ${kkData.rt ?? '-'} / ${kkData.rw ?? '-'}</span>
+                                </div>
                             </div>
+                            <div class="border-t border-gray-300 my-2"></div>
                         </div>
-                    `;
+                        `;
 
-                                if (kkData.anggota && kkData.anggota.some(a => a.no_nik)) {
-                                    const anggotaTableHtml = `
-                            <table class="min-w-full border mt-2">
-                                <thead class="bg-gray-100 text-sm">
-                                    <tr>
-                                        <th class="px-2 py-1 border border-[#00000033] w-[5%]">No</th>
-                                        <th class="px-2 py-1 border border-[#00000033] w-[25%]">NIK</th>
-                                        <th class="px-2 py-1 border border-[#00000033] w-[40%]">Nama Lengkap</th>
-                                        <th class="px-2 py-1 border border-[#00000033] w-[25%]">Siklus</th>
-                                        <th class="px-2 py-1 border border-[#00000033] w-[10%]">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${kkData.anggota.map((agt, idx) => `
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-2 py-1 border border-[#00000033] text-center">${idx+1}</td>
-                                            <td class="px-2 py-1 border border-[#00000033] text-center">${agt.no_nik}</td>
-                                            <td class="px-2 py-1 border border-[#00000033]">${agt.nama_lengkap}</td>
-                                            <td class="px-2 py-1 border border-[#00000033] text-center">${agt.siklus ?? '-'}</td>
-                                            <td class="px-2 py-1 border border-[#00000033] text-center">
-                                                <button class="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 open-detail-anggota" 
-                                                    data-idx="${idx}">
-                                                    Detail
-                                                </button>
-                                            </td>
+                    if (kkData.anggota && kkData.anggota.some(a => a.no_nik)) {
+                        const anggotaTableHtml = `
+                            <div class="overflow-x-auto mt-2">
+                                <table class="min-w-full border mt-2">
+                                    <thead class="bg-gray-100 text-sm">
+                                        <tr>
+                                            <th class="px-2 py-1 border border-[#00000033] w-[5%]">No</th>
+                                            <th class="px-2 py-1 border border-[#00000033] w-[25%]">NIK</th>
+                                            <th class="px-2 py-1 border border-[#00000033] w-[40%]">Nama Lengkap</th>
+                                            <th class="px-2 py-1 border border-[#00000033] w-[25%]">Siklus</th>
+                                            <th class="px-2 py-1 border border-[#00000033] w-[10%]">Aksi</th>
                                         </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        ${kkData.anggota.map((agt, idx) => `
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-2 py-1 border border-[#00000033] text-center">${idx+1}</td>
+                                                <td class="px-2 py-1 border border-[#00000033] text-center">${agt.no_nik}</td>
+                                                <td class="px-2 py-1 border border-[#00000033]">${agt.nama_lengkap}</td>
+                                                <td class="px-2 py-1 border border-[#00000033] text-center">${agt.siklus ?? '-'}</td>
+                                                <td class="px-2 py-1 border border-[#00000033] text-center">
+                                                    <button class="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 open-detail-anggota" 
+                                                        data-idx="${idx}">
+                                                        Detail
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
                         `;
                         detailBody.innerHTML += anggotaTableHtml;
                     }
@@ -238,32 +241,46 @@
                             container.dataset.currentIdx = idx;
 
                             const agtDetail = `
-                                <div class="p-2 border border-[#00000033] rounded bg-gray-50 space-y-1 text-sm">
+                                <div class="p-2 border border-[#00000033] rounded bg-gray-50 space-y-2 text-sm">
                                     <div class="grid grid-cols-[130px_1fr] gap-2">
                                         <span class="font-semibold">NIK</span><span>: ${agt.no_nik}</span>
                                     </div>
+
                                     <div class="grid grid-cols-[130px_1fr] gap-2">
                                         <span class="font-semibold">Nama</span><span>: ${agt.nama_lengkap}</span>
                                     </div>
-                                    <div class="grid grid-cols-[130px_1fr_130px_1fr] gap-2 mt-4">
-                                        <span class="font-semibold">Tempat Lahir</span><span>: ${agt.tempat_lahir ?? '-'}</span>
-                                        <span class="font-semibold">Jenis Kelamin</span><span>: ${agt.jenis_kelamin ?? '-'}</span>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
+                                        <div class="grid grid-cols-[130px_1fr] gap-2">
+                                            <span class="font-semibold">Tempat Lahir</span><span>: ${agt.tempat_lahir ?? '-'}</span>
+                                        </div>
+                                        <div class="grid grid-cols-[130px_1fr] gap-2">
+                                            <span class="font-semibold">Tanggal Lahir</span><span>: ${agt.tanggal_lahir ?? '-'}</span>
+                                        </div>
                                     </div>
-                                    <div class="grid grid-cols-[130px_1fr_130px_1fr] gap-2">
-                                        <span class="font-semibold">Tanggal Lahir</span><span>: ${agt.tanggal_lahir ?? '-'}</span>
-                                        <span class="font-semibold">Pekerjaan</span><span>: ${agt.pekerjaan ?? '-'}</span>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <div class="grid grid-cols-[130px_1fr] gap-2">
+                                            <span class="font-semibold">Jenis Kelamin</span><span>: ${agt.jenis_kelamin ?? '-'}</span>
+                                        </div>
+                                        <div class="grid grid-cols-[130px_1fr] gap-2">
+                                            <span class="font-semibold">Pekerjaan</span><span>: ${agt.pekerjaan ?? '-'}</span>
+                                        </div>
                                     </div>
+
                                     <div class="grid grid-cols-[130px_1fr] gap-2 mt-4">
                                         <span class="font-semibold">Pendidikan Terakhir</span><span>: ${agt.pendidikan_terakhir ?? '-'}</span>
                                     </div>
+
                                     <div class="grid grid-cols-[130px_1fr] gap-2">
                                         <span class="font-semibold">Hubungan Keluarga</span><span>: ${agt.hubungan_keluarga ?? '-'}</span>
                                     </div>
+
                                     <div class="grid grid-cols-[130px_1fr] gap-2">
                                         <span class="font-semibold">Status Perkawinan</span><span>: ${agt.status_perkawinan ?? '-'}</span>
                                     </div>
                                 </div>
-                            `;
+                                `;
                             container.innerHTML = agtDetail;
                         }
                     });
@@ -322,7 +339,7 @@
         }
 
         function renderPosyanduDropdown(posyanduList = []) {
-            const dropdownWrapper = document.getElementById('posyanduFilterDropdown'); // <- ubah di sini
+            const dropdownWrapper = document.getElementById('posyanduFilterDropdown');
             const dropdown = dropdownWrapper.querySelector('.dropdown-menu');
 
             dropdown.innerHTML = '';
@@ -375,27 +392,27 @@
         });
 
         async function fetchKkWithFilter() {
-    const kelurahan_id = document.getElementById("kelurahan_id").value || "";
-    const posyandu_id = document.getElementById("posyandu_id").value || "";
+            const kelurahan_id = document.getElementById("kelurahan_id").value || "";
+            const posyandu_id = document.getElementById("posyandu_id").value || "";
 
-    try {
-        const url = new URL("{{ url('api/monitoring/nik-per-kk') }}", window.location.origin);
+            try {
+                const url = new URL("{{ url('api/monitoring/nik-per-kk') }}", window.location.origin);
 
-        if (kelurahan_id) url.searchParams.append("kelurahan_id", kelurahan_id);
-        if (posyandu_id) url.searchParams.append("posyandu_id", posyandu_id);
+                if (kelurahan_id) url.searchParams.append("kelurahan_id", kelurahan_id);
+                if (posyandu_id) url.searchParams.append("posyandu_id", posyandu_id);
 
-        const res = await fetch(url.toString(), {
-            headers: {
-                "Accept": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                const res = await fetch(url.toString(), {
+                    headers: {
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    }
+                });
+                const result = await res.json();
+                renderTable(result.data);
+            } catch (err) {
+                console.error("Gagal memuat data:", err);
             }
-        });
-        const result = await res.json();
-        renderTable(result.data);
-    } catch (err) {
-        console.error("Gagal memuat data:", err);
-    }
-}
+        }
 
         fetchKk();
         loadKelurahan();
