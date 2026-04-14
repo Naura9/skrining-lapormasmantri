@@ -21,6 +21,19 @@ class IdentitasKeluargaHelper extends Helper
             $query->where('kelurahan_id', $filter['kelurahan_id']);
         }
 
+        if (!empty($filter['posyandu_id'])) {
+            $query->where('posyandu_id', $filter['posyandu_id']);
+        }
+
+        if (!empty($filter['keyword'])) {
+            $query->whereHas('keluarga', function ($q) use ($filter) {
+                $q->where('no_kk', 'like', "%{$filter['keyword']}%")
+                    ->orWhereHas('kepalaKeluarga', function ($q2) use ($filter) {
+                        $q2->where('nama', 'like', "%{$filter['keyword']}%");
+                    });
+            });
+        }
+
         $data = $query->paginate($perPage, ['*'], 'page', $page);
 
         return [
@@ -89,7 +102,6 @@ class IdentitasKeluargaHelper extends Helper
                 'status' => true,
                 'data' => $unit->load('keluarga.kepalaKeluarga')
             ];
-
         } catch (Throwable $th) {
 
             DB::rollBack();
@@ -102,87 +114,96 @@ class IdentitasKeluargaHelper extends Helper
     }
 
     public function update(array $payload, string $id): array
-{
-    DB::beginTransaction();
+    {
+        DB::beginTransaction();
 
-    try {
-        $unit = UnitModel::findOrFail($id);
+        try {
+            $unit = UnitModel::findOrFail($id);
 
-        // update unit
-        $unit->update([
-            'kelurahan_id' => $payload['kelurahan_id'],
-            'posyandu_id'  => $payload['posyandu_id'],
-            'alamat'       => $payload['alamat'],
-            'rt'           => $payload['rt'],
-            'rw'           => $payload['rw'],
-        ]);
+            $unit->update([
+                'kelurahan_id' => $payload['kelurahan_id'],
+                'posyandu_id'  => $payload['posyandu_id'],
+                'alamat'       => $payload['alamat'],
+                'rt'           => $payload['rt'],
+                'rw'           => $payload['rw'],
+            ]);
 
-        foreach ($payload['keluarga'] as $item) {
+            $existingIds = $unit->keluarga()->pluck('id')->toArray();      
+            $incomingIds = collect($payload['keluarga'])
+                ->pluck('id')
+                ->filter()                                     
+                ->toArray();                                 
 
-            // cari keluarga lama
-            $keluarga = KeluargaModel::where('unit_rumah_id', $unit->id)
-                ->where('no_kk', $item['no_kk'])
-                ->first();
+            $idsToDelete = array_diff($existingIds, $incomingIds);
 
-            if ($keluarga) {
-                // update keluarga
-                $keluarga->update([
-                    'alamat_ktp' => $item['alamat_ktp'],
-                    'rt_ktp'     => $item['rt_ktp'],
-                    'rw_ktp'     => $item['rw_ktp'],
-                    'no_telepon' => $item['no_telepon'],
-                ]);
+            if (!empty($idsToDelete)) {
+                AnggotaKeluargaModel::whereIn('keluarga_id', $idsToDelete)->delete();
 
-                // update kepala keluarga
-                $kepala = $keluarga->kepalaKeluarga;
-                $kepala->update([
-                    'nama' => $item['nama_kepala_keluarga'],
-                    'nik'  => $item['nik_kepala_keluarga'],
-                ]);
-
-            } else {
-
-                // create baru kalau tidak ditemukan
-                $keluarga = KeluargaModel::create([
-                    'unit_rumah_id' => $unit->id,
-                    'no_kk'         => $item['no_kk'],
-                    'alamat_ktp'    => $item['alamat_ktp'],
-                    'rt_ktp'        => $item['rt_ktp'],
-                    'rw_ktp'        => $item['rw_ktp'],
-                    'no_telepon'    => $item['no_telepon'],
-                ]);
-
-                AnggotaKeluargaModel::create([
-                    'keluarga_id' => $keluarga->id,
-                    'nama' => $item['nama_kepala_keluarga'],
-                    'nik'  => $item['nik_kepala_keluarga'],
-                    'hubungan_keluarga' => 'Kepala Keluarga'
-                ]);
+                KeluargaModel::whereIn('id', $idsToDelete)->delete();
             }
+            foreach ($payload['keluarga'] as $item) {
+                $keluarga = KeluargaModel::find($item['id'] ?? null);
+
+                if ($keluarga) {
+
+                    $resetKTP = (
+                        $keluarga->is_luar_wilayah == true &&
+                        $item['is_luar_wilayah'] == false
+                    );
+
+                    $keluarga->update([
+                        'is_luar_wilayah' => $item['is_luar_wilayah'],
+                        'alamat_ktp'      => $resetKTP ? null : $item['alamat_ktp'],
+                        'rt_ktp'          => $resetKTP ? null : $item['rt_ktp'],
+                        'rw_ktp'          => $resetKTP ? null : $item['rw_ktp'],
+                        'no_telepon'      => $item['no_telepon'],
+                    ]);
+
+                    $kepala = $keluarga->kepalaKeluarga;
+                    $kepala->update([
+                        'nama' => $item['nama_kepala_keluarga'],
+                        'nik'  => $item['nik_kepala_keluarga'],
+                    ]);
+                } else {
+                    $keluarga = KeluargaModel::create([
+                        'unit_rumah_id'   => $unit->id,
+                        'no_kk'           => $item['no_kk'],
+                        'is_luar_wilayah' => $item['is_luar_wilayah'],
+                        'alamat_ktp'      => $item['is_luar_wilayah'] ? $item['alamat_ktp'] : null,
+                        'rt_ktp'          => $item['is_luar_wilayah'] ? $item['rt_ktp'] : null,
+                        'rw_ktp'          => $item['is_luar_wilayah'] ? $item['rw_ktp'] : null,
+                        'no_telepon'      => $item['no_telepon'],
+                    ]);
+
+                    AnggotaKeluargaModel::create([
+                        'keluarga_id' => $keluarga->id,
+                        'nama'        => $item['nama_kepala_keluarga'],
+                        'nik'         => $item['nik_kepala_keluarga'],
+                        'hubungan_keluarga' => 'Kepala Keluarga'
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return [
+                'status' => true,
+                'data'   => $unit->fresh('keluarga.kepalaKeluarga')
+            ];
+        } catch (Throwable $th) {
+            DB::rollBack();
+            return [
+                'status' => false,
+                'error'  => $th->getMessage()
+            ];
         }
-
-        DB::commit();
-
-        return [
-            'status' => true,
-            'data'   => $unit->fresh('keluarga.kepalaKeluarga')
-        ];
-
-    } catch (Throwable $th) {
-        DB::rollBack();
-        return [
-            'status' => false,
-            'error'  => $th->getMessage()
-        ];
     }
-}
 
     public function delete(string $id): bool
     {
         DB::beginTransaction();
 
         try {
-
             $unit = UnitModel::findOrFail($id);
 
             foreach ($unit->keluarga as $kel) {
@@ -195,7 +216,6 @@ class IdentitasKeluargaHelper extends Helper
             DB::commit();
 
             return true;
-
         } catch (Throwable $th) {
             DB::rollBack();
             return false;

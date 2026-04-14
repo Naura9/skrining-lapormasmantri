@@ -143,7 +143,7 @@
                                             focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
                                 <p class="text-red-500 text-xs mt-1 hidden error-nik_kepala_keluarga"></p>
                             </div>
-                            <div class="md:col-span-2">
+                            <div>
                                 <label class="block text-sm font-semibold mb-1">Nama Kepala Keluarga</label>
                                 <input type="text" name="nama_kepala_keluarga"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
@@ -162,7 +162,6 @@
                                             focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
                                 <p class="text-red-500 text-xs mt-1 hidden error-no_telepon"></p>
                             </div>
-
                         </div>
                         <div class="luar-wilayah-field hidden mt-6">
                             <div class="grid md:grid-cols-2 gap-4">

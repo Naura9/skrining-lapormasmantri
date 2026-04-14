@@ -85,6 +85,7 @@ Route::delete('/identitas_keluarga/{id}', [IdentitasKeluargaController::class, '
 
 Route::get('/identitas_anggota', [IdentitasAnggotaController::class, 'index']);
 Route::get('/identitas_anggota/{id}', [IdentitasAnggotaController::class, 'show']);
+Route::get('/identitas_anggota/by-keluarga/{keluargaId}', [IdentitasAnggotaController::class, 'getByKeluarga']);
 Route::post('/identitas_anggota', [IdentitasAnggotaController::class, 'store']);
 Route::put('/identitas_anggota', [IdentitasAnggotaController::class, 'update']);
 Route::delete('/identitas_anggota/{id}', [IdentitasAnggotaController::class, 'destroy']);
@@ -99,10 +100,12 @@ Route::put('/skrining/{id}', [SkriningController::class, 'update']);
 Route::get('/monitoring/kader', [MonitoringController::class, 'monitoringKader']);
 Route::get('/monitoring/nik-per-kk', [MonitoringController::class, 'monitoringNikPerKk']);
 Route::get('/monitoring/nik-per-siklus', [MonitoringController::class, 'monitoringNikPerSiklus']);
+
+Route::get('/monitoring/hasil-skrining/{unit_id}', [MonitoringController::class, 'getHasilSkriningById']);
 Route::get('/monitoring/hasil-skrining', [MonitoringController::class, 'monitoringHasilSkrining']);
 Route::get('/download/hasil-skrining', [MonitoringController::class, 'exportHasilSkrining']);
 Route::get('/monitoring/hasil-skrining-chart', [MonitoringController::class, 'chartHasilSkrining']);
-Route::put('/monitoring/hasil-skrining/{unit_id}', [MonitoringController::class, 'updateUnit']);
+Route::put('/monitoring/hasil-skrining/{unit_id}', [MonitoringController::class, 'updateSkrining']);
 
 Route::get('/', function () {
     return response()->failed(['Endpoint yang anda minta tidak tersedia']);
