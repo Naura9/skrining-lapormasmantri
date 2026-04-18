@@ -11,21 +11,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <!-- <script src="{{ asset('js/fetchAuth.js') }}"></script> -->
-    <script src="{{ asset('helpers/alert.js') }}"></script>\
+    <script src="{{ asset('helpers/alert.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="bg-[#FAFAFA] overflow-x-hidden">
-    <header class="fixed top-0 inset-x-0 bg-[#FAFAFA] z-50 h-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-full">
-            @include('layouts.navbar')
-            @include('layouts.sidebar')
-        </div>
+    <header class="fixed top-0 inset-x-0 bg-[#FAFAFA] z-50 h-12 flex items-center px-4">
+        @include('layouts.navbar')
     </header>
 
-    <div id="overlay" class="hidden fixed inset-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50"></div>
+    @include('layouts.sidebar')
 
-    <main class="md:ml-64 pt-12 px-4">
+    <div id="overlay"
+        class="fixed inset-0 z-40 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300">
+    </div>
+
+    <main class="md:ml-64 pt-16 px-4">
         @yield('content')
     </main>
 </body>
@@ -34,37 +35,36 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const hamburger = document.getElementById('hamburger');
-        const mobileMenu = document.getElementById('mobileMenu');
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
 
-        if (!hamburger || !mobileMenu || !overlay) return;
+        if (!menuToggle || !sidebar || !overlay) return;
 
-        hamburger.addEventListener('click', () => {
-            const isHidden = mobileMenu.classList.contains('hidden');
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
 
-            if (isHidden) {
-                mobileMenu.classList.remove('hidden');
-                mobileMenu.style.maxHeight = mobileMenu.scrollHeight + "px";
-                overlay.classList.remove('hidden');
-                overlay.classList.add('opacity-100');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            overlay.classList.add('opacity-100');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+
+            overlay.classList.remove('opacity-100');
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        menuToggle.addEventListener('click', () => {
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+
+            if (isOpen) {
+                closeSidebar();
             } else {
-                mobileMenu.style.maxHeight = "0";
-                overlay.classList.remove('opacity-100');
-                setTimeout(() => {
-                    mobileMenu.classList.add('hidden');
-                    overlay.classList.add('hidden');
-                }, 300);
+                openSidebar();
             }
         });
 
-        overlay.addEventListener('click', () => {
-            mobileMenu.style.maxHeight = "0";
-            overlay.classList.remove('opacity-100');
-            setTimeout(() => {
-                mobileMenu.classList.add('hidden');
-                overlay.classList.add('hidden');
-            }, 300);
-        });
+        overlay.addEventListener('click', closeSidebar);
     });
 </script>

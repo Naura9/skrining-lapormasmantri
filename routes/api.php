@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AnggotaKeluargaController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\IdentitasAnggotaController;
 use App\Http\Controllers\Api\KategoriController;
 use App\Http\Controllers\Api\IdentitasKeluargaController;
@@ -24,6 +25,11 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api;" middleware group. Enjoy building your API!
 |
 */
+
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/logout', [AuthController::class, 'logout']);
+Route::get('/auth/profile', [AuthController::class, 'profile'])->middleware(['auth.api']);
+
 
 
 Route::get('/kelurahan', [KelurahanController::class, 'index']);

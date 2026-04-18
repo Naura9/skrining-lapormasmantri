@@ -7,8 +7,10 @@ use App\Repository\CrudInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class UserModel extends Model implements CrudInterface
+class UserModel extends Authenticatable implements CrudInterface, JWTSubject
 {
     use HasFactory;
     use Uuid;
@@ -120,5 +122,21 @@ class UserModel extends Model implements CrudInterface
     public function drop(string $id)
     {
         return $this->find($id)->delete();
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [
+            'user' => [
+                'id' => $this->id,
+                'username' => $this->username,
+                'updated_security' => $this->updated_security,
+            ],
+        ];
     }
 }

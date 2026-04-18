@@ -2,9 +2,8 @@
     class="fixed top-0 left-0 h-full w-64 bg-white border-r border-[#00000033] flex flex-col
            transform -translate-x-full md:translate-x-0 transition z-50">
 
-   <div class="px-6 py-5 hidden md:flex items-center space-x-2">
+    <div class="px-6 py-5 flex items-center space-x-4">
         <img src="/logo_puskesmas.png" alt="Logo Puskesmas" class="w-15 h-15 object-contain">
-        
         <h1 class="text-xl font-bold leading-tight">
             LAPOR<br>MAS MANTRI
         </h1>
@@ -217,7 +216,7 @@
 
         <ul id="kaderSkriningSubMenu" class="pl-5 mt-1 space-y-1 {{ $isKaderSkriningActive ? 'block' : 'hidden' }}">
             <li>
-                <a href="{{ route('kader.fitur.skrining_kk') }}" 
+                <a href="{{ route('kader.fitur.skrining_kk') }}"
                     class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
                         {{ request()->routeIs('kader.fitur.skrining_kk')
                             ? 'bg-[#61359C]/65 text-white'
@@ -356,20 +355,13 @@
                     <span>NIK</span>
                 </a>
             </li>
-            
+
         </ul>
     </nav>
 
 </aside>
 
 <script>
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebar = document.getElementById('sidebar');
-
-    menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('-translate-x-full');
-    });
-
     const kelolaUserMenuToggle = document.getElementById('kelolaUserMenuToggle');
     const kelolaUserSubMenu = document.getElementById('kelolaUserSubMenu');
 

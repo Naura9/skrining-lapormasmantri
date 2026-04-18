@@ -3,7 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="flex flex-col gap-4 w-full max-w-3xl mx-auto text-base">
+<div class="flex flex-col gap-4 w-full max-w-3xl mx-auto text-base mt-5">
     <div class="grid grid-cols-2 gap-3 mb-3">
         <button id="btnSkriningKK"
             class="h-14 rounded-full bg-[#61359C] text-white border-2 border-[#61359C]
