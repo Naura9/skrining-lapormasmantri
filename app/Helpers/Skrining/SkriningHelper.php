@@ -54,7 +54,7 @@ class SkriningHelper extends Helper
         try {
             $skrining = $this->skriningModel->store([
                 'keluarga_id' => $payload['keluarga_id'],
-                'user_id' => $payload['user_id'],
+                'user_id' => auth()->user()->id,
                 'tanggal_skrining' => $payload['tanggal_skrining'],
             ]);
 
@@ -81,7 +81,6 @@ class SkriningHelper extends Helper
         }
     }
 
-    
 
     public function delete(string $id): bool
     {

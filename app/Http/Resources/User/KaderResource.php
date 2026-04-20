@@ -11,8 +11,9 @@ class KaderResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'posyandu_id' => $this->posyandu_id,
+            'kelurahan_id' => $this->posyandu->kelurahan->id,
             'nama_kelurahan' => $this->posyandu->kelurahan->nama_kelurahan,
+            'posyandu_id' => $this->posyandu_id,
             'nama_posyandu' => $this->posyandu->nama_posyandu,
             'no_telepon' => $this->no_telepon,
             'jenis_kelamin' => $this->jenis_kelamin,

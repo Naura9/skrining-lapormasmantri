@@ -127,8 +127,18 @@
             localStorage.setItem("role", user.role);
             localStorage.setItem("user", JSON.stringify(user));
 
+            let redirectUrl = "{{ route('dashboard') }}";
+
+            if (user.role === "kader") {
+                redirectUrl = "{{ route('kader.dashboard_kader') }}";
+            } else if (user.role === "admin") {
+                redirectUrl = "{{ route('admin.dashboard_admin') }}";
+            } else if (user.role === "nakes") {
+                redirectUrl = "{{ route('nakes.dashboard_nakes') }}";
+            }
+
             setTimeout(() => {
-                window.location.href = "{{ route('dashboard') }}";
+                window.location.href = redirectUrl;
             }, 1200);
 
         } catch (error) {

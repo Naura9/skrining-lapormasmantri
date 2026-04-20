@@ -8,6 +8,7 @@
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
     <link rel="stylesheet" href="{{ asset('helpers/alert.css') }}">
+    <script src="{{ asset('js/fetchAuth.js') }}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <!-- <script src="{{ asset('js/fetchAuth.js') }}"></script> -->
@@ -34,7 +35,29 @@
 </html>
 
 <script>
+    window.App = {
+        user: JSON.parse(localStorage.getItem("user") || "null"),
+        token: localStorage.getItem("token"),
+        role: localStorage.getItem("role"),
+    };
+
+    async function initApp() {
+        if (!window.App.token) return;
+
+        const res = await fetchWithAuth(`/api/auth/profile`);
+        if (!res || !res.status) return;
+
+        const user = res.data;
+
+        window.App.user = user;
+        window.App.role = user.role;
+
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("role", user.role);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+
         const menuToggle = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
@@ -66,5 +89,9 @@
         });
 
         overlay.addEventListener('click', closeSidebar);
+    });
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        await initApp();
     });
 </script>

@@ -3,7 +3,7 @@ async function fetchWithAuth(url, options = {}) {
     if (!token) {
         showSessionExpiredToast();
         localStorage.clear();
-        window.location.href = "/login";
+        window.location.href = "/";
         return;
     }
 
@@ -30,7 +30,7 @@ async function fetchWithAuth(url, options = {}) {
         if (res.status === 403 && data.errors?.some(err => err.toLowerCase().includes("kadaluarsa"))) {
             showSessionExpiredToast();
             localStorage.clear();
-            window.location.href = "/login";
+            window.location.href = "/";
             return;
         }
 

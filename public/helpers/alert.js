@@ -169,7 +169,7 @@ function showSessionExpiredToast() {
 
   document.getElementById("btnSessionExpired").addEventListener("click", () => {
     localStorage.clear();
-    window.location.href = "/login";
+    window.location.href = "/";
     toast.hideToast();
   });
 }

@@ -10,6 +10,8 @@ Route::view('/', 'login')->name('login');
 Route::view('/dashboard', 'dashboard')->name('dashboard');
 
 //admin
+Route::view('/dashboard-admin', 'admin.dashboard_admin')->name('admin.dashboard_admin');
+
 Route::view('/data-admin', 'admin.fitur.kelola_user.data_admin.index')->name('admin.fitur.kelola_user.data_admin');
 Route::view('/data-kader', 'admin.fitur.kelola_user.data_kader.index')->name('admin.fitur.kelola_user.data_kader');
 Route::view('/data-nakes', 'admin.fitur.kelola_user.data_nakes.index')->name('admin.fitur.kelola_user.data_nakes');
@@ -40,4 +42,10 @@ Route::view('/dashboard-kader', 'kader.dashboard_kader')->name('kader.dashboard_
 
 Route::view('/skrining-kk', 'kader.fitur.skrining.skrining_kk')->name('kader.fitur.skrining_kk');
 Route::view('/skrining-nik', 'kader.fitur.skrining.skrining_nik')->name('kader.fitur.skrining_nik');
+Route::view('/riwayat-skrining', 'kader.fitur.skrining.riwayat_skrining')->name('kader.fitur.skrining.riwayat_skrining');
 
+Route::view('/profil', 'kader.fitur.profil')->name('kader.fitur.profil');
+
+
+//nakes
+Route::view('/dashboard-nakes', 'nakes.dashboard_nakes')->name('nakes.dashboard_nakes');

@@ -88,8 +88,14 @@ class IdentitasAnggotaHelper extends Helper
     {
         DB::beginTransaction();
 
-        try {
+        $user = auth()->user();
 
+        if ($user->role === 'kader') {
+            $payload['kelurahan_id'] = optional($user->kaderDetail->posyandu->kelurahan)->id;
+            $payload['posyandu_id']  = optional($user->kaderDetail->posyandu)->id;
+        }
+
+        try {
             $keluarga = KeluargaModel::find($payload['keluarga_id']);
 
             if (!$keluarga) {

@@ -6,7 +6,7 @@
 <section class="p-2 mb-10">
     <h2 id="judulSkrining" class="text-2xl font-bold mb-5 text-center sm:text-left">
         Skrining NIK
-        <span id="judulSiklus" class="block text-base font-semibold text-gray-500 mt-1"></span>
+        <span id="judulSiklus" class="inline-block text-2xl font-semibold text-gray-500 mt-1"></span>
     </h2>
 
     <div id="contentAwal" class="bg-white border border-[#61359C] rounded-2xl p-6 mb-6">
@@ -68,19 +68,7 @@
 
         <form id="formIdentitas">
             <div id="contentIdentitas">
-                <div class="text-left">
-                    <label for="user_id" class="block text-sm font-semibold mb-1">
-                        Petugas
-                    </label>
-                    <x-dropdown
-                        id="userDropdown"
-                        label="Pilih Petugas"
-                        :options="[]"
-                        width="w-full sm:w-56"
-                        data-dropdown="filter" />
-                    <p class="text-red-500 text-xs mt-1 hidden" id="error-user_id"></p>
-                    <input type="hidden" name="user_id" id="user_id">
-                </div>
+
                 <div class="bg-white border border-[#61359C] rounded-2xl p-6 mb-4 space-y-6">
                     <div>
                         <label class="block text-sm font-semibold mb-1">
@@ -276,10 +264,10 @@
 
         async function loadKk() {
             try {
-                const res = await fetch(`{{ url('api/identitas_keluarga') }}`);
-                const json = await res.json();
+                const res = await fetchWithAuth(`/api/identitas_keluarga`);
+                if (!res?.data) return;
 
-                const unitList = json.data.list || [];
+                const unitList = res.data.list || [];
 
                 kkData = [];
 
@@ -342,10 +330,8 @@
 
         async function loadAnggotaByKk(keluargaId) {
             try {
-                const res = await fetch(`{{ url('api/identitas_anggota/by-keluarga') }}/${keluargaId}`);
-                const json = await res.json();
-
-                anggotaKk = json.data?.data || [];
+                const res = await fetchWithAuth(`/api/identitas_anggota/by-keluarga/${keluargaId}`);
+                anggotaKk = res?.data?.data || [];
 
                 renderNikDropdown();
             } catch (e) {
@@ -448,10 +434,8 @@
 
         async function loadSiklus() {
             try {
-                const res = await fetch(`{{ url('api/kategori') }}`);
-                const json = await res.json();
-
-                const allData = json.data.list || [];
+                const res = await fetchWithAuth(`/api/kategori`);
+                const allData = res?.data?.list || [];
 
                 siklusData = allData
                     .filter(item =>
@@ -651,7 +635,10 @@
 
             document.getElementById('pertanyaanContainer').innerHTML = '';
 
-            document.getElementById('judulSkrining').innerText = 'Skrining NIK';
+            const judulSiklusEl = document.getElementById('judulSiklus');
+            if (judulSiklusEl) {
+                judulSiklusEl.innerText = '';
+            }
         });
 
         async function fetchPertanyaan() {
@@ -663,12 +650,10 @@
                     return;
                 }
 
-                const response = await fetch(`/api/pertanyaan?kategori_id=${siklusId}`);
-                const result = await response.json();
+                const res = await fetchWithAuth(`/api/pertanyaan?kategori_id=${siklusId}`);
+                if (!res?.data?.list) return;
 
-                if (!result?.data?.list) return;
-
-                renderPertanyaan(result.data.list);
+                renderPertanyaan(res.data.list);
 
             } catch (error) {
                 document.getElementById('pertanyaanContainer').innerHTML = `
@@ -1078,7 +1063,7 @@
             };
 
             if (anggotaId) {
-                const response = await fetch(`/api/identitas_anggota`, {
+                const result = await fetchWithAuth(`/api/identitas_anggota`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
@@ -1086,16 +1071,20 @@
                     },
                     body: JSON.stringify(identitasPayload)
                 });
-                const result = await response.json();
 
-                if (!response.ok) {
-                    showErrors(result.errors || result.error);
+                if (!result || result.status_code === 422) {
+                    showErrors(result?.errors || result?.message);
+                    return false;
+                }
+
+                if (result.status_code && result.status_code !== 200) {
                     return false;
                 }
 
                 return true;
+
             } else {
-                const response = await fetch(`/api/identitas_anggota?validate_only=1`, {
+                const result = await fetchWithAuth(`/api/identitas_anggota?validate_only=1`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -1103,10 +1092,13 @@
                     },
                     body: JSON.stringify(identitasPayload)
                 });
-                const result = await response.json();
 
-                if (response.status === 422) {
-                    showErrors(result.errors);
+                if (!result || result.status_code === 422) {
+                    showErrors(result?.errors);
+                    return false;
+                }
+
+                if (result.status_code && result.status_code !== 200) {
                     return false;
                 }
 
@@ -1297,38 +1289,28 @@
                     method = 'PUT';
                 }
 
-                const identitasResponse = await fetch(url, {
-                    method: method,
+                const identitasResponse = await fetchWithAuth('/api/identitas_anggota', {
+                    method: anggotaId ? "PUT" : "POST",
                     headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify(identitasPayload)
                 });
 
-                const identitasResult = await identitasResponse.json();
-
-                if (identitasResponse.status === 422) {
-                    showErrors(identitasResult.errors);
+                if (identitasResponse?.status_code === 422) {
+                    showErrors(identitasResponse.errors);
                     return;
                 }
 
-                if (!identitasResponse.ok) {
+                if (identitasResponse?.status_code && identitasResponse.status_code !== 200) {
                     showErrorToast("Gagal menyimpan identitas anggota");
                     return;
                 }
 
-                anggotaId = identitasResult.data?.id;
+                anggotaId = identitasResponse.data?.id;
 
                 if (!anggotaId) {
                     showErrorToast("ID anggota tidak ditemukan");
-                    return;
-                }
-
-                const userId = document.getElementById('user_id').value;
-
-                if (!userId) {
-                    showErrorToast("Petugas belum dipilih");
                     return;
                 }
 
@@ -1341,80 +1323,35 @@
                 const skriningPayload = {
                     keluarga_id: keluargaId,
                     anggota_keluarga_id: anggotaId,
-                    user_id: userId,
                     tanggal_skrining: new Date().toISOString().split('T')[0],
                     jawaban: jawaban
                 };
 
-                const skriningResponse = await fetch(`/api/skrining`, {
+                const skriningResponse = await fetchWithAuth(`/api/skrining`, {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify(skriningPayload)
                 });
 
-                const skriningResult = await skriningResponse.json();
-
-                if (skriningResponse.ok) {
-                    showSuccessToast("Skrining KK berhasil terkirim!");
-                    window.location.reload();
-                } else {
-                    showErrorToast("Gagal menyimpan skrining");
+                if (skriningResponse?.status_code === 422) {
+                    showErrorToast("Validasi gagal");
+                    return;
                 }
 
+                if (skriningResponse?.status_code && skriningResponse.status_code !== 200) {
+                    showErrorToast("Gagal menyimpan skrining");
+                    return;
+                }
 
+                showSuccessToast("Skrining NIK berhasil terkirim!");
+                window.location.reload();
             } catch (error) {
                 console.error(error);
                 showErrorToast("Terjadi kesalahan server");
             }
         });
-
-        let userData = [];
-
-        async function loadUsers() {
-            try {
-                const res = await fetch(`{{ url('api/users') }}`);
-                const json = await res.json();
-
-                userData = json.data.list || [];
-                renderUserDropdown();
-            } catch (error) {
-                console.error('Gagal load users:', error);
-            }
-        }
-
-        function renderUserDropdown() {
-            const dropdown = document
-                .getElementById('userDropdown')
-                .querySelector('.dropdown-menu');
-
-            dropdown.innerHTML = '';
-
-            if (!userData.length) {
-                dropdown.innerHTML = `
-                    <div class="px-4 py-2 text-sm text-gray-400 text-center">
-                        Tidak ada data petugas
-                    </div>
-                `;
-                return;
-            }
-
-            userData.forEach(user => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
-                btn.textContent = user.nama;
-
-                btn.onclick = () => {
-                    setDropdownLabel('userDropdown', user.nama, 'Pilih Petugas');
-                    document.getElementById('user_id').value = user.id;
-                };
-
-                dropdown.appendChild(btn);
-            });
-        }
 
         const tidakPunyaNik = document.getElementById('tidak_punya_nik');
         const nikDropdown = document.getElementById('nikDropdown');
@@ -1450,7 +1387,6 @@
         });
 
         loadKk();
-        loadUsers();
         loadSiklus();
     });
 </script>

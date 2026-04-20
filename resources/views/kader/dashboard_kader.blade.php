@@ -3,7 +3,7 @@
 @section('title', 'Dashboard Kader')
 
 @section('content')
-<div class="flex flex-col gap-4 w-full max-w-4xl mx-auto text-base">
+<div class="flex flex-col gap-4 w-full max-w-4xl mx-auto text-base py-5">
     <div id="kaderCards" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
     <div id="detailTableContainer" class="mt-3 hidden overflow-x-auto">
@@ -42,8 +42,7 @@
 
         async function fetchKader() {
             try {
-                const res = await fetch("{{ url('api/monitoring/kader') }}");
-                const result = await res.json();
+                const result = await fetchWithAuth("{{ url('api/monitoring/kader') }}");
 
                 if (!result.status) {
                     container.innerHTML = '<p class="text-red-500">Gagal memuat data kader.</p>';

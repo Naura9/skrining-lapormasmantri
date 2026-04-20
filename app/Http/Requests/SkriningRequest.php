@@ -33,7 +33,6 @@ class SkriningRequest extends FormRequest
     {
         return [
             'keluarga_id' => 'required|uuid|exists:m_keluarga,id',
-            'user_id' => 'required|uuid|exists:m_user,id',
             'tanggal_skrining' => 'required|date',
 
             'jawaban' => 'required|array|min:1',

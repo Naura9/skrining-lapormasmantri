@@ -65,6 +65,13 @@ class IdentitasKeluargaHelper extends Helper
     {
         DB::beginTransaction();
 
+        $user = auth()->user();
+
+        if ($user->role === 'kader') {
+            $payload['kelurahan_id'] = optional($user->kaderDetail->posyandu->kelurahan)->id;
+            $payload['posyandu_id']  = optional($user->kaderDetail->posyandu)->id;
+        }
+        
         try {
             $unit = UnitModel::create([
                 'kelurahan_id' => $payload['kelurahan_id'],
@@ -128,11 +135,11 @@ class IdentitasKeluargaHelper extends Helper
                 'rw'           => $payload['rw'],
             ]);
 
-            $existingIds = $unit->keluarga()->pluck('id')->toArray();      
+            $existingIds = $unit->keluarga()->pluck('id')->toArray();
             $incomingIds = collect($payload['keluarga'])
                 ->pluck('id')
-                ->filter()                                     
-                ->toArray();                                 
+                ->filter()
+                ->toArray();
 
             $idsToDelete = array_diff($existingIds, $incomingIds);
 

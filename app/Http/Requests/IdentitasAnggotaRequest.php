@@ -96,7 +96,7 @@ class IdentitasAnggotaRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     if ($value === 'Kepala Keluarga') {
                         $keluargaId = $this->input('keluarga_id');
-                        $id = $this->route('id');
+                        $id = $this->input('id');
                         $exists = AnggotaKeluargaModel::where('keluarga_id', $keluargaId)
                             ->where('hubungan_keluarga', 'Kepala Keluarga')
                             ->where('id', '!=', $id)

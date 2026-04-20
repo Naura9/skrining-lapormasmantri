@@ -27,46 +27,22 @@
             <div class="bg-white border border-[#61359C] rounded-2xl p-4 mb-4">
                 <div id="kkContainer" class="space-y-8">
                     <div class="bg-white mb-4">
-                        <div class="text-left">
-                            <label for="user_id" class="block text-sm font-semibold mb-1">
-                                Petugas
-                            </label>
-                            <x-dropdown
-                                id="userDropdown"
-                                label="Pilih Petugas"
-                                :options="[]"
-                                width="w-full sm:w-56"
-                                data-dropdown="filter" />
-                            <p class="text-red-500 text-xs mt-1 hidden" id="error-user_id"></p>
-                            <input type="hidden" name="user_id" id="user_id">
-                        </div>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div class="text-left">
-                                <label for="kelurahan_id" class="block text-sm font-semibold mb-1">
-                                    Kelurahan
-                                </label>
-                                <x-dropdown
-                                    id="kelurahanDropdown"
-                                    label="Pilih Kelurahan"
-                                    :options="[]"
-                                    width="w-full sm:w-56"
-                                    data-dropdown="filter" />
-                                <p class="text-red-500 text-xs mt-1 hidden" id="error-kelurahan_id"></p>
+                                <label class="block text-sm font-semibold mb-1">Kelurahan</label>
+                                <input type="text" id="kelurahan_text"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 cursor-not-allowed" disabled>
                                 <input type="hidden" name="kelurahan_id" id="kelurahan_id">
+                                <p class="text-red-500 text-xs mt-1 hidden" id="error-kelurahan_id"></p>
                             </div>
 
                             <div class="text-left">
-                                <label for="posyandu_id" class="block text-sm font-semibold mb-1">
-                                    Posyandu
-                                </label>
-                                <x-dropdown
-                                    id="posyanduDropdown"
-                                    label="Pilih Posyandu"
-                                    :options="[]"
-                                    width="w-full sm:w-56"
-                                    data-dropdown="filter" />
-                                <p class="text-red-500 text-xs mt-1 hidden" id="error-posyandu_id"></p>
+                                <label class="block text-sm font-semibold mb-1">Posyandu</label>
+                                <input type="text" id="posyandu_text"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 cursor-not-allowed" disabled>
                                 <input type="hidden" name="posyandu_id" id="posyandu_id">
+
+                                <p class="text-red-500 text-xs mt-1 hidden" id="error-posyandu_id"></p>
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-semibold mb-1">Alamat Domisili</label>
@@ -256,7 +232,7 @@
 </section>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
         const tabIdentitas = document.getElementById('tabIdentitas');
         const tabPertanyaan = document.getElementById('tabPertanyaan');
 
@@ -370,148 +346,30 @@
             tabIdentitas.click();
         });
 
+
         //tab identitas keluarga
-        function setDropdownLabel(id, text, fallback) {
-            const el = document.getElementById(id);
-            if (!el) return;
+        function initKelurahanPosyandu() {
+            const user = window.App.user;
+            if (!user) return;
 
-            const label = el.querySelector('.dropdown-selected');
-            if (label) label.textContent = text || fallback;
-        }
+            if (user.role === 'kader') {
+                const kader = user.kaderDetail;
 
-        let kelurahanData = [];
-        async function loadKelurahan() {
-            const res = await fetch(`{{ url('api/kelurahan') }}`);
-            const json = await res.json();
+                document.getElementById('kelurahan_id').value = kader?.kelurahan_id || '';
+                document.getElementById('posyandu_id').value = kader?.posyandu_id || '';
 
-            kelurahanData = json.data.list || [];
-            renderKelurahanDropdown();
-        }
+                document.getElementById('kelurahan_text').value = kader?.nama_kelurahan || '-';
+                document.getElementById('posyandu_text').value = kader?.nama_posyandu || '-';
 
-        function renderKelurahanDropdown() {
-            const dropdown = document
-                .getElementById('kelurahanDropdown')
-                .querySelector('.dropdown-menu');
-
-            dropdown.innerHTML = '';
-
-            kelurahanData.forEach(kel => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
-                btn.textContent = kel.nama_kelurahan;
-
-                btn.onclick = () => {
-                    setDropdownLabel('kelurahanDropdown', kel.nama_kelurahan, 'Pilih Kelurahan');
-                    document.getElementById('kelurahan_id').value = kel.id;
-
-                    setDropdownDisabled('posyanduDropdown', false);
-                    renderPosyanduDropdown(kel.posyandu);
-                };
-
-                dropdown.appendChild(btn);
-            });
-        }
-
-        function renderPosyanduDropdown(posyanduList = []) {
-            const dropdownWrapper = document.getElementById('posyanduDropdown');
-            const dropdown = dropdownWrapper.querySelector('.dropdown-menu');
-
-            dropdown.innerHTML = '';
-            document.getElementById('posyandu_id').value = '';
-            setDropdownLabel('posyanduDropdown', null, 'Pilih Posyandu');
-
-            if (!posyanduList.length) {
-                setDropdownDisabled('posyanduDropdown', true);
-                dropdown.innerHTML = `
-            <div class="px-4 py-2 text-sm text-gray-400 text-center">
-                Tidak ada posyandu
-            </div>`;
                 return;
             }
 
-            posyanduList.forEach(p => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
-                btn.textContent = p.nama_posyandu;
-
-                btn.onclick = () => {
-                    setDropdownLabel('posyanduDropdown', p.nama_posyandu, 'Pilih Posyandu');
-                    document.getElementById('posyandu_id').value = p.id;
-                };
-
-                dropdown.appendChild(btn);
-            });
-        }
-
-        function setDropdownDisabled(id, disabled = true) {
-            const wrapper = document.getElementById(id);
-            if (!wrapper) return;
-
-            const button = wrapper.querySelector('button');
-            const menu = wrapper.querySelector('.dropdown-menu');
-
-            if (disabled) {
-                button.classList.add('opacity-50', 'cursor-not-allowed');
-                button.setAttribute('disabled', true);
-                if (menu) menu.classList.add('hidden');
-            } else {
-                button.classList.remove('opacity-50', 'cursor-not-allowed');
-                button.removeAttribute('disabled');
-            }
-        }
-
-        let userData = [];
-
-        async function loadUsers() {
-            try {
-                const res = await fetch(`{{ url('api/users') }}`);
-                const json = await res.json();
-
-                userData = json.data.list || [];
-                renderUserDropdown();
-            } catch (error) {
-                console.error('Gagal load users:', error);
-            }
-        }
-
-        function renderUserDropdown() {
-            const dropdown = document
-                .getElementById('userDropdown')
-                .querySelector('.dropdown-menu');
-
-            dropdown.innerHTML = '';
-
-            if (!userData.length) {
-                dropdown.innerHTML = `
-                    <div class="px-4 py-2 text-sm text-gray-400 text-center">
-                        Tidak ada data petugas
-                    </div>
-                `;
-                return;
-            }
-
-            userData.forEach(user => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
-                btn.textContent = user.nama;
-
-                btn.onclick = () => {
-                    setDropdownLabel('userDropdown', user.nama, 'Pilih Petugas');
-                    document.getElementById('user_id').value = user.id;
-                };
-
-                dropdown.appendChild(btn);
-            });
         }
 
         //tab pertanyaan
         async function fetchPertanyaan() {
             try {
-                const response = await fetch(`{{ url('api/pertanyaan') }}`);
-                const result = await response.json();
+                const result = await fetchWithAuth(`{{ url('api/pertanyaan') }}`);
 
                 if (!result?.data?.list) return;
 
@@ -810,6 +668,40 @@
                 </div>
             `;
         }
+        
+        window.toggleDropdown = function(button) {
+            const dropdown = button.parentElement.querySelector('.dropdown-menu');
+            const allDropdowns = document.querySelectorAll('.dropdown-menu');
+
+            allDropdowns.forEach(menu => {
+                if (menu !== dropdown) menu.classList.add('hidden');
+            });
+
+            dropdown.classList.toggle('hidden');
+        };
+
+        window.selectDropdownOption = function(optionEl, value) {
+            const dropdown = optionEl.closest('.relative');
+            const selectedSpan = dropdown.querySelector('.dropdown-selected');
+            const otherWrapper = dropdown.querySelector('.dropdown-other-wrapper');
+
+            selectedSpan.textContent = value;
+
+            if (otherWrapper) {
+                otherWrapper.classList.add('hidden');
+            }
+
+            dropdown.querySelector('.dropdown-menu').classList.add('hidden');
+        };
+
+        window.selectDropdownOther = function(optionEl) {
+            const dropdown = optionEl.closest('.relative');
+            const wrapper = dropdown.querySelector('.dropdown-other-wrapper');
+            const selectedSpan = dropdown.querySelector('.dropdown-selected');
+
+            wrapper.classList.remove('hidden');
+            selectedSpan.textContent = 'Lainnya';
+        };
 
         document.querySelectorAll('.other-input').forEach(input => {
             if (input.value) {
@@ -851,7 +743,7 @@
                 });
             });
 
-            const response = await fetch(`/api/identitas_keluarga?validate_only=1`, {
+            const result = await fetchWithAuth(`/api/identitas_keluarga?validate_only=1`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -860,12 +752,11 @@
                 body: JSON.stringify(identitasPayload)
             });
 
-            const result = await response.json();
-
-            if (response.status === 422) {
+            if (result?.status_code === 422) {
                 showErrors(result.errors);
                 return false;
             }
+
             return true;
         }
 
@@ -1064,7 +955,7 @@
                     });
                 });
 
-                const identitasResponse = await fetch(`/api/identitas_keluarga`, {
+                const identitasResult = await fetchWithAuth(`/api/identitas_keluarga`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -1073,9 +964,7 @@
                     body: JSON.stringify(identitasPayload)
                 });
 
-                const identitasResult = await identitasResponse.json();
-
-                if (identitasResponse.status === 422) {
+                if (identitasResult.status === 422) {
                     const errors = identitasResult.errors;
 
                     Object.keys(errors).forEach(key => {
@@ -1109,8 +998,8 @@
                     return;
                 }
 
-                if (!identitasResponse.ok) {
-                    showErrorToast("Terjadi kesalaha serve");
+                if (identitasResult.status_code && identitasResult.status_code !== 200) {
+                    showErrorToast("Terjadi kesalahan server");
                     return;
                 }
 
@@ -1120,23 +1009,14 @@
                     return;
                 }
 
-                const userId = document.getElementById('user_id').value;
-
-                if (!userId) {
-                    showErrorToast("Petugas belum dipilih");
-                    return;
-                }
-
                 for (const keluarga of keluargaList) {
-
                     const skriningPayload = {
                         keluarga_id: keluarga.id,
-                        user_id: userId,
                         tanggal_skrining: new Date().toISOString().split('T')[0],
                         jawaban: jawaban
                     };
 
-                    const skriningResponse = await fetch(`/api/skrining`, {
+                    const skriningResponse = await fetchWithAuth(`/api/skrining`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -1145,7 +1025,7 @@
                         body: JSON.stringify(skriningPayload)
                     });
 
-                    if (!skriningResponse.ok) {
+                    if (skriningResponse.status_code && skriningResponse.status_code !== 200) {
                         showErrorToast("Gagal menyimpan skrining");
                         return;
                     }
@@ -1160,9 +1040,8 @@
             }
         });
 
-        loadKelurahan();
-        loadUsers();
-        setDropdownDisabled('posyanduDropdown', true);
+        await initApp();
+        initKelurahanPosyandu();
     });
 </script>
 @endsection

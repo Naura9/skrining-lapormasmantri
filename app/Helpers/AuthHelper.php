@@ -37,7 +37,7 @@ class AuthHelper extends Helper
         return [
             'access_token' => $token,
             'token_type' => 'bearer',
-            'user' => new UserResource(auth()->user()),
+            'user' => new UserResource(auth()->user() ?? JWTAuth::user()),
         ];
     }
 
