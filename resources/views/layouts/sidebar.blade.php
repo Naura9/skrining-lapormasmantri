@@ -202,7 +202,7 @@
             ]);
             @endphp
 
-            <a href="#" id="monitoringMenuToggle"
+            <a href="#" id="monitoringAdminMenuToggle"
                 class="group flex items-center justify-between gap-3 px-2 py-2.5 rounded-lg transition font-semibold
                 {{ $isMonitoringActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
@@ -214,7 +214,7 @@
                 </div>
             </a>
 
-            <ul id="monitoringSubMenu" class="pl-5 mt-1 space-y-1 {{ $isMonitoringActive ? 'block' : 'hidden' }}">
+            <ul id="monitoringAdminSubMenu" class="pl-5 mt-1 space-y-1 {{ $isMonitoringActive ? 'block' : 'hidden' }}">
                 <li>
                     <a href="{{ route('admin.fitur.monitoring.nik_per_kk') }}"
                         class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
@@ -295,8 +295,6 @@
             </ul>
         </div>
 
-
-        
         <div id="menu-kader" class="space-y-2" style="display:none;">
             <a href="{{ route('kader.dashboard_kader') }}"
                 class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
@@ -309,7 +307,7 @@
                 </i>
                 <span>Dashboard</span>
             </a>
-            
+
             @php
             $isKaderSkriningActive = request()->routeIs([
             'kader.skrining',
@@ -373,6 +371,97 @@
 
                 <span>Riwayat Skrining</span>
             </a>
+        </div>
+
+
+        <div id="menu-nakes" class="space-y-2" style="display:none;">
+            <a href="{{ route('nakes.dashboard_nakes') }}"
+                class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
+            {{ request()->routeIs('nakes.dashboard_nakes') 
+                ? 'bg-[#61359C]/65 text-white font-semibold' 
+                : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
+
+                <i class="fa-solid fa-house text-lg w-5 text-center
+                {{ request()->routeIs('nakes.dashboard_nakes') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                </i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ route('nakes.fitur.hasil_skrining') }}"
+                class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('nakes.fitur.hasil_skrining')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                <i class="fa-solid fa-file-lines text-lg w-5 text-center
+                        {{ request()->routeIs('nakes.fitur.hasil_skrining') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                </i>
+
+                <span>Hasil Skrining</span>
+            </a>
+
+            @php
+            $isMonitoringNakesActive = request()->routeIs([
+            'nakes.monitoring',
+            'nakes.monitoring.kader',
+            'nakes.monitoring.nik_per_siklus',
+            'nakes.monitoring.nik_per_kk',
+            ]);
+            @endphp
+
+            <a href="#" id="monitoringNakesMenuToggle"
+                class="group flex items-center justify-between gap-3 px-2 py-2.5 rounded-lg transition font-semibold
+                {{ $isMonitoringNakesActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-square-poll-vertical text-lg transition w-5 text-center
+                    {{ $isMonitoringNakesActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+                    <span>Monitoring</span>
+                </div>
+            </a>
+
+            <ul id="monitoringNakesSubMenu" class="pl-5 mt-1 space-y-1 {{ $isMonitoringNakesActive ? 'block' : 'hidden' }}">
+                <li>
+                    <a href="{{ route('nakes.fitur.monitoring.kader') }}"
+                        class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
+                {{ request()->routeIs('nakes.fitur.monitoring.kader') 
+                    ? 'bg-[#61359C]/65 text-white font-semibold' 
+                    : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-user-group text-lg w-5 text-center
+                {{ request()->routeIs('nakes.fitur.monitoring.kader') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+                        <span>Kader</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('nakes.fitur.monitoring.nik_per_kk') }}"
+                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
+                {{ request()->routeIs('nakes.fitur.monitoring.nik_per_kk')
+                ? 'bg-[#61359C]/65 text-white'
+                : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-people-group text-lg w-5 text-center
+                {{ request()->routeIs('nakes.fitur.monitoring.nik_per_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+                        <span>NIK Per KK</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('nakes.fitur.monitoring.nik_per_siklus') }}"
+                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
+                {{ request()->routeIs('nakes.fitur.monitoring.nik_per_siklus')
+                    ? 'bg-[#61359C]/65 text-white'
+                    : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-circle-notch text-lg w-5 text-center
+                {{ request()->routeIs('nakes.fitur.monitoring.nik_per_siklus') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+                        <span>NIK Per Siklus</span>
+                    </a>
+                </li>
+            </ul>
 
         </div>
     </nav>
@@ -413,7 +502,6 @@
             });
         }
 
-
         const kaderSkriningMenuToggle = document.getElementById('kaderSkriningMenuToggle');
         const kaderSkriningSubMenu = document.getElementById('kaderSkriningSubMenu');
 
@@ -424,14 +512,13 @@
             });
         }
 
+        const monitoringAdminMenuToggle = document.getElementById('monitoringAdminMenuToggle');
+        const monitoringAdminSubMenu = document.getElementById('monitoringAdminSubMenu');
 
-        const monitoringMenuToggle = document.getElementById('monitoringMenuToggle');
-        const monitoringSubMenu = document.getElementById('monitoringSubMenu');
-
-        if (monitoringMenuToggle && monitoringSubMenu) {
-            monitoringMenuToggle.addEventListener('click', (e) => {
+        if (monitoringAdminMenuToggle && monitoringAdminSubMenu) {
+            monitoringAdminMenuToggle.addEventListener('click', (e) => {
                 e.preventDefault();
-                monitoringSubMenu.classList.toggle('hidden');
+                monitoringAdminSubMenu.classList.toggle('hidden');
             });
         }
 
@@ -442,6 +529,17 @@
             dataWargaMenuToggle.addEventListener('click', (e) => {
                 e.preventDefault();
                 dataWargaSubMenu.classList.toggle('hidden');
+            });
+        }
+
+        //nakes
+        const monitoringNakesMenuToggle = document.getElementById('monitoringNakesMenuToggle');
+        const monitoringNakesSubMenu = document.getElementById('monitoringNakesSubMenu');
+
+        if (monitoringNakesMenuToggle && monitoringNakesSubMenu) {
+            monitoringNakesMenuToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                monitoringNakesSubMenu.classList.toggle('hidden');
             });
         }
     });

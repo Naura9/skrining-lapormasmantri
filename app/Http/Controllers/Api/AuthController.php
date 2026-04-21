@@ -53,7 +53,6 @@ class AuthController extends Controller
     public function updateProfile(ProfileRequest $request)
     {
         $user = auth()->user();
-
         $validated = $request->validated();
 
         try {
@@ -65,33 +64,39 @@ class AuthController extends Controller
                     : $user->password,
             ]);
 
+
             if ($user->role === 'kader') {
+
                 $user->kaderDetail()->updateOrCreate(
                     ['user_id' => $user->id],
-                    [
+                    array_filter([
                         'no_telepon' => $validated['no_telepon'] ?? null,
                         'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
-                    ]
+                    ])
                 );
             }
 
             if ($user->role === 'nakes') {
+
                 $user->nakesDetail()->updateOrCreate(
                     ['user_id' => $user->id],
-                    [
+                    array_filter([
+                        'nik' => $validated['nik'] ?? null,
                         'no_telepon' => $validated['no_telepon'] ?? null,
                         'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
-                    ]
+                    ])
                 );
             }
 
             if ($user->role === 'admin') {
+
                 $user->adminDetail()->updateOrCreate(
                     ['user_id' => $user->id],
-                    [
+                    array_filter([
+                        'nik' => $validated['nik'] ?? null,
                         'no_telepon' => $validated['no_telepon'] ?? null,
                         'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
-                    ]
+                    ])
                 );
             }
 

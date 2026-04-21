@@ -19,7 +19,7 @@
 
             <div id="userDropdown"
                 class="hidden absolute right-4 top-10 w-44 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
-                <a href="{{ route('kader.fitur.profil') }}"
+                <a id="profileLink"
                     class="block px-4 py-2 text-sm hover:bg-gray-100">
                     <i class="fa-solid fa-user mr-2"></i> Profil
                 </a>
@@ -58,6 +58,27 @@
         const user = window.App?.user;
         if (!user) return;
 
+        // === PROFILE LINK LOGIC ===
+        const profileLink = document.getElementById("profileLink");
+
+        if (profileLink && user.role) {
+            let profileUrl = "/";
+
+            switch (user.role.toLowerCase()) {
+                case "kader":
+                    profileUrl = "/kader/profil";
+                    break;
+                case "nakes":
+                    profileUrl = "/nakes/profil";
+                    break;
+                default:
+                    profileUrl = "/profil";
+                    break;
+            }
+
+            profileLink.href = profileUrl;
+        }
+
         const nameEl = document.getElementById("userName");
         const roleEl = document.getElementById("userRole");
 
@@ -77,7 +98,6 @@
 
                 const isHidden = dropdown.classList.toggle("hidden");
 
-                // toggle icon
                 if (isHidden) {
                     icon.classList.remove("fa-chevron-up");
                     icon.classList.add("fa-chevron-down");

@@ -28,7 +28,7 @@ Route::view('/monitoring-kader', 'admin.fitur.monitoring.kader')->name('admin.fi
 Route::view('/monitoring-nik-per-siklus', 'admin.fitur.monitoring.nik_per_siklus')->name('admin.fitur.monitoring.nik_per_siklus');
 Route::view('/monitoring-nik-per-kk', 'admin.fitur.monitoring.nik_per_kk')->name('admin.fitur.monitoring.nik_per_kk');
 
-Route::view('/hasil-skrining', 'admin.fitur.monitoring.hasil_skrining')->name('admin.fitur.monitoring.hasil_skrining');
+Route::view('/admin/hasil-skrining', 'admin.fitur.monitoring.hasil_skrining')->name('admin.fitur.monitoring.hasil_skrining');
 Route::get('/download/hasil-skrining', [MonitoringController::class, 'exportHasilskrining'])->name('hasil_skrining.download');
 Route::get('/hasil-skrining/edit/{unit_id}', [MonitoringController::class, 'edit'])->name('hasil-skrining.edit');
 
@@ -44,8 +44,14 @@ Route::view('/skrining-kk', 'kader.fitur.skrining.skrining_kk')->name('kader.fit
 Route::view('/skrining-nik', 'kader.fitur.skrining.skrining_nik')->name('kader.fitur.skrining_nik');
 Route::view('/riwayat-skrining', 'kader.fitur.skrining.riwayat_skrining')->name('kader.fitur.skrining.riwayat_skrining');
 
-Route::view('/profil', 'kader.fitur.profil')->name('kader.fitur.profil');
+Route::view('/kader/profil', 'kader.fitur.profil')->name('kader.fitur.profil');
 
 
 //nakes
 Route::view('/dashboard-nakes', 'nakes.dashboard_nakes')->name('nakes.dashboard_nakes');
+Route::view('/nakes/hasil-skrining', 'nakes.fitur.hasil_skrining')->name('nakes.fitur.hasil_skrining');
+Route::view('/nakes/monitoring-kader', 'nakes.fitur.monitoring.kader')->name('nakes.fitur.monitoring.kader');
+Route::view('/nakes/monitoring-nik-per-siklus', 'nakes.fitur.monitoring.nik_per_siklus')->name('nakes.fitur.monitoring.nik_per_siklus');
+Route::view('/nakes/monitoring-nik-per-kk', 'nakes.fitur.monitoring.nik_per_kk')->name('nakes.fitur.monitoring.nik_per_kk');
+
+Route::view('/nakes/profil', 'nakes.fitur.profil')->name('nakes.fitur.profil');
