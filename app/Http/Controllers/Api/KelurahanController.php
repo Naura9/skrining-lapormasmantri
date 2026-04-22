@@ -82,12 +82,18 @@ class KelurahanController extends Controller
 
     public function destroy($id)
     {
-        $kelurahan = $this->kelurahanHelper->delete($id);
+        $result = $this->kelurahanHelper->delete($id);
 
-        if (!$kelurahan) {
-            return response()->failed(['Mohon maaf data soal tidak ditemukan']);
+        if (!$result['status']) {
+            return response()->json([
+                'status' => false,
+                'message' => $result['message']
+            ], 400);
         }
 
-        return response()->success($kelurahan, 'Kelurahan berhasil dihapus');
+        return response()->json([
+            'status' => true,
+            'message' => $result['message']
+        ]);
     }
 }

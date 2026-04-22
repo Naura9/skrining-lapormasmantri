@@ -21,13 +21,14 @@
             <span class="text-sm font-semibold">Skrining NIK</span>
         </button>
     </div>
-    
+
     <x-dropdown
         id="nikCategoryDropdown"
         label="Pilih Siklus"
         :options="[]"
         width="w-full h-10"
-        data-dropdown="filter" />
+        data-dropdown="filter" 
+        class="hidden"/>
 
     <x-dropdown
         id="pertanyaanFilterDropdown"
@@ -90,19 +91,17 @@
     </div>
 </div>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
         let pertanyaanData = [];
         setDropdownDisabled('kelurahanFilterDropdown', true);
-        setDropdownDisabled('posyanduFilterDropdown', true);
 
         async function loadPertanyaan() {
-            const res = await fetch("{{ url('api/pertanyaan') }}", {
+            const result = await fetchWithAuth("{{ url('api/pertanyaan') }}", {
+                method: "GET",
                 headers: {
-                    "Accept": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    "Accept": "application/json"
                 }
             });
-            const result = await res.json();
             pertanyaanData = result?.data?.list || [];
 
             setActiveButton('btnSkriningKK');
@@ -120,7 +119,6 @@
                 const label = btn.querySelector("span");
 
                 if (id === activeId) {
-                    // ACTIVE
                     btn.classList.remove(
                         'bg-white',
                         'text-[#61359C]',
@@ -138,7 +136,6 @@
                     icon.classList.add('text-white');
 
                 } else {
-                    // NON-ACTIVE
                     btn.classList.remove(
                         'bg-[#61359C]',
                         'text-white',
@@ -157,10 +154,8 @@
                 }
             });
 
-            // Disable dropdown jika mode NIK
             if (activeId === 'btnSkriningNIK') {
                 setDropdownDisabled('kelurahanFilterDropdown', true);
-                setDropdownDisabled('posyanduFilterDropdown', true);
 
                 setDropdownLabel('kelurahanFilterDropdown', null, 'Pilih Kelurahan');
                 setDropdownLabel('posyanduFilterDropdown', null, 'Pilih Posyandu');
@@ -213,8 +208,8 @@
                         setDropdownDisabled('kelurahanFilterDropdown', false);
                         setDropdownLabel('kelurahanFilterDropdown', null, 'Pilih Kelurahan');
                         document.getElementById('kelurahan_id').value = '';
-                        setDropdownDisabled('posyanduFilterDropdown', true);
                         setDropdownLabel('posyanduFilterDropdown', null, 'Pilih Posyandu');
+                        document.getElementById('posyandu_id').value = '';
                     };
 
                     listContainer.appendChild(btn);
@@ -248,13 +243,12 @@
             if (kelurahanId) url.searchParams.append("kelurahan_id", kelurahanId);
             if (posyanduId) url.searchParams.append("posyandu_id", posyanduId);
 
-            const res = await fetch(url, {
+            const result = await fetchWithAuth(url.toString(), {
+                method: "GET",
                 headers: {
                     "Accept": "application/json"
-                },
+                }
             });
-
-            const result = await res.json();
 
             if (!result.status) {
                 showErrorToast("Gagal mengambil data skrining");
@@ -316,12 +310,14 @@
             if (jawabanArray.length === 0) {
                 noJawabanEl.classList.remove("hidden");
 
-                document.getElementById("jawabanPieChart").getContext('2d').clearRect(0, 0, 250, 250);
+                if (window.jawabanChart) {
+                    window.jawabanChart.destroy();
+                    window.jawabanChart = null;
+                }
+
                 document.getElementById("skriningTableContainer").innerHTML = '';
 
                 return;
-            } else {
-                noJawabanEl.classList.add("hidden");
             }
 
             renderJawabanPieChart(jawabanArray);
@@ -643,10 +639,14 @@
         let kelurahanData = [];
 
         async function loadKelurahan() {
-            const res = await fetch(`{{ url('api/kelurahan') }}`);
-            const json = await res.json();
+            const res = await fetchWithAuth(`{{ url('api/kelurahan') }}`);
 
-            kelurahanData = json.data.list || [];
+            if (!res || res.status_code !== 200) {
+                console.log("Gagal load kelurahan:", res);
+                return;
+            }
+
+            kelurahanData = res.data?.list || [];
             renderKelurahanDropdown();
         }
 
@@ -797,6 +797,7 @@
             renderNikCategoryDropdown();
         });
 
+        await initApp();
         loadPertanyaan();
         loadKelurahan();
         setDropdownDisabled('posyanduFilterDropdown', true);

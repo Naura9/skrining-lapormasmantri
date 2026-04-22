@@ -44,7 +44,6 @@
                 disabled
                 class="h-9 px-4 bg-gray-100 text-gray-700 text-sm border border-gray-300 rounded-lg w-full flex items-center justify-center">
         </div>
-        <input type="hidden" id="kelurahan_id">
 
         <x-dropdown
             id="posyanduFilterDropdown"

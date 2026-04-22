@@ -11,14 +11,14 @@
 
     <nav class="flex-1 overflow-y-auto px-2 py-6 space-y-2">
         <div id="menu-admin" class="space-y-2" style="display:none;">
-            <a href="{{ route('dashboard') }}"
+            <a href="{{ route('admin.dashboard_admin') }}"
                 class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
-            {{ request()->routeIs('dashboard') 
+            {{ request()->routeIs('admin.dashboard_admin') 
                 ? 'bg-[#61359C]/65 text-white font-semibold' 
                 : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
 
                 <i class="fa-solid fa-house text-lg w-5 text-center
-                {{ request()->routeIs('dashboard') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                {{ request()->routeIs('admin.dashboard_admin') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                 </i>
                 <span>Dashboard</span>
             </a>

@@ -25,7 +25,7 @@
             </button>
         </div>
     </div>
-    
+
     <div class="overflow-x-auto">
         <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700 whitespace-nowrap">
             <thead class="bg-[#61359C] text-white text-center">
@@ -105,24 +105,22 @@
 
         async function fetchKelurahan() {
             try {
-                const response = await fetch(`{{ url('api/kelurahan') }}`, {
+                const data = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
                     headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Accept": "application/json"
                     }
                 });
 
-                const data = await response.json();
-                if (!data) return;
+                if (!data || data.status_code !== 200) return;
 
-                kelurahanData = data.data.list || [];
+                kelurahanData = data.data?.list || [];
 
                 let items = [...kelurahanData];
 
                 if (currentFilter === 'Terbanyak → Terkecil') {
-                    items.sort((a, b) => b.jumlah_posyandu - a.jumlah_posyandu);
-                } else if (currentFilter === 'Terkecil → Terbanyak') {
                     items.sort((a, b) => a.jumlah_posyandu - b.jumlah_posyandu);
+                } else if (currentFilter === 'Terkecil → Terbanyak') {
+                    items.sort((a, b) => b.jumlah_posyandu - a.jumlah_posyandu);
                 }
 
                 renderTable(items);
@@ -130,14 +128,13 @@
             } catch (error) {
                 console.error("Gagal memuat data wilayah:", error);
                 tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center text-red-500 py-4">
-                        Gagal memuat data
-                    </td>
-                </tr>`;
+                    <tr>
+                        <td colspan="5" class="text-center text-red-500 py-4">
+                            Gagal memuat data
+                        </td>
+                    </tr>`;
             }
         }
-
 
         function renderTable(list) {
             tbody.innerHTML = "";
@@ -241,18 +238,15 @@
 
                     showDeleteConfirmToast("Apakah Anda yakin ingin menghapus data ini?", async () => {
                         try {
-                            const data = await fetch(`{{ url('api/kelurahan') }}/${id}`, {
-                                method: "DELETE",
-                                headers: {
-                                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                }
+                            const result = await fetchWithAuth(`{{ url('api/kelurahan') }}/${id}`, {
+                                method: "DELETE"
                             });
-                            if (!data) return;
+
+                            if (!result) return;
 
                             showSuccessToast("Data berhasil dihapus!");
                             await fetchKelurahan();
                         } catch (error) {
-                            console.error("Gagal menghapus data:", error);
                             showErrorToast("Terjadi kesalahan pada server!");
                         }
                     });
@@ -306,33 +300,31 @@
                     formData.append("_method", "PUT");
                 }
 
-                const res = await fetch(url, {
+                const result = await fetchWithAuth(url, {
                     method: method,
                     body: formData
                 });
-                const data = await res.json();
 
-                if (!data.errors) {
-                    showSuccessToast("Data berhasil disimpan!");
-                    kelurahanModalRef.classList.add("hidden");
-                    kelurahanModalRef.classList.remove("flex");
-                    fetchKelurahan();
-                } else {
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(key => {
-                            const el = document.getElementById("error-" + key);
-                            if (el) {
-                                el.textContent = data.errors[key][0];
-                                el.classList.remove("hidden");
-                            }
-                        });
-                    } else {
-                        showErrorToast("Gagal menyimpan data!");
-                    }
+                if (result?.status_code === 422) {
+                    Object.keys(result.errors).forEach(key => {
+                        const el = document.getElementById("error-" + key);
+                        if (el) {
+                            el.textContent = result.errors[key][0];
+                            el.classList.remove("hidden");
+                        }
+                    });
+                    return;
                 }
+
+                if (result?.status_code !== 200) return;
+
+                showSuccessToast("Data berhasil disimpan!");
+                kelurahanModalRef.classList.add("hidden");
+                kelurahanModalRef.classList.remove("flex");
+
+                fetchKelurahan();
             } catch (err) {
-                console.error("Error:", err);
-                alert("Terjadi kesalahan pada server!");
+                showErrorToast("Terjadi kesalahan pada server");
             }
         });
 
@@ -344,10 +336,9 @@
             if (mode === "edit" && id) {
                 kelurahanModalTitle.textContent = "Edit Data Wilayah";
                 try {
-                    const data = await fetch(`{{ url('api/kelurahan') }}/${id}`);
-                    const json = await data.json();
+                    const result = await fetchWithAuth(`{{ url('api/kelurahan') }}/${id}`);
+                    const item = result.data;
 
-                    const item = json.data;
                     setFormData(item);
 
                     formEdit.setAttribute('data-mode', 'edit');

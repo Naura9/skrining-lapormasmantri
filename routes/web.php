@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'login')->name('login');
-Route::view('/dashboard', 'dashboard')->name('dashboard');
 
 //admin
 Route::view('/dashboard-admin', 'admin.dashboard_admin')->name('admin.dashboard_admin');

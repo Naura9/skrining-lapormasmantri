@@ -44,7 +44,7 @@
         <label for="no_telepon" class="block text-sm font-semibold mb-1">
             No Telepon
         </label>
-        <input type="text" id="no_telepon" name="no_telepon"
+        <input type="number" id="no_telepon" name="no_telepon"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
                    focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
             placeholder="Masukkan No Telepon">
@@ -141,10 +141,14 @@
     let kelurahanData = [];
 
     async function loadKelurahan() {
-        const res = await fetch(`{{ url('api/kelurahan') }}`);
-        const json = await res.json();
+        const res = await fetchWithAuth(`{{ url('api/kelurahan') }}`);
 
-        kelurahanData = json.data.list || [];
+        if (!res || res.status_code !== 200) {
+            console.log("Gagal load kelurahan:", res);
+            return;
+        }
+
+        kelurahanData = res.data?.list || [];
         renderKelurahanDropdown();
     }
 

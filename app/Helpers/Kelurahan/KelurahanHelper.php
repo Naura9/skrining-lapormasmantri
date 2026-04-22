@@ -5,6 +5,8 @@ namespace App\Helpers\Kelurahan;
 use App\Helpers\Helper;
 use App\Models\KelurahanModel;
 use App\Models\PosyanduModel;
+use App\Models\UnitModel;
+use App\Models\User\UserModel;
 use Throwable;
 
 class KelurahanHelper extends Helper
@@ -108,28 +110,42 @@ class KelurahanHelper extends Helper
     public function delete(string $kelurahanId)
     {
         try {
+            $isUsed =
+                UnitModel::where('kelurahan_id', $kelurahanId)->exists() ||
+                UserModel::whereHas('nakesDetail', function ($q) use ($kelurahanId) {
+                    $q->where('kelurahan_id', $kelurahanId);
+                })->exists();
+
+            if ($isUsed) {
+                return [
+                    'status' => false,
+                    'message' => 'Kelurahan tidak bisa dihapus karena masih digunakan pada data lain'
+                ];
+            }
+
             $this->beginTransaction();
 
-            $this->kelurahanModel->drop($kelurahanId);
-
             $this->posyanduModel->dropByKelurahanId($kelurahanId);
+
+            $this->kelurahanModel->drop($kelurahanId);
 
             $this->commitTransaction();
 
             return [
-                'status' => true,
-                'data' => $kelurahanId
-            ];
+    'status' => true,
+    'data' => $kelurahanId,
+    'message' => 'Kelurahan berhasil dihapus'
+];
         } catch (Throwable $th) {
             $this->rollbackTransaction();
 
             return [
                 'status' => false,
-                'error' => $th->getMessage()
+                'message' => $th->getMessage()
             ];
         }
     }
-
+    
     private function insertUpdateDetail(array $posyandu, string $kelurahanId)
     {
         if (empty($posyandu)) {

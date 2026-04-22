@@ -45,6 +45,7 @@ Route::middleware(['auth.api'])->group(function () {
     Route::post('/users', [UserController::class, 'store']);
     Route::put('/users', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    Route::post('/users/{id}/reset-password', [UserController::class, 'resetPassword']);
     
     Route::get('/kategori', [KategoriController::class, 'index']);
     Route::get('/kategori/{id}', [KategoriController::class, 'show']);

@@ -3,6 +3,7 @@
 namespace App\Helpers\User;
 
 use App\Helpers\Helper;
+use App\Models\SkriningModel;
 use App\Models\User\UserModel;
 use Illuminate\Support\Facades\Hash;
 use Throwable;
@@ -172,11 +173,25 @@ class UserHelper extends Helper
         }
     }
 
-    public function delete(string $id): bool
+    public function delete(string $id): array
     {
         try {
             $user = $this->userModel->find($id);
-            if (!$user) return false;
+            if (!$user) {
+                return [
+                    'status' => false,
+                    'message' => 'User tidak ditemukan'
+                ];
+            }
+
+            $isUsed = SkriningModel::where('user_id', $id)->exists();
+
+            if ($isUsed) {
+                return [
+                    'status' => false,
+                    'message' => 'User tidak bisa dihapus karena sudah digunakan pada data skrining'
+                ];
+            }
 
             switch ($user->role) {
                 case 'admin':
@@ -194,9 +209,42 @@ class UserHelper extends Helper
 
             $user->delete();
 
-            return true;
+            return [
+                'status' => true,
+                'message' => 'User berhasil dihapus'
+            ];
         } catch (\Throwable $th) {
-            return false;
+            return [
+                'status' => false,
+                'message' => $th->getMessage()
+            ];
+        }
+    }
+
+    public function resetPassword(string $id, string $newPassword): array
+    {
+        try {
+            $user = $this->userModel->find($id);
+
+            if (!$user) {
+                return [
+                    'status' => false,
+                    'message' => 'User tidak ditemukan'
+                ];
+            }
+
+            $user->password = Hash::make($newPassword);
+            $user->save();
+
+            return [
+                'status' => true,
+                'message' => 'Password berhasil direset'
+            ];
+        } catch (\Throwable $th) {
+            return [
+                'status' => false,
+                'message' => $th->getMessage()
+            ];
         }
     }
 }

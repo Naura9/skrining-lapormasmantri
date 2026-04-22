@@ -66,14 +66,8 @@
 
         async function fetchAdmin() {
             try {
-                const response = await fetch(`{{ url('api/users') }}`, {
-                    headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    }
-                });
+                const result = await fetchWithAuth(`{{ url('api/users') }}`);
 
-                const result = await response.json();
                 if (!result || !result.data) return;
 
                 const users = result.data.list || [];
@@ -82,7 +76,8 @@
 
                 renderTable(adminUsers);
             } catch (error) {
-                showErrorToast.error("Gagal memuat data admin:", error);
+                console.error(error);
+                showErrorToast("Gagal memuat data admin");
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500 py-4">Gagal memuat data</td></tr>`;
             }
         }
@@ -134,13 +129,11 @@
 
                     showDeleteConfirmToast("Apakah Anda yakin ingin menghapus data ini?", async () => {
                         try {
-                            const data = await fetch(`{{ url('api/users') }}/${id}`, {
-                                method: "DELETE",
-                                headers: {
-                                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                }
+                            const result = await fetchWithAuth(`{{ url('api/users') }}/${id}`, {
+                                method: "DELETE"
                             });
-                            if (!data) return;
+
+                            if (!result) return;
 
                             showSuccessToast("Data berhasil dihapus!");
                             await fetchAdmin();
@@ -180,33 +173,32 @@
                     formData.append("_method", "PUT");
                 }
 
-                const res = await fetch(url, {
+                const result = await fetchWithAuth(url, {
                     method: method,
                     body: formData
                 });
-                const data = await res.json();
 
-                if (!data.errors) {
-                    showSuccessToast("Data berhasil disimpan!");
-                    adminModalRef.classList.add("hidden");
-                    adminModalRef.classList.remove("flex");
-                    fetchAdmin();
-                } else {
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(key => {
-                            const el = document.getElementById("error-" + key);
-                            if (el) {
-                                el.textContent = data.errors[key][0];
-                                el.classList.remove("hidden");
-                            }
-                        });
-                    } else {
-                        showErrorToast("Gagal menyimpan data!");
-                    }
+                if (result?.status_code === 422) {
+                    Object.keys(result.errors).forEach(key => {
+                        const el = document.getElementById("error-" + key);
+                        if (el) {
+                            el.textContent = result.errors[key][0];
+                            el.classList.remove("hidden");
+                        }
+                    });
+                    return;
                 }
+
+                if (result?.status_code !== 200) return;
+
+                showSuccessToast("Data berhasil disimpan!");
+                adminModalRef.classList.add("hidden");
+                adminModalRef.classList.remove("flex");
+
+                fetchAdmin();
+
             } catch (err) {
-                showErrorToast.error("Error:", err);
-                alert("Terjadi kesalahan pada server!");
+                showErrorToast("Terjadi kesalahan pada server");
             }
         });
 
@@ -217,10 +209,10 @@
             if (mode === "edit" && id) {
                 adminModalTitle.textContent = "Edit Data Admin";
                 try {
-                    const data = await fetch(`{{ url('api/users') }}/${id}`);
-                    const json = await data.json();
+                    const result = await fetchWithAuth(`{{ url('api/users') }}/${id}`);
 
-                    const item = json.data;
+                    const item = result.data;
+
                     setFormData(item);
 
                     formEdit.setAttribute('data-mode', 'edit');

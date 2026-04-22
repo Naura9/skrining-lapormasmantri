@@ -127,14 +127,20 @@
             localStorage.setItem("role", user.role);
             localStorage.setItem("user", JSON.stringify(user));
 
-            let redirectUrl = "{{ route('dashboard') }}";
+            let redirectUrl = "";
 
-            if (user.role === "kader") {
-                redirectUrl = "{{ route('kader.dashboard_kader') }}";
-            } else if (user.role === "admin") {
-                redirectUrl = "{{ route('admin.dashboard_admin') }}";
-            } else if (user.role === "nakes") {
-                redirectUrl = "{{ route('nakes.dashboard_nakes') }}";
+            switch (user.role) {
+                case "kader":
+                    redirectUrl = "{{ route('kader.dashboard_kader') }}";
+                    break;
+                case "admin":
+                    redirectUrl = "{{ route('admin.dashboard_admin') }}";
+                    break;
+                case "nakes":
+                    redirectUrl = "{{ route('nakes.dashboard_nakes') }}";
+                    break;
+                default:
+                    redirectUrl = "/";
             }
 
             setTimeout(() => {

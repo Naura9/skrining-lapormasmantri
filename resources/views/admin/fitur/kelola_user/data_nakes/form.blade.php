@@ -122,10 +122,14 @@
     let kelurahanData = [];
 
     async function loadKelurahan() {
-        const res = await fetch(`{{ url('api/kelurahan') }}`);
-        const json = await res.json();
+        const res = await fetchWithAuth(`{{ url('api/kelurahan') }}`);
 
-        kelurahanData = json.data.list || [];
+        if (!res || res.status_code !== 200) {
+            console.log("Gagal load kelurahan:", res);
+            return;
+        }
+
+        kelurahanData = res.data?.list || [];
         renderKelurahanDropdown();
     }
 

@@ -44,7 +44,7 @@
         <label for="nik" class="block text-sm font-semibold mb-1">
             NIK
         </label>
-        <input type="text" id="nik" name="nik"
+        <input type="number" id="nik" name="nik"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
                    focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
             placeholder="Masukkan NIK">

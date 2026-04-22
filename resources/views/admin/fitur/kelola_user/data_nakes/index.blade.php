@@ -146,6 +146,40 @@
     @include('admin.fitur.kelola_user.data_nakes.import')
 </x-modal>
 
+<x-modal id="resetPasswordModal" size="md">
+    <x-slot name="title">
+        <h3 class="text-lg font-bold">Reset Password</h3>
+    </x-slot>
+
+    <form id="formResetPassword" class="space-y-4 px-2">
+        <input type="hidden" id="reset_user_id">
+
+        <div class="text-left w-full relative">
+            <label class="block text-sm font-medium mb-1">Password Baru</label>
+            <input type="password" id="reset_password"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+                placeholder="Masukkan password baru">
+            <button type="button"
+                onclick="togglePassword()"
+                class="absolute right-3 top-[30px] text-gray-500 hover:text-gray-700">
+                <i id="eye-icon" class="fa-solid fa-eye-slash"></i>
+            </button>
+            <p id="error-reset_password" class="text-red-500 text-xs mt-1 hidden"></p>
+        </div>
+    </form>
+
+    <x-slot name="footer">
+        <button type="button" id="resetCancelBtn"
+            class="w-full px-6 py-2 rounded-lg bg-gray-400 text-white font-medium hover:opacity-90">
+            Batal
+        </button>
+        <button type="submit" form="formResetPassword"
+            class="w-full px-6 py-2 rounded-lg bg-[#61359C] text-white font-medium hover:opacity-90">
+            Simpan
+        </button>
+    </x-slot>
+</x-modal>
+
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const tbody = document.getElementById("nakesTableBody");
@@ -168,15 +202,12 @@
 
         let nakesList = [];
 
-        async function fetchNakes() {
+        window.fetchNakes = async function() {
+            const keyword = searchInput.value.trim();
             const params = new URLSearchParams();
-
             params.append("role", "nakes");
 
-            const keyword = searchInput.value.trim();
-            if (keyword) {
-                params.append("keyword", keyword);
-            }
+            if (keyword) params.append("name", keyword);
 
             let kelurahan = "";
             if (filterDropdown) {
@@ -192,26 +223,20 @@
                 params.append("kelurahan", kelurahan);
             }
 
-
             try {
-                const response = await fetch(
-                    `{{ url('api/users') }}?${params.toString()}`, {
-                        headers: {
-                            "Accept": "application/json",
-                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                        }
+                const result = await fetchWithAuth(`{{ url('api/users') }}?${params.toString()}`, {
+                    headers: {
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
                     }
-                );
-
-                const result = await response.json();
-                if (!result?.data) return;
+                });
 
                 let users = result.data.list || [];
+
                 const nakesUsers = users.filter(user => user.role === 'nakes');
 
                 nakesList = nakesUsers;
                 renderTable(nakesUsers);
-
             } catch (error) {
                 showErrorToast.error("Gagal memuat data tenaga kesehatan:", error);
             }
@@ -250,7 +275,7 @@
                                 Edit
                             </button>
                             <button
-                                onclick="openNakesModal('edit', '${item.id}')"
+                                onclick="openResetPasswordModal('${item.id}')"
                                 class="px-3 py-1 text-xs rounded bg-gray-500 text-white hover:bg-gray-600 transition">
                                 Reset Password
                             </button>
@@ -272,18 +297,15 @@
 
                     showDeleteConfirmToast("Apakah Anda yakin ingin menghapus data ini?", async () => {
                         try {
-                            const data = await fetch(`{{ url('api/users') }}/${id}`, {
-                                method: "DELETE",
-                                headers: {
-                                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                }
+                            const result = await fetchWithAuth(`{{ url('api/users') }}/${id}`, {
+                                method: "DELETE"
                             });
-                            if (!data) return;
+
+                            if (!result) return;
 
                             showSuccessToast("Data berhasil dihapus!");
                             await fetchNakes();
                         } catch (error) {
-                            showErrorToast.error("Gagal menghapus data:", error);
                             showErrorToast("Terjadi kesalahan pada server!");
                         }
                     });
@@ -318,33 +340,31 @@
                     formData.append("_method", "PUT");
                 }
 
-                const res = await fetch(url, {
+                const result = await fetchWithAuth(url, {
                     method: method,
                     body: formData
                 });
-                const data = await res.json();
 
-                if (!data.errors) {
-                    showSuccessToast("Data berhasil disimpan!");
-                    nakesModalRef.classList.add("hidden");
-                    nakesModalRef.classList.remove("flex");
-                    fetchNakes();
-                } else {
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(key => {
-                            const el = document.getElementById("error-" + key);
-                            if (el) {
-                                el.textContent = data.errors[key][0];
-                                el.classList.remove("hidden");
-                            }
-                        });
-                    } else {
-                        showErrorToast("Gagal menyimpan data!");
-                    }
+                if (result?.status_code === 422) {
+                    Object.keys(result.errors).forEach(key => {
+                        const el = document.getElementById("error-" + key);
+                        if (el) {
+                            el.textContent = result.errors[key][0];
+                            el.classList.remove("hidden");
+                        }
+                    });
+                    return;
                 }
+
+                if (result?.status_code !== 200) return;
+
+                showSuccessToast("Data berhasil disimpan!");
+                nakesModalRef.classList.add("hidden");
+                nakesModalRef.classList.remove("flex");
+
+                fetchNakes();
             } catch (err) {
-                showErrorToast.error("Error:", err);
-                alert("Terjadi kesalahan pada server!");
+                showErrorToast("Terjadi kesalahan pada server");
             }
         });
 
@@ -379,10 +399,9 @@
             if (mode === "edit" && id) {
                 nakesModalTitle.textContent = "Edit Tenaga Kesehatan";
                 try {
-                    const data = await fetch(`{{ url('api/users') }}/${id}`);
-                    const json = await data.json();
+                    const result = await fetchWithAuth(`{{ url('api/users') }}/${id}`);
+                    const item = result.data;
 
-                    const item = json.data;
                     setFormData(item);
 
                     formEdit.setAttribute('data-mode', 'edit');
@@ -399,6 +418,89 @@
         };
 
         window.openNakesModal = openNakesModal;
+
+        const resetModal = document.getElementById("resetPasswordModal");
+
+        document.getElementById("resetCancelBtn").addEventListener("click", () => {
+            resetModal.classList.add("hidden");
+            resetModal.classList.remove("flex");
+        });
+
+        window.openResetPasswordModal = function(id) {
+            document.getElementById("reset_user_id").value = id;
+            document.getElementById("reset_password").value = "";
+
+            resetModal.classList.remove("hidden");
+            resetModal.classList.add("flex");
+        };
+
+        window.togglePassword = function() {
+            const input = document.getElementById("reset_password");
+            const icon = document.getElementById("eye-icon");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            }
+        };
+
+        document.getElementById("formResetPassword")
+            .addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const id = document.getElementById("reset_user_id").value;
+                const password = document.getElementById("reset_password").value;
+                const errorEl = document.getElementById("error-reset_password");
+
+                errorEl.textContent = "";
+                errorEl.classList.add("hidden");
+
+                if (!password) {
+                    errorEl.textContent = "Password wajib diisi";
+                    errorEl.classList.remove("hidden");
+                    return;
+                }
+
+                if (password.length < 6) {
+                    errorEl.textContent = "Password minimal 6 karakter";
+                    errorEl.classList.remove("hidden");
+                    return;
+                }
+
+                try {
+                    const result = await fetchWithAuth(
+                        `{{ url('api/users') }}/${id}/reset-password`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                password
+                            })
+                        }
+                    );
+
+                    if (!result) return;
+
+                    if (!result.status) {
+                        showErrorToast(result.message || "Gagal reset password");
+                        return;
+                    }
+
+                    showSuccessToast("Password berhasil direset!");
+
+                    resetModal.classList.add("hidden");
+                    resetModal.classList.remove("flex");
+
+                } catch (err) {
+                    showErrorToast("Terjadi kesalahan pada server");
+                }
+            });
 
         document.querySelectorAll('button').forEach(btn => {
             if (btn.textContent.includes("Tambah")) {
@@ -439,10 +541,18 @@
 
         async function loadKelurahanFilter() {
             try {
-                const res = await fetch(`{{ url('api/kelurahan') }}`);
-                const json = await res.json();
+                const res = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                });
 
-                kelurahanFilterData = json.data?.list || [];
+                if (!res || res.status_code !== 200) {
+                    showErrorToast("Gagal memuat data kelurahan");
+                    return;
+                }
+
+                kelurahanFilterData = res.data?.list || [];
                 renderKelurahanFilterDropdown();
 
                 setDropdownLabel(
@@ -452,7 +562,8 @@
                 );
 
             } catch (err) {
-                showErrorToast.error("Gagal load kelurahan filter:", err);
+                console.error(err);
+                showErrorToast("Terjadi kesalahan saat load kelurahan");
             }
         }
 

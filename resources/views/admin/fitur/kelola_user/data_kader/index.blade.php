@@ -47,14 +47,14 @@
     </div>
 
     <div class="overflow-x-auto">
-        <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700 whitespace-nowrap">
+        <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700">
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>
-                    <th class="px-3 py-2 border border-[#00000033]">No</th>
-                    <th class="px-3 py-2 border border-[#00000033]">Nama</th>
-                    <th class="px-3 py-2 border border-[#00000033]">Kelurahan</th>
-                    <th class="px-3 py-2 border border-[#00000033]">Posyandu</th>
-                    <th class="px-3 py-2 border border-[#00000033]">Aksi</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[5%]">No</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[28%]">Nama</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[17%]">Kelurahan</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[17%]">Posyandu</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[33%]">Aksi</th>
                 </tr>
             </thead>
             <tbody id="kaderTableBody"></tbody>
@@ -113,7 +113,7 @@
                     <div class="flex justify-start">
                         <button
                             id="modal-status"
-                            class="flex items-center gap-2 text-white text-sm px-2 py-1 rounded-xl transition">
+                            class="flex items-center gap-2 text-white text-sm px-2 py-0.5 rounded-lg transition">
                             -
                         </button>
                     </div>
@@ -158,6 +158,40 @@
     @include('admin.fitur.kelola_user.data_kader.import')
 </x-modal>
 
+<x-modal id="resetPasswordModal" size="md">
+    <x-slot name="title">
+        <h3 class="text-lg font-bold">Reset Password</h3>
+    </x-slot>
+
+    <form id="formResetPassword" class="space-y-4 px-2">
+        <input type="hidden" id="reset_user_id">
+
+        <div class="text-left w-full relative">
+            <label class="block text-sm font-medium mb-1">Password Baru</label>
+            <input type="password" id="reset_password"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+                placeholder="Masukkan password baru">
+            <button type="button"
+                onclick="togglePassword()"
+                class="absolute right-3 top-[30px] text-gray-500 hover:text-gray-700">
+                <i id="eye-icon" class="fa-solid fa-eye-slash"></i>
+            </button>
+            <p id="error-reset_password" class="text-red-500 text-xs mt-1 hidden"></p>
+        </div>
+    </form>
+
+    <x-slot name="footer">
+        <button type="button" id="resetCancelBtn"
+            class="w-full px-6 py-2 rounded-lg bg-gray-400 text-white font-medium hover:opacity-90">
+            Batal
+        </button>
+        <button type="submit" form="formResetPassword"
+            class="w-full px-6 py-2 rounded-lg bg-[#61359C] text-white font-medium hover:opacity-90">
+            Simpan
+        </button>
+    </x-slot>
+</x-modal>
+
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const tbody = document.getElementById("kaderTableBody");
@@ -181,7 +215,7 @@
 
         let kaderList = [];
 
-        async function fetchKader() {
+        window.fetchKader = async function() {
             const keyword = searchInput.value.trim();
 
             let status = "";
@@ -192,22 +226,16 @@
 
             const params = new URLSearchParams();
             params.append("role", "kader");
-            if (keyword) {
-                params.append("keyword", keyword);
-            }
-
+            if (keyword) params.append("keyword", keyword);
             if (status) params.append("status", status.toLowerCase());
 
             try {
-                const response = await fetch(`{{ url('api/users') }}?${params.toString()}`, {
+                const result = await fetchWithAuth(`{{ url('api/users') }}?${params.toString()}`, {
                     headers: {
                         "Accept": "application/json",
                         "X-CSRF-TOKEN": "{{ csrf_token() }}"
                     }
                 });
-
-                const result = await response.json();
-                if (!result || !result.data) return;
 
                 let users = result.data.list || [];
 
@@ -225,10 +253,9 @@
                 kaderList = kaderUsers;
                 renderTable(kaderUsers);
             } catch (error) {
-                showErrorToast.error("Gagal memuat data kader:", error);
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500 py-4">Gagal memuat data</td></tr>`;
+                showErrorToast("Gagal memuat data kader");
             }
-        }
+        };
 
         function renderTable(list) {
             tbody.innerHTML = "";
@@ -263,7 +290,7 @@
                                 Edit
                             </button>
                             <button
-                                onclick="openKaderModal('edit', '${item.id}')"
+                                onclick="openResetPasswordModal('${item.id}')"
                                 class="px-3 py-1 text-xs rounded bg-gray-500 text-white hover:bg-gray-600 transition">
                                 Reset Password
                             </button>
@@ -285,18 +312,15 @@
 
                     showDeleteConfirmToast("Apakah Anda yakin ingin menghapus data ini?", async () => {
                         try {
-                            const data = await fetch(`{{ url('api/users') }}/${id}`, {
-                                method: "DELETE",
-                                headers: {
-                                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                }
+                            const result = await fetchWithAuth(`{{ url('api/users') }}/${id}`, {
+                                method: "DELETE"
                             });
-                            if (!data) return;
+
+                            if (!result) return;
 
                             showSuccessToast("Data berhasil dihapus!");
                             await fetchKader();
                         } catch (error) {
-                            showErrorToast.error("Gagal menghapus data:", error);
                             showErrorToast("Terjadi kesalahan pada server!");
                         }
                     });
@@ -331,33 +355,32 @@
                     formData.append("_method", "PUT");
                 }
 
-                const res = await fetch(url, {
+                const result = await fetchWithAuth(url, {
                     method: method,
                     body: formData
                 });
-                const data = await res.json();
 
-                if (!data.errors) {
-                    showSuccessToast("Data berhasil disimpan!");
-                    kaderModalRef.classList.add("hidden");
-                    kaderModalRef.classList.remove("flex");
-                    fetchKader();
-                } else {
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(key => {
-                            const el = document.getElementById("error-" + key);
-                            if (el) {
-                                el.textContent = data.errors[key][0];
-                                el.classList.remove("hidden");
-                            }
-                        });
-                    } else {
-                        showErrorToast("Gagal menyimpan data!");
-                    }
+                if (result?.status_code === 422) {
+                    Object.keys(result.errors).forEach(key => {
+                        const el = document.getElementById("error-" + key);
+                        if (el) {
+                            el.textContent = result.errors[key][0];
+                            el.classList.remove("hidden");
+                        }
+                    });
+                    return;
                 }
+
+                if (result?.status_code !== 200) return;
+
+                showSuccessToast("Data berhasil disimpan!");
+                kaderModalRef.classList.add("hidden");
+                kaderModalRef.classList.remove("flex");
+
+                fetchKader();
+
             } catch (err) {
-                showErrorToast.error("Error:", err);
-                alert("Terjadi kesalahan pada server!");
+                showErrorToast("Terjadi kesalahan pada server");
             }
         });
 
@@ -405,10 +428,9 @@
             if (mode === "edit" && id) {
                 kaderModalTitle.textContent = "Edit Kader";
                 try {
-                    const data = await fetch(`{{ url('api/users') }}/${id}`);
-                    const json = await data.json();
+                    const result = await fetchWithAuth(`{{ url('api/users') }}/${id}`);
+                    const item = result.data;
 
-                    const item = json.data;
                     setFormData(item);
 
                     formEdit.setAttribute('data-mode', 'edit');
@@ -425,6 +447,89 @@
         };
 
         window.openKaderModal = openKaderModal;
+
+        const resetModal = document.getElementById("resetPasswordModal");
+
+        document.getElementById("resetCancelBtn").addEventListener("click", () => {
+            resetModal.classList.add("hidden");
+            resetModal.classList.remove("flex");
+        });
+
+        window.openResetPasswordModal = function(id) {
+            document.getElementById("reset_user_id").value = id;
+            document.getElementById("reset_password").value = "";
+
+            resetModal.classList.remove("hidden");
+            resetModal.classList.add("flex");
+        };
+
+        window.togglePassword = function() {
+            const input = document.getElementById("reset_password");
+            const icon = document.getElementById("eye-icon");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            }
+        };
+
+        document.getElementById("formResetPassword")
+            .addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const id = document.getElementById("reset_user_id").value;
+                const password = document.getElementById("reset_password").value;
+                const errorEl = document.getElementById("error-reset_password");
+
+                errorEl.textContent = "";
+                errorEl.classList.add("hidden");
+
+                if (!password) {
+                    errorEl.textContent = "Password wajib diisi";
+                    errorEl.classList.remove("hidden");
+                    return;
+                }
+
+                if (password.length < 6) {
+                    errorEl.textContent = "Password minimal 6 karakter";
+                    errorEl.classList.remove("hidden");
+                    return;
+                }
+
+                try {
+                    const result = await fetchWithAuth(
+                        `{{ url('api/users') }}/${id}/reset-password`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                password
+                            })
+                        }
+                    );
+
+                    if (!result) return;
+
+                    if (!result.status) {
+                        showErrorToast(result.message || "Gagal reset password");
+                        return;
+                    }
+
+                    showSuccessToast("Password berhasil direset!");
+
+                    resetModal.classList.add("hidden");
+                    resetModal.classList.remove("flex");
+
+                } catch (err) {
+                    showErrorToast("Terjadi kesalahan pada server");
+                }
+            });
 
         document.querySelectorAll('button').forEach(btn => {
             if (btn.textContent.includes("Tambah")) {
