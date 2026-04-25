@@ -115,6 +115,11 @@
                         <p id="modal-nama"></p>
                     </div>
 
+                    <div class="grid grid-cols-[140px_10px_1fr] items-start">
+                        <p class="font-medium">Jenis Kelamin</p>
+                        <p>:</p>
+                        <p id="modal-jenis-kelamin"></p>
+                    </div>
                 </div>
 
                 <div class="space-y-1">
@@ -128,12 +133,6 @@
                         <p class="font-medium">Tanggal Lahir</p>
                         <p>:</p>
                         <p id="modal-tanggal-lahir"></p>
-                    </div>
-
-                    <div class="grid grid-cols-[140px_10px_1fr] items-start">
-                        <p class="font-medium">Jenis Kelamin</p>
-                        <p>:</p>
-                        <p id="modal-jenis-kelamin"></p>
                     </div>
 
                     <div class="grid grid-cols-[140px_10px_1fr] items-start">
@@ -228,7 +227,7 @@
 
         let list = [];
 
-        async function fetchDataWarga() {
+        window.fetchDataWarga = async function() {
             const keyword = document.getElementById("searchInput").value.trim();
             const kelurahanId = document.getElementById("kelurahan_id").value;
             const posyanduId = document.getElementById("posyandu_id").value;
@@ -240,16 +239,19 @@
             if (posyanduId) params.append("posyandu_id", posyanduId);
 
             try {
-                const response = await fetch(`{{ url('api/identitas_anggota') }}?${params.toString()}`, {
-                    headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    }
+                const result = await fetchWithAuth(`{{ url('api/identitas_anggota') }}?${params.toString()}`);
+
+                if (!result || !result.data) {
+                    return renderTable([]);
+                }
+
+                let list = result.data.list || [];
+
+                list = list.sort((a, b) => {
+                    return new Date(b.created_at) - new Date(a.created_at);
                 });
 
-                const result = await response.json();
-
-                renderTable(result.data?.list || []);
+                renderTable(list);
             } catch (err) {
                 showErrorToast.error("Gagal memuat data:", err);
                 renderTable([]);
@@ -298,7 +300,6 @@
                                 data-id="${item.id}">
                                 Hapus
                             </button>
-
                         </div>
                     </td>
                 `;
@@ -311,15 +312,18 @@
                     const id = btn.dataset.id;
 
                     showDeleteConfirmToast("Apakah Anda yakin ingin menghapus data ini?", async () => {
-                        await fetch(`{{ url('api/identitas_anggota') }}/${id}`, {
-                            method: "DELETE",
-                            headers: {
-                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                            }
-                        });
+                        try {
+                            const result = await fetchWithAuth(`{{ url('api/identitas_anggota') }}/${id}`, {
+                                method: "DELETE"
+                            });
 
-                        showSuccessToast("Data berhasil dihapus!");
-                        fetchDataWarga();
+                            if (!result) return;
+
+                            showSuccessToast("Data berhasil dihapus!");
+                            await fetchDataWarga();
+                        } catch (error) {
+                            showErrorToast("Terjadi kesalahan pada server!");
+                        }
                     });
                 });
             });
@@ -343,37 +347,41 @@
 
             try {
                 let url = "{{ url('api/identitas_anggota') }}";
-                let method = "POST";
 
                 if (mode === "edit" && id) {
                     formData.append("_method", "PUT");
                 }
 
-                const res = await fetch(url, {
-                    method: method,
+                const result = await fetchWithAuth(url, {
+                    method: "POST",
                     body: formData
                 });
-                const data = await res.json();
 
-                if (!data.errors) {
-                    showSuccessToast("Data berhasil disimpan!");
-                    keluargaModalRef.classList.add("hidden");
-                    keluargaModalRef.classList.remove("flex");
-                    fetchDataWarga();
-                } else {
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(key => {
-                            const fieldName = key.split('.').pop();
-                            const el = document.querySelector(`p[data-key="${fieldName}"]`);
-                            if (el) {
-                                el.textContent = data.errors[key][0];
-                                el.classList.remove("hidden");
-                            }
-                        });
-                    } else {
-                        showErrorToast("Gagal menyimpan data!");
-                    }
+                if (!result) return;
+
+                if (result.status_code === 422 && result.errors) {
+                    Object.keys(result.errors).forEach(key => {
+                        const fieldName = key.split('.').pop();
+                        const el = document.querySelector(`p[data-key="${fieldName}"]`);
+
+                        if (el) {
+                            el.textContent = result.errors[key][0];
+                            el.classList.remove("hidden");
+                        }
+                    });
+                    return;
                 }
+
+                if (result.status_code && result.status_code !== 200) {
+                    showErrorToast(result.message || "Gagal menyimpan data");
+                    return;
+                }
+
+                showSuccessToast(result.message || "Data berhasil disimpan!");
+                keluargaModalRef.classList.add("hidden");
+                keluargaModalRef.classList.remove("flex");
+                fetchDataWarga();
+
             } catch (err) {
                 console.error("Error:", err);
                 showErrorToast("Terjadi kesalahan pada server!");
@@ -418,10 +426,8 @@
             if (mode === "edit" && id) {
                 keluargaModalTitle.textContent = "Edit Anggota Keluarga";
                 try {
-                    const data = await fetch(`{{ url('api/identitas_anggota') }}/${id}`);
-                    const json = await data.json();
-
-                    const item = json.data;
+                    const result = await fetchWithAuth(`{{ url('api/identitas_anggota') }}/${id}`);
+                    const item = result.data;
                     setFormData(item);
 
                     formEdit.setAttribute('data-mode', 'edit');
@@ -492,8 +498,12 @@
         let kelurahanData = [];
 
         async function loadKelurahan() {
-            const res = await fetch(`{{ url('api/kelurahan') }}`);
-            const json = await res.json();
+            const json = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
 
             kelurahanData = json.data.list || [];
             renderKelurahanDropdown();

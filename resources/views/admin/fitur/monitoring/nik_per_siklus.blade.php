@@ -68,19 +68,20 @@
 
         async function fetchNikSiklus() {
             try {
-                const response = await fetch(`{{ url('api/monitoring/nik-per-siklus') }}`, {
+                const res = await fetchWithAuth("{{ url('api/monitoring/nik-per-siklus') }}", {
+                    method: "GET",
                     headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Accept": "application/json"
                     }
                 });
 
-                const result = await response.json();
+                if (!res) return;
+
+                const result = await res.json?.() ?? res;
+
                 if (!result || !result.data) return;
 
-                const kader = result.data || [];
-
-                renderTable(kader);
+                renderTable(result.data || []);
             } catch (error) {
                 console.error("Gagal memuat data kader skrining:", error);
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500 py-4">Gagal memuat data</td></tr>`;
@@ -91,7 +92,12 @@
             tbody.innerHTML = "";
 
             if (!list.length) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center text-gray-500 py-4">Tidak ada data NIK pada siklus ini.</td></tr>`;
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center text-gray-500 py-4">
+                            Tidak ada data NIK pada kelurahan/siklus ini.
+                        </td>
+                    </tr>`;
                 return;
             }
 
@@ -110,7 +116,6 @@
             });
         }
 
-
         function setDropdownLabel(id, text, fallback) {
             const el = document.getElementById(id);
             if (!el) return;
@@ -123,10 +128,17 @@
 
         async function loadSiklus() {
             try {
-                const res = await fetch(`{{ url('api/kategori') }}`);
-                const json = await res.json();
+                const res = await fetchWithAuth("{{ url('api/kategori') }}", {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                });
+
+                const json = await res.json?.() ?? res;
 
                 const allData = json.data.list || [];
+
                 siklusData = allData
                     .filter(item => item.target_skrining?.toLowerCase() === 'nik')
                     .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -174,9 +186,15 @@
         }
 
         let kelurahanData = [];
+
         async function loadKelurahan() {
-            const res = await fetch(`{{ url('api/kelurahan') }}`);
-            const json = await res.json();
+            const json = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+
             kelurahanData = json.data.list || [];
             renderKelurahanDropdown();
         }
@@ -255,13 +273,15 @@
             });
 
             try {
-                const res = await fetch(url.toString(), {
+                const res = await fetchWithAuth(url.toString(), {
+                    method: "GET",
                     headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Accept": "application/json"
                     }
                 });
-                const result = await res.json();
+
+                const result = await res.json?.() ?? res;
+
                 renderTable(result.data || []);
             } catch (err) {
                 console.error('Gagal memuat data:', err);

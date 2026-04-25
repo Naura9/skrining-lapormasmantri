@@ -111,13 +111,13 @@ class IdentitasAnggotaController extends Controller
 
     public function destroy($id)
     {
-        $deleted = $this->helper->delete($id);
+        $result = $this->helper->delete($id);
 
-        if (!$deleted) {
-            return response()->failed(['Gagal menghapus data']);
+        if (!$result['status']) {
+            return response()->json($result, 400);
         }
 
-        return response()->success(true, 'Anggota berhasil dihapus');
+        return response()->json($result);
     }
 
     public function validateOnly(IdentitasAnggotaRequest $request)

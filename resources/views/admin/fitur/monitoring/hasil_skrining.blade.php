@@ -95,6 +95,8 @@
 
         const hasilModalRef = document.getElementById("hasilModalRef");
         const hasilModalTitle = document.getElementById("hasilModalTitle");
+        
+        const formEdit = document.getElementById("formEdit");
 
         async function fetchHasil() {
             try {
@@ -145,33 +147,33 @@
                     const tr = document.createElement("tr");
 
                     tr.innerHTML = `
-                    <td class="border border-[#00000033] px-3 py-2 text-center">${formatTanggal(tanggal)}</td>
-                    <td class="border border-[#00000033] px-3 py-2">${unit.kelurahan ?? "-"}</td>
-                    <td class="border border-[#00000033] px-3 py-2">${unit.posyandu ?? "-"}</td>
-                    <td class="border border-[#00000033] px-3 py-2">${item.nama_kader}</td>
-                    <td class="border border-[#00000033] px-3 py-2 max-w-xs break-words">${unit.alamat_unit ?? "-"}</td>
-                    <td class="border border-[#00000033] px-3 py-2 text-center">
-                        <div class="flex justify-center gap-1">
-                            <button
-                                class="px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition open-detail"
-                                data-index="${i}" data-unit="${index}">
-                                Detail
-                            </button>
-                            
-                            <a href="/hasil-skrining/${item.id}/edit"
-                                class="px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition">
-                                Edit
-                            </a>
+                        <td class="border border-[#00000033] px-3 py-2 text-center">${formatTanggal(tanggal)}</td>
+                        <td class="border border-[#00000033] px-3 py-2">${unit.kelurahan ?? "-"}</td>
+                        <td class="border border-[#00000033] px-3 py-2">${unit.posyandu ?? "-"}</td>
+                        <td class="border border-[#00000033] px-3 py-2">${item.nama_kader}</td>
+                        <td class="border border-[#00000033] px-3 py-2 max-w-xs break-words">${unit.alamat_unit ?? "-"}</td>
+                        <td class="border border-[#00000033] px-3 py-2 text-center">
+                            <div class="flex justify-center gap-1">
+                                <button
+                                    class="px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition open-detail"
+                                    data-index="${i}" data-unit="${index}">
+                                    Detail
+                                </button>
+                                
+                                <a href="/hasil-skrining/edit/${unit.unit_rumah_id}"
+                                    class="px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition">
+                                    Edit
+                                </a>
 
-                            <button
-                                class="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-btn"
-                                data-id="${item.id}"
-                                data-name="${item.nama_kelurahan}">
-                                Hapus
-                            </button>
-                        </div>
-                    </td>
-                `;
+                                <button
+                                    class="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-btn"
+                                    data-id="${item.id}"
+                                    data-name="${item.nama_kelurahan}">
+                                    Hapus
+                                </button>
+                            </div>
+                        </td>
+                    `;
                     tbody.appendChild(tr);
                 })
             });

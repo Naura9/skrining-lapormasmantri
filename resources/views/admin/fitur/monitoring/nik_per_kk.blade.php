@@ -6,8 +6,8 @@
 <section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Monitoring NIK per KK</h2>
 
-    <div class="flex flex-col sm:flex-row sm:items-start justify-start gap-4 mb-5 flex-wrap">
-        <div class="flex flex-col sm:flex-row items-start gap-3 w-full sm:w-auto">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-center gap-4 mb-5 flex-wrap">
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <x-dropdown
                 id="kelurahanFilterDropdown"
                 label="Pilih Kelurahan"
@@ -89,14 +89,16 @@
                 if (kelurahan_id) url.searchParams.append("kelurahan_id", kelurahan_id);
                 if (posyandu_id) url.searchParams.append("posyandu_id", posyandu_id);
 
-                const res = await fetch(url.toString(), {
+                const result = await fetchWithAuth(url.toString(), {
+                    method: "GET",
                     headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Accept": "application/json"
                     }
                 });
-                const result = await res.json();
-                renderTable(result.data);
+
+                if (!result || result.status_code) return;
+
+                renderTable(result.data || []);
             } catch (err) {
                 console.error("Gagal memuat data:", err);
                 tbody.innerHTML = `<tr><td colspan="7" class="text-center text-red-500 py-4">Gagal memuat data</td></tr>`;
@@ -107,7 +109,7 @@
             tbody.innerHTML = "";
 
             if (!list.length) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-500 py-4">Tidak ada data KK.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-500 py-4">Tidak ada hasil.</td></tr>`;
                 return;
             }
 
@@ -135,6 +137,12 @@
 
             document.querySelectorAll(".open-detail").forEach(btn => {
                 btn.addEventListener("click", () => {
+                    const container = document.getElementById("anggota-detail-container");
+                    if (container) {
+                        container.innerHTML = "";
+                        container.dataset.currentIdx = "";
+                    }
+                    
                     const noKk = btn.dataset.id;
 
                     let kkData;
@@ -306,8 +314,12 @@
         let kelurahanData = [];
 
         async function loadKelurahan() {
-            const res = await fetch(`{{ url('api/kelurahan') }}`);
-            const json = await res.json();
+            const json = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
 
             kelurahanData = json.data.list || [];
             renderKelurahanDropdown();
@@ -401,14 +413,16 @@
                 if (kelurahan_id) url.searchParams.append("kelurahan_id", kelurahan_id);
                 if (posyandu_id) url.searchParams.append("posyandu_id", posyandu_id);
 
-                const res = await fetch(url.toString(), {
+                const result = await fetchWithAuth(url.toString(), {
+                    method: "GET",
                     headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Accept": "application/json"
                     }
                 });
-                const result = await res.json();
-                renderTable(result.data);
+
+                if (!result || result.status_code) return;
+
+                renderTable(result.data || []);
             } catch (err) {
                 console.error("Gagal memuat data:", err);
             }

@@ -175,37 +175,31 @@
         if (label) label.textContent = text || fallback;
     }
 
-
     async function loadKk() {
-        const res = await fetch(`{{ url('api/identitas_keluarga') }}`);
-        const json = await res.json();
+        try {
+            const result = await fetchWithAuth(`{{ url('api/identitas_keluarga') }}`);
 
-        const raw = json.data.list || [];
+            const raw = result.data?.list || [];
 
+            window.kkData = [];
 
-
-        renderKKDropdown();
-    }
-    async function loadKk() {
-        const res = await fetch(`{{ url('api/identitas_keluarga') }}`);
-        const json = await res.json();
-
-        const raw = json.data.list || [];
-
-        // Tambahkan ini agar kkData terisi
-        window.kkData = [];
-
-        raw.forEach(item => {
-            (item.keluarga || []).forEach(k => {
-                kkData.push({
-                    id: k.id,
-                    no_kk: k.no_kk,
-                    nama_kepala_keluarga: k.kepala_keluarga?.nama ?? '-'
+            raw.forEach(item => {
+                (item.keluarga || []).forEach(k => {
+                    window.kkData.push({
+                        id: k.id,
+                        no_kk: k.no_kk,
+                        nama_kepala_keluarga: k.kepala_keluarga?.nama ?? '-'
+                    });
                 });
             });
-        });
 
-        renderKKDropdown();
+            renderKKDropdown();
+
+        } catch (err) {
+            console.error("Gagal memuat data KK:", err);
+            window.kkData = [];
+            renderKKDropdown();
+        }
     }
 
     function renderKKDropdown() {

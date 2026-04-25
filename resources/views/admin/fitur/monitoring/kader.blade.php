@@ -6,8 +6,8 @@
 <section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Monitoring Kader</h2>
 
-    <div class="flex flex-col sm:flex-row sm:items-start justify-start gap-4 mb-5 flex-wrap">
-        <div class="flex flex-col sm:flex-row items-start gap-3 w-full sm:w-auto">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-center gap-4 mb-5 flex-wrap">
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <input id="searchInput" type="text"
                 placeholder="Cari berdasarkan nama kader..."
                 class="h-9 bg-white border border-[#00000033] rounded-lg px-3 text-sm
@@ -87,31 +87,24 @@
         const kaderModalTitle = document.getElementById("kaderModalTitle");
 
         async function fetchKader() {
-            try {
-                const response = await fetch(`{{ url('api/monitoring/kader') }}`, {
-                    headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    }
-                });
+            const result = await fetchWithAuth(`{{ url('api/monitoring/kader') }}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
 
-                const result = await response.json();
-                if (!result || !result.data) return;
+            if (!result || result.status_code) return;
 
-                const kader = result.data || [];
-
-                renderTable(kader);
-            } catch (error) {
-                console.error("Gagal memuat data kader skrining:", error);
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500 py-4">Gagal memuat data</td></tr>`;
-            }
+            const kader = result.data || [];
+            renderTable(kader);
         }
 
         function renderTable(list) {
             tbody.innerHTML = "";
 
             if (!list.length) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-500 py-4">Tidak ada data kader.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-500 py-4">Tidak ada hasil.</td></tr>`;
                 return;
             }
 
@@ -297,8 +290,12 @@
         let kelurahanData = [];
 
         async function loadKelurahan() {
-            const res = await fetch(`{{ url('api/kelurahan') }}`);
-            const json = await res.json();
+            const json = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
 
             kelurahanData = json.data.list || [];
             renderKelurahanDropdown();
@@ -397,14 +394,17 @@
                 if (kelurahan_id) url.searchParams.append("kelurahan_id", kelurahan_id);
                 if (posyandu_id) url.searchParams.append("posyandu_id", posyandu_id);
 
-                const res = await fetch(url.toString(), {
+                const result = await fetchWithAuth(url.toString(), {
+                    method: "GET",
                     headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Accept": "application/json"
                     }
                 });
-                const result = await res.json();
-                renderTable(result.data);
+
+                if (!result || result.status_code) return;
+
+                renderTable(result.data || []);
+
             } catch (err) {
                 console.error("Gagal memuat data:", err);
             }

@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Models\UnitModel;
 use App\Models\KeluargaModel;
 use App\Models\AnggotaKeluargaModel;
+use App\Models\SkriningModel;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -71,7 +72,7 @@ class IdentitasKeluargaHelper extends Helper
             $payload['kelurahan_id'] = optional($user->kaderDetail->posyandu->kelurahan)->id;
             $payload['posyandu_id']  = optional($user->kaderDetail->posyandu)->id;
         }
-        
+
         try {
             $unit = UnitModel::create([
                 'kelurahan_id' => $payload['kelurahan_id'],
@@ -206,12 +207,25 @@ class IdentitasKeluargaHelper extends Helper
         }
     }
 
-    public function delete(string $id): bool
+    public function delete(string $id): array
     {
         DB::beginTransaction();
 
         try {
-            $unit = UnitModel::findOrFail($id);
+            $unit = UnitModel::with('keluarga')->findOrFail($id);
+
+            $isUsed = SkriningModel::whereIn(
+                'keluarga_id',
+                $unit->keluarga->pluck('id')
+            )->exists();
+
+            if ($isUsed) {
+                DB::rollBack();
+                return [
+                    'status' => false,
+                    'message' => 'Data tidak bisa dihapus karena sudah digunakan pada skrining'
+                ];
+            }
 
             foreach ($unit->keluarga as $kel) {
                 AnggotaKeluargaModel::where('keluarga_id', $kel->id)->delete();
@@ -222,10 +236,17 @@ class IdentitasKeluargaHelper extends Helper
 
             DB::commit();
 
-            return true;
+            return [
+                'status' => true,
+                'message' => 'Data berhasil dihapus'
+            ];
         } catch (Throwable $th) {
             DB::rollBack();
-            return false;
+
+            return [
+                'status' => false,
+                'message' => $th->getMessage()
+            ];
         }
     }
 }

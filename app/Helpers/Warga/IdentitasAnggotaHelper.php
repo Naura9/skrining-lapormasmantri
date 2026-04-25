@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Models\UnitModel;
 use App\Models\KeluargaModel;
 use App\Models\AnggotaKeluargaModel;
+use App\Models\JawabanModel;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -175,19 +176,38 @@ class IdentitasAnggotaHelper extends Helper
         }
     }
 
-    public function delete(string $id): bool
+    public function delete(string $id): array
     {
         DB::beginTransaction();
 
         try {
             $anggota = AnggotaKeluargaModel::findOrFail($id);
+
+            $isUsed = JawabanModel::where('anggota_keluarga_id', $id)->exists();
+
+            if ($isUsed) {
+                DB::rollBack();
+                return [
+                    'status' => false,
+                    'message' => 'Anggota tidak bisa dihapus karena sudah digunakan pada data skrining'
+                ];
+            }
+
             $anggota->delete();
 
             DB::commit();
-            return true;
+
+            return [
+                'status' => true,
+                'message' => 'Anggota berhasil dihapus'
+            ];
         } catch (Throwable $th) {
             DB::rollBack();
-            return false;
+
+            return [
+                'status' => false,
+                'message' => $th->getMessage()
+            ];
         }
     }
 }

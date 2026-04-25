@@ -9,7 +9,7 @@
                     id="kelurahanDropdown"
                     label="Pilih Kelurahan"
                     :options="[]"
-                    width="w-full sm:w-56"
+                    width="w-full"
                     data-dropdown="filter" />
                 <p class="text-red-500 text-xs mt-1 hidden" data-key="kelurahan_id"></p>
                 <input type="hidden" name="kelurahan_id" id="kelurahan_id">
@@ -23,7 +23,7 @@
                     id="posyanduDropdown"
                     label="Pilih Posyandu"
                     :options="[]"
-                    width="w-full sm:w-56"
+                    width="w-full"
                     data-dropdown="filter" />
                 <p class="text-red-500 text-xs mt-1 hidden" data-key="posyandu_id"></p>
                 <input type="hidden" name="posyandu_id" id="posyandu_id">
@@ -245,21 +245,15 @@
         let kelurahanData = [];
 
         async function loadKelurahan() {
-            try {
-                const res = await fetch(`{{ url('api/kelurahan') }}`);
-
-                if (!res.ok) {
-                    console.error("API error:", res.status);
-                    return;
+            const json = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
                 }
+            });
 
-                const json = await res.json();
-                kelurahanData = json.data?.list || [];
-
-                renderKelurahanDropdown();
-            } catch (err) {
-                console.error("Load kelurahan gagal:", err);
-            }
+            kelurahanData = json.data.list || [];
+            renderKelurahanDropdown();
         }
 
         function renderKelurahanDropdown() {

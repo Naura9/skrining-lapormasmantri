@@ -182,23 +182,13 @@
                 <span>Data Wilayah</span>
             </a>
 
-            <a href="{{ route('admin.fitur.monitoring.kader') }}"
-                class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
-            {{ request()->routeIs('admin.fitur.monitoring.kader') 
-                ? 'bg-[#61359C]/65 text-white font-semibold' 
-                : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
-
-                <i class="fa-solid fa-user-group text-lg w-5 text-center
-            {{ request()->routeIs('admin.fitur.monitoring.kader') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
-                </i>
-                <span>Monitoring Kader</span>
-            </a>
 
             @php
             $isMonitoringActive = request()->routeIs([
             'admin.monitoring',
             'admin.monitoring.nik_per_siklus',
             'admin.monitoring.nik_per_kk',
+            'admin.monitoring.kader',
             ]);
             @endphp
 
@@ -239,6 +229,19 @@
                 {{ request()->routeIs('admin.fitur.monitoring.nik_per_siklus') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                         </i>
                         <span>NIK Per Siklus</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.fitur.monitoring.kader') }}"
+                        class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
+                {{ request()->routeIs('admin.fitur.monitoring.kader') 
+                    ? 'bg-[#61359C]/65 text-white font-semibold' 
+                    : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-user-group text-lg w-5 text-center
+                {{ request()->routeIs('admin.fitur.monitoring.kader') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+                        <span>Monitoring Kader</span>
                     </a>
                 </li>
             </ul>

@@ -273,10 +273,9 @@
         let sectionData = [];
 
         async function loadKategori() {
-            const res = await fetch(`{{ url('api/kategori') }}`);
-            const json = await res.json();
+            const result = await fetchWithAuth(`{{ url('api/kategori') }}`);
 
-            const list = json.data.list || [];
+            const list = result.data?.list || [];
 
             const kategoriKk = list.find(k => k.target_skrining === 'kk');
 
@@ -286,20 +285,23 @@
         }
 
         async function loadSection() {
-            const res = await fetch(`{{ url('api/section') }}`);
-            const json = await res.json();
+            try {
+                const result = await fetchWithAuth(`{{ url('api/section') }}`);
 
-            const allSection = json.data.list || [];
+                const allSection = result.data?.list || [];
 
-            sectionData = allSection.filter(sec =>
-                sec.target_skrining === 'kk'
-            );
+                sectionData = allSection.filter(sec =>
+                    sec.target_skrining === 'kk'
+                );
 
-            renderSectionDropdown();
+                renderSectionDropdown();
 
-            btnAddSection.classList.remove("hidden");
-
-            disableFormFields();
+                btnAddSection.classList.remove("hidden");
+                disableFormFields();
+            } catch (err) {
+                console.error("Error loadSection:", err);
+                showErrorToast("Gagal memuat section");
+            }
         }
 
         function renderSectionDropdown() {
@@ -351,31 +353,27 @@
 
                 deleteBtn.onclick = async (e) => {
                     e.stopPropagation();
-
                     try {
-                        const res = await fetch(`{{ url('api/section') }}/${sec.id}`, {
-                            method: "DELETE",
-                            headers: {
-                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                            }
+                        const result = await fetchWithAuth(`{{ url('api/section') }}/${sec.id}`, {
+                            method: "DELETE"
                         });
 
-                        const json = await res.json();
-
-                        if (!res.ok) {
+                        if (!result || result.status === false || result.status_code) {
                             showErrorToast(
-                                "Gagal Menghapus",
-                                json.errors ? json.errors[0] : "Terjadi kesalahan"
+                                "Terjadi kesalahan",
+                                result?.message || "Gagal menghapus section"
                             );
                             return;
                         }
 
-                        showSuccessToast("Section berhasil dihapus!");
-
+                        showSuccessToast(result.message || "Section berhasil dihapus!");
                         await loadSection();
 
                     } catch (error) {
-                        showErrorToast("Error", "Terjadi kesalahan sistem");
+                        showErrorToast(
+                            "Terjadi kesalahan",
+                            "Terjadi kesalahan sistem"
+                        );
                     }
                 };
 
@@ -393,7 +391,6 @@
         let kategoriKkId = null;
 
         document.getElementById("saveSectionBtn").addEventListener("click", async () => {
-
             const judul = document.getElementById("new_judul_section").value;
 
             if (!judul) {
@@ -401,23 +398,39 @@
                 return;
             }
 
-            await fetch(`{{ url('api/section') }}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
+            try {
+                const result = await fetchWithAuth(`{{ url('api/section') }}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        kategori_id: kategoriKkId,
+                        judul_section: judul
+                    })
+                });
 
-                body: JSON.stringify({
-                    kategori_id: kategoriKkId,
-                    judul_section: judul
-                })
-            });
+                if (!result) return;
 
-            addSectionForm.classList.add("hidden");
-            document.getElementById("new_judul_section").value = "";
+                if (result.status_code === 422 && result.errors) {
+                    showErrorToast(Object.values(result.errors).flat()[0]);
+                    return;
+                }
 
-            await loadSection();
+                if (result.status_code && result.status_code !== 200) {
+                    showErrorToast(result.message || "Gagal menyimpan section");
+                    return;
+                }
+
+                addSectionForm.classList.add("hidden");
+                document.getElementById("new_judul_section").value = "";
+
+                await loadSection();
+
+            } catch (err) {
+                console.error("Error saveSection:", err);
+                showErrorToast("Terjadi kesalahan pada server!");
+            }
         });
 
         function setDropdownLabel(dropdownId, value, defaultLabel) {

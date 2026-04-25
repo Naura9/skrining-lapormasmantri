@@ -82,12 +82,18 @@ class SectionController extends Controller
         $result = $this->sectionHelper->delete($id);
 
         if (!$result['status']) {
-            return response()->failed([$result['message']]);
+            return response()->json([
+                'status' => false,
+                'message' => $result['message']
+            ], 400);
         }
 
-        return response()->success(null, 'Section berhasil dihapus');
+        return response()->json([
+            'status' => true,
+            'message' => 'Section berhasil dihapus'
+        ]);
     }
-
+    
     public function move(Request $request, string $id)
     {
         DB::beginTransaction();

@@ -299,12 +299,13 @@
     let kategoriData = [];
 
     async function loadKategori() {
-        const res = await fetch(`{{ url('api/kategori') }}`);
-        const json = await res.json();
+        const result = await fetchWithAuth(`{{ url('api/kategori') }}`);
 
-        const list = json.data.list || [];
+        const list = result.data?.list || [];
 
-        kategoriData = list.filter(k => k.target_skrining === 'nik');
+        kategoriData = list
+            .filter(k => k.target_skrining === 'nik')
+            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
         renderKategoriDropdown();
 
@@ -343,11 +344,9 @@
     let sectionData = [];
 
     async function loadSectionByKategori(kategoriId, isEdit = false) {
+        const result = await fetchWithAuth(`{{ url('api/section') }}`);
 
-        const res = await fetch(`{{ url('api/section') }}`);
-        const json = await res.json();
-
-        const allSection = json.data.list || [];
+        const allSection = result.data?.list || [];
 
         sectionData = allSection.filter(sec =>
             sec.kategori_id === kategoriId
@@ -410,29 +409,29 @@
             deleteBtn.onclick = async (e) => {
                 e.stopPropagation();
                 try {
-                    const res = await fetch(`{{ url('api/section') }}/${sec.id}`, {
-                        method: "DELETE",
-                        headers: {
-                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                        }
+                    const result = await fetchWithAuth(`{{ url('api/section') }}/${sec.id}`, {
+                        method: "DELETE"
                     });
 
-                    const json = await res.json();
-
-                    if (!res.ok) {
+                    if (!result || result.status === false || result.status_code) {
                         showErrorToast(
-                            "Gagal Menghapus",
-                            json.errors ? json.errors[0] : "Terjadi kesalahan"
+                            "Terjadi kesalahan",
+                            result?.message || "Gagal menghapus section"
                         );
                         return;
                     }
 
-                    showSuccessToast("Section berhasil dihapus!");
+                    showSuccessToast(result.message || "Section berhasil dihapus!");
+                    const kategoriId = document.getElementById('kategori_id').value;
 
-                    await loadSectionByKategori();
-
+                    if (kategoriId) {
+                        await loadSectionByKategori(kategoriId);
+                    }
                 } catch (error) {
-                    showErrorToast("Error", "Terjadi kesalahan sistem");
+                    showErrorToast(
+                        "Terjadi kesalahan",
+                        "Terjadi kesalahan sistem"
+                    );
                 }
             };
 
@@ -450,36 +449,52 @@
     let kategoriKkId = null;
 
     document.getElementById("saveSectionBtn").addEventListener("click", async () => {
-
         const judul = document.getElementById("new_judul_section").value;
         const kategoriId = document.getElementById("kategori_id").value;
 
         if (!judul) {
-            alert("Judul section wajib diisi");
+            showErrorToast("Judul section wajib diisi");
             return;
         }
 
         if (!kategoriId) {
-            alert("Pilih siklus terlebih dahulu");
+            showErrorToast("Pilih siklus terlebih dahulu");
             return;
         }
 
-        await fetch(`{{ url('api/section') }}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            body: JSON.stringify({
-                kategori_id: kategoriId,
-                judul_section: judul
-            })
-        });
+        try {
+            const result = await fetchWithAuth(`{{ url('api/section') }}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    kategori_id: kategoriId,
+                    judul_section: judul
+                })
+            });
 
-        addSectionForm.classList.add("hidden");
-        document.getElementById("new_judul_section").value = "";
+            if (!result) return;
 
-        await loadSectionByKategori(kategoriId);
+            if (result.status_code === 422 && result.errors) {
+                showErrorToast(Object.values(result.errors).flat()[0]);
+                return;
+            }
+
+            if (result.status_code && result.status_code !== 200) {
+                showErrorToast(result.message || "Gagal menyimpan section");
+                return;
+            }
+
+            addSectionForm.classList.add("hidden");
+            document.getElementById("new_judul_section").value = "";
+
+            await loadSectionByKategori(kategoriId);
+
+        } catch (err) {
+            console.error("Error saveSection:", err);
+            showErrorToast("Terjadi kesalahan pada server!");
+        }
     });
 
     function setDropdownLabel(dropdownId, value, defaultLabel) {
@@ -505,10 +520,10 @@
 
     window.setFormData = async (item) => {
         if (item) {
-            const res = await fetch(`{{ url('api/section') }}`);
-            const json = await res.json();
-            const allSection = json.data.list || [];
+            disableKategoriDropdown();
 
+            const result = await fetchWithAuth(`{{ url('api/section') }}`);
+            const allSection = result.data?.list || [];
             const selectedSection = allSection.find(s => s.id == item.section_id);
 
             if (selectedSection) {
@@ -580,6 +595,7 @@
                 allowOtherContainer.classList.add("hidden");
             }
         } else {
+            enableKategoriDropdown();
             formEditPertanyaan.reset();
 
             formModel.id = "";
@@ -598,6 +614,17 @@
         }
     };
 
+    function disableKategoriDropdown() {
+        const kategoriEl = document.getElementById("kategoriDropdown");
+
+        kategoriEl.classList.add("pointer-events-none", "opacity-50");
+    }
+
+    function enableKategoriDropdown() {
+        const kategoriEl = document.getElementById("kategoriDropdown");
+
+        kategoriEl.classList.remove("pointer-events-none", "opacity-50");
+    }
     document.addEventListener('DOMContentLoaded', async () => {
         await loadKategori();
     });

@@ -63,14 +63,8 @@
 
         async function fetchKategori() {
             try {
-                const response = await fetch(`{{ url('api/kategori') }}`, {
-                    headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    }
-                });
+                const result = await fetchWithAuth(`{{ url('api/kategori') }}`);
 
-                const result = await response.json();
                 if (!result || !result.data) return;
 
                 const kategori = result.data.list || [];
@@ -128,13 +122,11 @@
 
                     showDeleteConfirmToast("Apakah Anda yakin ingin menghapus data ini?", async () => {
                         try {
-                            const data = await fetch(`{{ url('api/kategori') }}/${id}`, {
-                                method: "DELETE",
-                                headers: {
-                                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                }
+                            const result = await fetchWithAuth(`{{ url('api/kategori') }}/${id}`, {
+                                method: "DELETE"
                             });
-                            if (!data) return;
+
+                            if (!result) return;
 
                             showSuccessToast("Data berhasil dihapus!");
                             await fetchKategori();
@@ -168,39 +160,47 @@
 
             try {
                 let url = "{{ url('api/kategori') }}";
-                let method = "POST";
 
                 if (mode === "edit" && id) {
                     formData.append("_method", "PUT");
                 }
 
-                const res = await fetch(url, {
-                    method: method,
+                const result = await fetchWithAuth(url, {
+                    method: "POST",
                     body: formData
                 });
-                const data = await res.json();
 
-                if (!data.errors) {
-                    showSuccessToast("Data berhasil disimpan!");
-                    kategoriModalRef.classList.add("hidden");
-                    kategoriModalRef.classList.remove("flex");
-                    fetchKategori();
-                } else {
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(key => {
-                            const el = document.getElementById("error-" + key);
-                            if (el) {
-                                el.textContent = data.errors[key][0];
-                                el.classList.remove("hidden");
-                            }
-                        });
-                    } else {
-                        showErrorToast("Gagal menyimpan data!");
-                    }
+                if (!result) return;
+
+                document.querySelectorAll("[id^='error-']").forEach(el => {
+                    el.textContent = "";
+                    el.classList.add("hidden");
+                });
+
+                if (result.status_code === 422 && result.errors) {
+                    Object.keys(result.errors).forEach(key => {
+                        const el = document.getElementById("error-" + key);
+                        if (el) {
+                            el.textContent = result.errors[key][0];
+                            el.classList.remove("hidden");
+                        }
+                    });
+                    return;
                 }
+
+                if (result.status_code && result.status_code !== 200) {
+                    showErrorToast(result.message || "Gagal menyimpan data");
+                    return;
+                }
+
+                showSuccessToast(result.message || "Data berhasil disimpan!");
+                kategoriModalRef.classList.add("hidden");
+                kategoriModalRef.classList.remove("flex");
+                fetchKategori();
+
             } catch (err) {
                 console.error("Error:", err);
-                alert("Terjadi kesalahan pada server!");
+                showErrorToast("Terjadi kesalahan pada server!");
             }
         });
 
@@ -211,10 +211,9 @@
             if (mode === "edit" && id) {
                 kategoriModalTitle.textContent = "Edit Kategori Skrining";
                 try {
-                    const data = await fetch(`{{ url('api/kategori') }}/${id}`);
-                    const json = await data.json();
+                    const result = await fetchWithAuth(`{{ url('api/kategori') }}/${id}`);
 
-                    const item = json.data;
+                    const item = result.data;
                     setFormData(item);
 
                     formEdit.setAttribute('data-mode', 'edit');

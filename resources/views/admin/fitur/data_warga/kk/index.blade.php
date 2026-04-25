@@ -1,10 +1,10 @@
 @extends('layouts.main')
 
-@section('title', 'Data Warga (KK)')
+@section('title', 'Data Keluarga (KK)')
 
 @section('content')
 <section class="p-2 mb-10">
-    <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Data Warga (KK)</h2>
+    <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Data Keluarga (KK)</h2>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 flex-wrap">
         <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
@@ -157,7 +157,7 @@
 
 <x-modal id="importKeluargaModal" size="md">
     <x-slot name="title">
-        <h3 class="text-lg font-bold">Import Data Warga (KK)</h3>
+        <h3 class="text-lg font-bold">Import Data Keluarga (KK)</h3>
     </x-slot>
 
     @include('admin.fitur.data_warga.kk.import')
@@ -189,23 +189,26 @@
 
         let list = [];
 
-        async function fetchDataWarga() {
+        window.fetchDataWarga = async function() {
             const keyword = searchInput.value.trim();
 
             const params = new URLSearchParams();
             if (keyword) params.append("keyword", keyword);
 
             try {
-                const response = await fetch(`{{ url('api/identitas_keluarga') }}?${params.toString()}`, {
-                    headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    }
+                const result = await fetchWithAuth(`{{ url('api/identitas_keluarga') }}?${params.toString()}`);
+
+                if (!result || !result.data) {
+                    return renderTable([]);
+                }
+
+                let list = result.data.list || [];
+
+                list = list.sort((a, b) => {
+                    return new Date(b.created_at) - new Date(a.created_at);
                 });
 
-                const result = await response.json();
-                if (!result || !result.data) return renderTable([]);
-                renderTable(result.data.list || []);
+                renderTable(list);
             } catch (err) {
                 console.error("Gagal memuat data:", err);
                 renderTable([]);
@@ -274,15 +277,18 @@
                     const id = btn.dataset.id;
 
                     showDeleteConfirmToast("Apakah Anda yakin ingin menghapus data ini?", async () => {
-                        await fetch(`{{ url('api/identitas_keluarga') }}/${id}`, {
-                            method: "DELETE",
-                            headers: {
-                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                            }
-                        });
+                         try {
+                            const result = await fetchWithAuth(`{{ url('api/identitas_keluarga') }}/${id}`, {
+                                method: "DELETE"
+                            });
 
-                        showSuccessToast("Data berhasil dihapus!");
-                        fetchDataWarga();
+                            if (!result) return;
+
+                            showSuccessToast("Data berhasil dihapus!");
+                            await fetchDataWarga();
+                        } catch (error) {
+                            showErrorToast("Terjadi kesalahan pada server!");
+                        }
                     });
                 });
             });
@@ -325,52 +331,54 @@
             }
 
             try {
-                const res = await fetch("{{ url('api/identitas_keluarga') }}", {
+                const result = await fetchWithAuth(`{{ url('api/identitas_keluarga') }}`, {
                     method: "POST",
                     body: formData
                 });
-                const data = await res.json();
 
-                if (!data.errors) {
-                    showSuccessToast("Data berhasil disimpan!");
-                    keluargaModalRef.classList.add("hidden");
-                    keluargaModalRef.classList.remove("flex");
-                    fetchDataWarga();
-                } else {
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(key => {
-                            if (key.startsWith('keluarga.')) {
-                                const parts = key.split('.');
-                                const index = parts[1];
-                                const fieldName = parts[2];
+                if (!result) return;
 
-                                const kkItems = document.querySelectorAll('.kk-item');
-                                const targetKK = kkItems[index];
+                if (result.status_code === 422 && result.errors) {
+                    Object.keys(result.errors).forEach(key => {
+                        if (key.startsWith('keluarga.')) {
+                            const parts = key.split('.');
+                            const index = parts[1];
+                            const fieldName = parts[2];
 
-                                if (targetKK) {
-                                    const el = targetKK.querySelector(`p[data-key="${fieldName}"]`);
-                                    if (el) {
-                                        el.textContent = data.errors[key][0];
-                                        el.classList.remove("hidden");
-                                    }
-                                }
-                            }
-                            else {
-                                const el = document.querySelector(`p[data-key="${key}"]`);
+                            const kkItems = document.querySelectorAll('.kk-item');
+                            const targetKK = kkItems[index];
+
+                            if (targetKK) {
+                                const el = targetKK.querySelector(`p[data-key="${fieldName}"]`);
                                 if (el) {
-                                    el.textContent = data.errors[key][0];
+                                    el.textContent = result.errors[key][0];
                                     el.classList.remove("hidden");
                                 }
                             }
-
-                        });
-                    } else {
-                        showErrorToast("Gagal menyimpan data!");
-                    }
+                        } else {
+                            const el = document.querySelector(`p[data-key="${key}"]`);
+                            if (el) {
+                                el.textContent = result.errors[key][0];
+                                el.classList.remove("hidden");
+                            }
+                        }
+                    });
+                    return;
                 }
+
+                if (result.status_code && result.status_code !== 200) {
+                    showErrorToast(result.message || "Gagal menyimpan data");
+                    return;
+                }
+
+                showSuccessToast(result.message || "Data berhasil disimpan!");
+                keluargaModalRef.classList.add("hidden");
+                keluargaModalRef.classList.remove("flex");
+                fetchDataWarga();
+
             } catch (err) {
-                console.error("Error:", err);
-                alert("Terjadi kesalahan pada server!");
+                console.error(err);
+                showErrorToast("Terjadi kesalahan pada server!");
             }
         });
 
@@ -469,15 +477,15 @@
 
             if (mode === "edit" && id) {
                 keluargaModalTitle.textContent = "Edit Data Keluarga";
-                try {
-                    const data = await fetch(`{{ url('api/identitas_keluarga') }}/${id}`);
-                    const json = await data.json();
 
-                    const item = json.data;
+                try {
+                    const result = await fetchWithAuth(`{{ url('api/identitas_keluarga') }}/${id}`);
+                    const item = result.data;
                     setFormData(item);
 
                     formEdit.setAttribute('data-mode', 'edit');
                     formEdit.setAttribute('data-id', id);
+
                 } catch (err) {
                     console.error("Gagal mengambil data keluarga:", err);
                 }
@@ -488,12 +496,11 @@
                 formEdit.setAttribute('data-mode', 'add');
             }
         };
-
         window.openKeluargaModal = openKeluargaModal;
 
         document.getElementById("btnTambahKeluarga").addEventListener("click", () => {
-    openKeluargaModal("add");
-});
+            openKeluargaModal("add");
+        });
 
         document.addEventListener("click", (e) => {
             if (e.target && e.target.textContent === "Edit") {
@@ -542,8 +549,12 @@
         let kelurahanData = [];
 
         async function loadKelurahan() {
-            const res = await fetch(`{{ url('api/kelurahan') }}`);
-            const json = await res.json();
+            const json = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
 
             kelurahanData = json.data.list || [];
             renderKelurahanDropdown();
@@ -635,14 +646,8 @@
             if (posyanduId) params.append("posyandu_id", posyanduId);
 
             try {
-                const response = await fetch(`{{ url('api/identitas_keluarga') }}?${params.toString()}`, {
-                    headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    }
-                });
+                const result = await fetchWithAuth(`{{ url('api/identitas_keluarga') }}?${params.toString()}`);
 
-                const result = await response.json();
                 renderTable(result.data?.list || []);
             } catch (err) {
                 console.error("Gagal memuat data:", err);

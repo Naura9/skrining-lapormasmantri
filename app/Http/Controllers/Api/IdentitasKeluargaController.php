@@ -75,7 +75,7 @@ class IdentitasKeluargaController extends Controller
 
         return response()->success(
             new IdentitasKeluargaResource($result['data']),
-            'Identitas berhasil ditambahkan'
+            'Data keluarga berhasil ditambahkan'
         );
     }
 
@@ -128,13 +128,13 @@ class IdentitasKeluargaController extends Controller
 
     public function destroy($id)
     {
-        $deleted = $this->helper->delete($id);
+        $result = $this->helper->delete($id);
 
-        if (!$deleted) {
-            return response()->failed(['Gagal menghapus data']);
+        if (!$result['status']) {
+            return response()->json($result, 400);
         }
 
-        return response()->success(true, 'Identitas berhasil dihapus');
+        return response()->json($result);
     }
 
     public function validateOnly(IdentitasKeluargaRequest $request)
@@ -197,7 +197,7 @@ class IdentitasKeluargaController extends Controller
                 return response()->json([
                     'status'  => false,
                     'message' => 'Import gagal',
-                    'errors'  => ['Format file tidak sesuai template']
+                    'errors'  => ['Format file tidak sesuai template, periksa judul kolom']
                 ], 422);
             }
         }
@@ -296,26 +296,20 @@ class IdentitasKeluargaController extends Controller
 
             $unitKey = $kelurahan->id . '-' . $posyandu->id . '-' . $unitCode;
 
-            if (!isset($unitCache[$unitKey])) {
-                $unit = UnitModel::firstOrCreate(
-                    [
-                        'kelurahan_id' => $kelurahan->id,
-                        'posyandu_id'  => $posyandu->id,
-                        'alamat'       => $alamat,
-                    ],
-                    [
-                        'rt' => $rt,
-                        'rw' => $rw,
-                    ]
-                );
-                $unitCache[$unitKey] = $unit->id;
-            }
+            $unitCache[$unitKey] = [
+                'kelurahan_id' => $kelurahan->id,
+                'posyandu_id'  => $posyandu->id,
+                'alamat'       => $alamat,
+                'rt'           => $rt,
+                'rw'           => $rw,
+            ];
 
             $unitId = $unitCache[$unitKey];
             $keluargaId = Str::uuid();
 
             $insertKeluarga[] = [
                 'id'              => $keluargaId,
+                'unit_key' => $unitKey,
                 'unit_rumah_id'   => $unitId,
                 'no_kk'           => $noKK,
                 'is_luar_wilayah' => $isLuar,
@@ -344,10 +338,35 @@ class IdentitasKeluargaController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($insertKeluarga, $insertAnggota) {
+        DB::transaction(function () use ($unitCache, &$unitIdMap, $insertKeluarga, $insertAnggota) {
+            $unitIdMap = [];
+
+            foreach ($unitCache as $key => $unitData) {
+                $unit = UnitModel::firstOrCreate(
+                    [
+                        'kelurahan_id' => $unitData['kelurahan_id'],
+                        'posyandu_id'  => $unitData['posyandu_id'],
+                        'alamat'       => $unitData['alamat'],
+                    ],
+                    [
+                        'rt' => $unitData['rt'],
+                        'rw' => $unitData['rw'],
+                    ]
+                );
+
+                $unitIdMap[$key] = $unit->id;
+            }
+
+            foreach ($insertKeluarga as &$kel) {
+                $key = $kel['unit_key'];
+                $kel['unit_rumah_id'] = $unitIdMap[$key];
+                unset($kel['unit_key']);
+            }
+
             KeluargaModel::insert($insertKeluarga);
             AnggotaKeluargaModel::insert($insertAnggota);
         });
+
         return response()->json([
             'status'  => true,
             'message' => 'Data warga berhasil diimport'
