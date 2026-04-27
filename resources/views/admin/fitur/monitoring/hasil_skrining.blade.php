@@ -6,7 +6,7 @@
 <section class="p-2 mb-10">
     <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Hasil Skrining</h2>
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 flex-wrap">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-center gap-4 mb-5 flex-wrap">
         <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <input id="searchInput" type="text"
                 placeholder="Cari berdasarkan nama, No KK, atau NIK..."
@@ -34,7 +34,7 @@
                 <i class="fa-solid fa-magnifying-glass"></i>
             </button>
         </div>
-                <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
+        <!-- <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
 
             <button id="downloadSkriningBtn"
                 class="h-9 flex items-center gap-2 bg-[#61359C] text-white
@@ -46,8 +46,8 @@
 
             <input type="hidden" id="kelurahan_id" value="">
             <input type="hidden" id="posyandu_id" value="">
-        </div>
-        </div>
+        </div> -->
+    </div>
     </div>
 
     <div class="overflow-x-auto">
@@ -95,27 +95,33 @@
 
         const hasilModalRef = document.getElementById("hasilModalRef");
         const hasilModalTitle = document.getElementById("hasilModalTitle");
-        
+
         const formEdit = document.getElementById("formEdit");
 
         async function fetchHasil() {
             try {
-                const response = await fetch(`{{ url('api/monitoring/hasil-skrining') }}`, {
+                const result = await fetchWithAuth(`{{ url('api/monitoring/hasil-skrining') }}`, {
+                    method: "GET",
                     headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Accept": "application/json"
                     }
                 });
 
-                const result = await response.json();
                 if (!result || !result.data) return;
 
                 const hasil = result.data || [];
 
                 renderTable(hasil);
+
             } catch (error) {
                 console.error("Gagal memuat data hasil skrining:", error);
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500 py-4">Gagal memuat data</td></tr>`;
+
+                tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-red-500 py-4">
+                    Gagal memuat data
+                </td>
+            </tr>`;
             }
         }
 
@@ -123,7 +129,7 @@
             tbody.innerHTML = "";
 
             if (!list.length) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-500 py-4">Tidak ada data hasil skrining.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-500 py-4">Tidak ada hasil.</td></tr>`;
                 return;
             }
 
@@ -131,7 +137,7 @@
 
             list.forEach((item, i) => {
                 item.unit_rumah?.forEach((unit, index) => {
-                    const tanggal = unit.tanggal_skrining_kk ?? "-";
+                    const tanggal = unit.tanggal_skrining ?? "-";
                     const jumlahKK = unit.jumlah_kk ?? 0;
 
                     let jumlahNIK = 0;
@@ -189,7 +195,7 @@
 
                     const detailBody = document.getElementById("modal-detail-body");
 
-                    const tanggal = unit.tanggal_skrining_kk ?? '-';
+                    const tanggal = unit.tanggal_skrining ?? '-';
 
                     detailBody.innerHTML = `
                         <div class="space-y-2 text-sm">
@@ -527,8 +533,12 @@
         let kelurahanData = [];
 
         async function loadKelurahan() {
-            const res = await fetch(`{{ url('api/kelurahan') }}`);
-            const json = await res.json();
+            const json = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
 
             kelurahanData = json.data.list || [];
             renderKelurahanDropdown();
@@ -622,27 +632,41 @@
             const posyandu_id = document.getElementById("posyandu_id").value || "";
 
             try {
-                const url = new URL("{{ url('api/monitoring/hasil-skrining') }}", window.location.origin);
-                url.searchParams.append("search", search);
+                const url = new URL("{{ url('api/monitoring/hasil-skrining') }}");
+
+                if (search) url.searchParams.append("search", search);
                 if (kelurahan_id) url.searchParams.append("kelurahan_id", kelurahan_id);
                 if (posyandu_id) url.searchParams.append("posyandu_id", posyandu_id);
 
-                const res = await fetch(url.toString(), {
+                const result = await fetchWithAuth(url.toString(), {
+                    method: "GET",
                     headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Accept": "application/json"
                     }
                 });
-                const result = await res.json();
-                renderTable(result.data);
+
+                if (!result || !result.status) {
+                    showErrorToast("Gagal memuat data");
+                    return;
+                }
+
+                renderTable(result.data || []);
+
             } catch (err) {
                 console.error("Gagal memuat data:", err);
+                showErrorToast("Terjadi kesalahan saat mengambil data");
             }
         }
 
-        document.getElementById("downloadSkriningBtn").addEventListener("click", () => {
-            window.location.href = "{{ url('/download/hasil-skrining') }}";
-        });
+        // document.getElementById("downloadSkriningBtn").addEventListener("click", () => {
+        //     const token = localStorage.getItem('token');
+
+        //     const url = new URL("{{ url('/download/hasil-skrining') }}");
+
+        //     if (token) url.searchParams.append("token", token);
+
+        //     window.location.href = url.toString();
+        // });
 
         fetchHasil();
         loadKelurahan();

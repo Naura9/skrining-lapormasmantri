@@ -14,10 +14,20 @@ class IdentitasKeluargaHelper extends Helper
 {
     public function getAll(array $filter, int $page = 1, int $perPage = 25)
     {
+        $user = auth()->user();
+
         $query = UnitModel::with([
             'keluarga.kepalaKeluarga'
         ]);
 
+        if ($user->role === 'kader') {
+    $posyanduId = $user->kaderDetail?->posyandu_id;
+
+    if ($posyanduId) {
+        $query->where('posyandu_id', $posyanduId);
+    }
+}
+        
         if (!empty($filter['kelurahan_id'])) {
             $query->where('kelurahan_id', $filter['kelurahan_id']);
         }
@@ -59,6 +69,55 @@ class IdentitasKeluargaHelper extends Helper
         return [
             'status' => true,
             'data' => $unit
+        ];
+    }
+
+    public function getAllKK(array $filter, int $page = 1, int $perPage = 50)
+    {
+        $user = auth()->user();
+
+        $kelurahanId = null;
+        $posyanduId = null;
+
+        if ($user->role === 'kader') {
+            $kelurahanId = $user->kaderDetail?->kelurahan_id;
+            $posyanduId  = $user->kaderDetail?->posyandu_id;
+        }
+
+        if ($user->role === 'nakes') {
+            $kelurahanId = $user->nakesDetail?->kelurahan_id;
+        }
+
+        $query = UnitModel::with([
+            'keluarga.kepalaKeluarga'
+        ])->whereHas('keluarga', function ($q) {
+            $q->whereDoesntHave('skrining', function ($s) {
+                $s->whereHas('jawaban.pertanyaan.section.kategori', function ($k) {
+                    $k->where('target_skrining', 'kk');
+                });
+            });
+        });
+
+        if ($kelurahanId) {
+            $query->where('kelurahan_id', $kelurahanId);
+        }
+
+        if ($posyanduId) {
+            $query->where('posyandu_id', $posyanduId);
+        }
+
+        if (!empty($filter['keyword'])) {
+            $query->whereHas('keluarga', function ($q) use ($filter) {
+                $q->where('no_kk', 'like', "%{$filter['keyword']}%")
+                    ->orWhereHas('kepalaKeluarga', function ($q2) use ($filter) {
+                        $q2->where('nama', 'like', "%{$filter['keyword']}%");
+                    });
+            });
+        }
+
+        return [
+            'status' => true,
+            'data' => $query->get()
         ];
     }
 

@@ -19,7 +19,6 @@ public function view(): View
     $rows = [];
     $questions = [];
 
-    // 🔹 ambil semua pertanyaan unik
     foreach ($this->data as $kader) {
         foreach ($kader['unit_rumah'] as $unit) {
             foreach ($unit['keluarga'] as $kk) {
@@ -42,9 +41,8 @@ public function view(): View
         }
     }
 
-    $questions = array_keys($questions); // jadi array header
+    $questions = array_keys($questions);
 
-    // 🔹 mapping data
     foreach ($this->data as $kader) {
         foreach ($kader['unit_rumah'] as $unit) {
             foreach ($unit['keluarga'] as $kk) {
@@ -61,12 +59,10 @@ public function view(): View
                                 'siklus' => $skr['siklus'],
                             ];
 
-                            // default semua "-"
                             foreach ($questions as $q) {
                                 $row[$q] = '-';
                             }
 
-                            // isi jawaban
                             foreach ($agt['pertanyaan'] as $p) {
                                 $row[$p['pertanyaan']] = $p['jawaban'] ?? '-';
                             }

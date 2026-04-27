@@ -36,7 +36,12 @@ class AnggotaKeluargaModel extends Model implements CrudInterface
     {
         return $this->belongsTo(KeluargaModel::class, 'keluarga_id', 'id');
     }
-    
+
+    public function jawaban()
+    {
+        return $this->hasMany(JawabanModel::class, 'anggota_keluarga_id', 'id');
+    }
+        
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
         $skip = ($page * $itemPerPage) - $itemPerPage;
@@ -58,7 +63,7 @@ class AnggotaKeluargaModel extends Model implements CrudInterface
 
     public function getById(string $id)
     {
-        return $this->where('id', $id)->first(); 
+        return $this->where('id', $id)->first();
     }
 
     public function store(array $payload)

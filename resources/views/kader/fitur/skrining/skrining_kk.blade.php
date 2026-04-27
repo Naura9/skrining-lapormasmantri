@@ -25,182 +25,203 @@
     <form id="formIdentitas">
         <div id="contentIdentitas">
             <div class="bg-white border border-[#61359C] rounded-2xl p-4 mb-4">
-                <div id="kkContainer" class="space-y-8">
-                    <div class="bg-white mb-4">
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="text-left">
-                                <label class="block text-sm font-semibold mb-1">Kelurahan</label>
-                                <input type="text" id="kelurahan_text"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 cursor-not-allowed" disabled>
-                                <input type="hidden" name="kelurahan_id" id="kelurahan_id">
-                                <p class="text-red-500 text-xs mt-1 hidden" id="error-kelurahan_id"></p>
-                            </div>
+                <div class="mb-4">
+                    <x-dropdown
+                        id="kkDropdown"
+                        label="Pilih Alamat"
+                        :options="[]"
+                        width="w-full"
+                        :searchable="true"
+                        allowOther="true"
+                        otherLabel="+ Tambah KK"
+                        otherPlaceholder="Ketik No KK manual..."
+                        data-dropdown="kk" />
 
-                            <div class="text-left">
-                                <label class="block text-sm font-semibold mb-1">Posyandu</label>
-                                <input type="text" id="posyandu_text"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 cursor-not-allowed" disabled>
-                                <input type="hidden" name="posyandu_id" id="posyandu_id">
+                    <input type="hidden" name="keluarga_id" id="selected_keluarga_id">
+                    <input type="hidden" name="unit_id" id="selected_unit_id">
+                    <input type="hidden" name="no_kk" id="selected_no_kk">
 
-                                <p class="text-red-500 text-xs mt-1 hidden" id="error-posyandu_id"></p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-semibold mb-1">Alamat Domisili</label>
-                                <textarea name="alamat"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"></textarea>
-                                <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="alamat"></p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold mb-1">RT Domisili</label>
-                                <input type="text"
-                                    name="rt"
-                                    inputmode="numeric"
-                                    pattern="[0-9]*"
-                                    maxlength="3"
-                                    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="rt"></p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold mb-1">RW Domisili</label>
-                                <input type="text"
-                                    name="rw"
-                                    inputmode="numeric"
-                                    pattern="[0-9]*"
-                                    maxlength="3"
-                                    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="rw"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="border-t-2 border-[#00000033] my-6"></div>
-                    <div class="kk-item border border-gray-300 rounded-xl p-4 relative bg-white">
-                        <div class="mb-4">
-                            <div class="flex items-start gap-2">
-                                <input type="checkbox" class="kk-luar-wilayah mt-1 w-4 h-4 accent-[#61359C]">
-                                <div>
-                                    <span class="font-semibold text-sm">
-                                        KK Luar Wilayah
-                                    </span>
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        *Centang jika KK berasal dari luar wilayah.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-semibold mb-1">Nomor Kartu Keluarga</label>
-                                <input type="text"
-                                    name="no_kk"
-                                    inputmode="numeric"
-                                    maxlength="16"
-                                    pattern="[0-9]{16}"
-                                    oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,16)"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                <p class="text-red-500 text-xs mt-1 hidden error-no_kk"></p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold mb-1">NIK Kepala Keluarga</label>
-                                <input type="text"
-                                    name="nik_kepala_keluarga"
-                                    inputmode="numeric"
-                                    maxlength="16"
-                                    pattern="[0-9]{16}"
-                                    oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,16)"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                <p class="text-red-500 text-xs mt-1 hidden error-nik_kepala_keluarga"></p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold mb-1">Nama Kepala Keluarga</label>
-                                <input type="text" name="nama_kepala_keluarga"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                <p class="text-red-500 text-xs mt-1 hidden error-nama_kepala_keluarga"></p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold mb-1">No Telepon</label>
-                                <input type="text"
-                                    name="no_telepon"
-                                    inputmode="numeric"
-                                    pattern="[0-9]*"
-                                    maxlength="20"
-                                    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                <p class="text-red-500 text-xs mt-1 hidden error-no_telepon"></p>
-                            </div>
-                        </div>
-                        <div class="luar-wilayah-field hidden mt-6">
+                    <p class="text-red-500 text-xs mt-1 hidden" id="error-no_kk"></p>
+                </div>
+                <div id="formManualKK" class="hidden">
+                    <div id="kkContainer" class="space-y-8">
+                        <div class="bg-white mb-4">
                             <div class="grid md:grid-cols-2 gap-4">
+                                <div class="text-left">
+                                    <label class="block text-sm font-semibold mb-1">Kelurahan</label>
+                                    <input type="text" id="kelurahan_text"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 cursor-not-allowed" disabled>
+                                    <input type="hidden" name="kelurahan_id" id="kelurahan_id">
+                                    <p class="text-red-500 text-xs mt-1 hidden" id="error-kelurahan_id"></p>
+                                </div>
+
+                                <div class="text-left">
+                                    <label class="block text-sm font-semibold mb-1">Posyandu</label>
+                                    <input type="text" id="posyandu_text"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 cursor-not-allowed" disabled>
+                                    <input type="hidden" name="posyandu_id" id="posyandu_id">
+
+                                    <p class="text-red-500 text-xs mt-1 hidden" id="error-posyandu_id"></p>
+                                </div>
                                 <div class="md:col-span-2">
-                                    <label class="block text-sm font-semibold mb-1">Alamat (KTP)</label>
-                                    <textarea name="alamat_ktp"
+                                    <label class="block text-sm font-semibold mb-1">Alamat Domisili</label>
+                                    <textarea name="alamat"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"></textarea>
-                                    <p class="text-red-500 text-xs mt-1 hidden error-alamat_ktp"></p>
+                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"></textarea>
+                                    <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="alamat"></p>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">RT (KTP)</label>
+                                    <label class="block text-sm font-semibold mb-1">RT Domisili</label>
                                     <input type="text"
-                                        name="rt_ktp"
+                                        name="rt"
                                         inputmode="numeric"
+                                        pattern="[0-9]*"
                                         maxlength="3"
                                         oninput="this.value=this.value.replace(/[^0-9]/g,'')"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                                focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                    <p class="text-red-500 text-xs mt-1 hidden error-rt_ktp"></p>
+                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                    <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="rt"></p>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">RW (KTP)</label>
+                                    <label class="block text-sm font-semibold mb-1">RW Domisili</label>
                                     <input type="text"
-                                        name="rw_ktp"
+                                        name="rw"
                                         inputmode="numeric"
+                                        pattern="[0-9]*"
                                         maxlength="3"
                                         oninput="this.value=this.value.replace(/[^0-9]/g,'')"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                                                focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
-                                    <p class="text-red-500 text-xs mt-1 hidden error-rw_ktp"></p>
+                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                    <p class="text-red-500 text-xs mt-1 hidden error-field" data-error="rw"></p>
                                 </div>
                             </div>
                         </div>
-                        <button type="button"
-                            class="btn-remove hidden absolute top-4 right-4
+
+                        <div class="border-t-2 border-[#00000033] my-6"></div>
+                        <div class="kk-item border border-gray-300 rounded-xl p-4 relative bg-white">
+                            <div class="mb-4">
+                                <div class="flex items-start gap-2">
+                                    <input type="checkbox" class="kk-luar-wilayah mt-1 w-4 h-4 accent-[#61359C]">
+                                    <div>
+                                        <span class="font-semibold text-sm">
+                                            KK Luar Wilayah
+                                        </span>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            *Centang jika KK berasal dari luar wilayah.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-1">Nomor Kartu Keluarga</label>
+                                    <input type="text"
+                                        name="no_kk"
+                                        inputmode="numeric"
+                                        maxlength="16"
+                                        pattern="[0-9]{16}"
+                                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,16)"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                    <p class="text-red-500 text-xs mt-1 hidden error-no_kk"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-1">NIK Kepala Keluarga</label>
+                                    <input type="text"
+                                        name="nik_kepala_keluarga"
+                                        inputmode="numeric"
+                                        maxlength="16"
+                                        pattern="[0-9]{16}"
+                                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,16)"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                    <p class="text-red-500 text-xs mt-1 hidden error-nik_kepala_keluarga"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-1">Nama Kepala Keluarga</label>
+                                    <input type="text" name="nama_kepala_keluarga"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                    <p class="text-red-500 text-xs mt-1 hidden error-nama_kepala_keluarga"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-1">No Telepon</label>
+                                    <input type="text"
+                                        name="no_telepon"
+                                        inputmode="numeric"
+                                        pattern="[0-9]*"
+                                        maxlength="20"
+                                        oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                    <p class="text-red-500 text-xs mt-1 hidden error-no_telepon"></p>
+                                </div>
+                            </div>
+                            <div class="luar-wilayah-field hidden mt-6">
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-semibold mb-1">Alamat (KTP)</label>
+                                        <textarea name="alamat_ktp"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"></textarea>
+                                        <p class="text-red-500 text-xs mt-1 hidden error-alamat_ktp"></p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">RT (KTP)</label>
+                                        <input type="text"
+                                            name="rt_ktp"
+                                            inputmode="numeric"
+                                            maxlength="3"
+                                            oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                                                focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                        <p class="text-red-500 text-xs mt-1 hidden error-rt_ktp"></p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">RW (KTP)</label>
+                                        <input type="text"
+                                            name="rw_ktp"
+                                            inputmode="numeric"
+                                            maxlength="3"
+                                            oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                                                focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                        <p class="text-red-500 text-xs mt-1 hidden error-rw_ktp"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button"
+                                class="btn-remove hidden absolute top-4 right-4
                             flex items-center gap-1
                             bg-red-50 text-red-600
                             px-3 py-1 rounded-lg
                             hover:bg-red-100
                             transition text-sm font-semibold">
-                            <i class="fa-solid fa-trash"></i>
-                            Hapus
-                        </button>
+                                <i class="fa-solid fa-trash"></i>
+                                Hapus
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <div class="mt-4">
-                    <button type="button"
-                        id="btnAddKK"
-                        class="flex items-center gap-2 
+
+                    <div class="mt-4">
+                        <button type="button"
+                            id="btnAddKK"
+                            class="flex items-center gap-2 
                         border border-[#61359C] text-[#61359C]
                         text-sm font-semibold px-3 py-1.5 rounded-lg
                         hover:bg-[#61359C] hover:text-white
                         transition duration-200">
-                        <i class="fa-solid fa-plus"></i>
-                        Tambah KK
-                    </button>
+                            <i class="fa-solid fa-plus"></i>
+                            Tambah KK
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="flex justify-end gap-2 mt-4">
                 <button type="button"
                     id="btnNextTab"
-                    class="bg-[#61359C] text-white px-3 py-1.5 text-sm font-semibold rounded-lg hover:bg-[#512c82] transition">
+                    class="hidden bg-[#61359C] text-white px-3 py-1.5 text-sm font-semibold rounded-lg hover:bg-[#512c82] transition">
                     Selanjutnya
                 </button>
             </div>
@@ -233,6 +254,200 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
+        let kkList = [];
+        let formMode = "create";
+        let selectedUnitId = null;
+
+        async function loadKKDropdown() {
+            try {
+                const res = await fetchWithAuth(`/api/kk/list`);
+
+                const units = res?.data?.list || [];
+
+                unitList = units.map(unit => ({
+                    ...unit,
+                    keluarga: unit.keluarga || []
+                }));
+
+                renderKKDropdown();
+
+            } catch (err) {
+                console.error('Gagal load KK', err);
+            }
+        }
+
+        let isKKManual = false;
+
+        function renderKKDropdown() {
+            const wrapper = document.getElementById('kkDropdown');
+            const dropdown = wrapper.querySelector('.dropdown-menu');
+
+            const searchInput = dropdown.querySelector('input[type="text"]');
+
+            const searchHTML = searchInput ? searchInput.outerHTML : '';
+
+            dropdown.innerHTML = '';
+
+            if (searchHTML) {
+                dropdown.innerHTML += searchHTML;
+            }
+
+            if (!unitList.length) {
+                dropdown.innerHTML += `
+                    <div class="px-3 py-2 text-sm text-gray-400">
+                        Tidak ada data
+                    </div>
+                `;
+                return;
+            }
+
+            unitList.forEach(unit => {
+                const kkListText = unit.keluarga
+                    .map(k => k.no_kk)
+                    .join(' - ');
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+
+                btn.className = `
+                    dropdown-item w-full text-left px-3 py-2 text-sm hover:bg-gray-100
+                `;
+
+                btn.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="font-medium text-gray-800 truncate">
+                            ${truncateText(unit.alamat, 40)}
+                        </span>
+                        <span class="text-xs text-gray-500 mt-0.5">
+                            ${kkListText}
+                        </span>
+                    </div>
+                `;
+
+                btn.onclick = () => {
+                    document.getElementById('formManualKK').classList.remove('hidden');
+
+                    setDropdownLabel('kkDropdown', unit.alamat, 'Pilih No KK');
+
+                    document.getElementById('selected_unit_id').value = unit.id;
+
+                    autofillUnit(unit);
+
+                    formMode = "update";
+                    selectedUnitId = unit.id;
+
+                    dropdown.classList.add('hidden');
+                    btnNextTab.classList.remove('hidden');
+                };
+
+                dropdown.appendChild(btn);
+            });
+
+            const otherBtn = document.createElement('button');
+            otherBtn.type = 'button';
+            otherBtn.className = `
+                w-full text-center px-4 py-2 text-sm
+                text-[#61359C] hover:bg-gray-100 font-semibold
+            `;
+            otherBtn.textContent = "+ Tambah KK Baru";
+
+            otherBtn.onclick = () => {
+                resetFormKK();
+                setDropdownLabel('kkDropdown', '', 'Tambah KK Baru');
+
+                formMode = "create";
+                selectedUnitId = null;
+            };
+
+            dropdown.appendChild(otherBtn);
+        }
+
+        function truncateText(text, max = 40) {
+            if (!text) return '-';
+            return text.length > max ? text.slice(0, max) + '...' : text;
+        }
+
+        function resetFormKK() {
+            isKKManual = true;
+
+            document.getElementById('formManualKK').classList.remove('hidden');
+
+            document.getElementById('selected_keluarga_id').value = '';
+            document.getElementById('selected_unit_id').value = '';
+            document.getElementById('selected_no_kk').value = '';
+
+            document.querySelectorAll('#formManualKK input, #formManualKK textarea')
+                .forEach(el => {
+                    if (el.type === 'checkbox') el.checked = false;
+                    else el.value = '';
+                });
+
+            initKelurahanPosyandu();
+            document.getElementById('btnNextTab').classList.remove('hidden');
+        }
+
+        function autofillUnit(unit) {
+            const kepalaList = unit.keluarga || [];
+
+            document.querySelector('[name="alamat"]').value = unit.alamat || '';
+            document.querySelector('[name="rt"]').value = unit.rt || '';
+            document.querySelector('[name="rw"]').value = unit.rw || '';
+            document.getElementById('selected_keluarga_id').value =
+                kepalaList?.[0]?.id || '';
+
+            const container = document.getElementById('kkContainer');
+
+            const items = container.querySelectorAll('.kk-item');
+            items.forEach((item, i) => {
+                if (i > 0) item.remove();
+            });
+
+            const firstItem = container.querySelector('.kk-item');
+
+            fillKKItem(firstItem, kepalaList[0]);
+
+            for (let i = 1; i < kepalaList.length; i++) {
+                const clone = firstItem.cloneNode(true);
+                clone.setAttribute('data-keluarga-id', kepalaList[i]?.id ?? '');
+                container.appendChild(clone);
+                fillKKItem(clone, kepalaList[i]);
+            }
+
+            updateRemoveButtons();
+        }
+
+        function fillKKItem(el, kk) {
+            if (!kk) return;
+            el.setAttribute('data-keluarga-id', kk.id ?? '');
+            const kepala = kk.kepala_keluarga || {};
+
+            el.querySelector('[name="no_kk"]').value = kk.no_kk || '';
+            el.querySelector('[name="nik_kepala_keluarga"]').value = kepala.nik || '';
+            el.querySelector('[name="nama_kepala_keluarga"]').value = kepala.nama || '';
+            el.querySelector('[name="no_telepon"]').value = kk.no_telepon || '';
+
+            const checkbox = el.querySelector('.kk-luar-wilayah');
+            const luarField = el.querySelector('.luar-wilayah-field');
+
+            const isLuar = kk.is_luar_wilayah == 1;
+
+            if (checkbox) {
+                checkbox.checked = isLuar;
+            }
+
+            if (luarField) {
+                if (isLuar) {
+                    luarField.classList.remove('hidden');
+                } else {
+                    luarField.classList.add('hidden');
+                }
+            }
+
+            el.querySelector('[name="alamat_ktp"]').value = kk.alamat_ktp || '';
+            el.querySelector('[name="rt_ktp"]').value = kk.rt_ktp || '';
+            el.querySelector('[name="rw_ktp"]').value = kk.rw_ktp || '';
+        }
+
         const tabIdentitas = document.getElementById('tabIdentitas');
         const tabPertanyaan = document.getElementById('tabPertanyaan');
 
@@ -668,7 +883,7 @@
                 </div>
             `;
         }
-        
+
         window.toggleDropdown = function(button) {
             const dropdown = button.parentElement.querySelector('.dropdown-menu');
             const allDropdowns = document.querySelectorAll('.dropdown-menu');
@@ -715,6 +930,7 @@
         async function validateIdentitas() {
             resetErrorsTextOnly();
 
+            const keluargaId = document.getElementById('selected_keluarga_id').value || null;
             const identitasPayload = {
                 kelurahan_id: document.getElementById('kelurahan_id').value.trim(),
                 posyandu_id: document.getElementById('posyandu_id').value.trim(),
@@ -728,7 +944,13 @@
                 const isLuarWilayah =
                     item.querySelector('.kk-luar-wilayah').checked ? 1 : 0;
 
+                const keluargaId =
+                    item.getAttribute('data-keluarga-id') ||
+                    item.dataset.keluargaId ||
+                    null;
+
                 identitasPayload.keluarga.push({
+                    id: keluargaId,
                     is_luar_wilayah: isLuarWilayah,
                     no_kk: item.querySelector('[name="no_kk"]').value.trim(),
                     no_telepon: item.querySelector('[name="no_telepon"]').value.trim(),
@@ -743,8 +965,13 @@
                 });
             });
 
-            const result = await fetchWithAuth(`/api/identitas_keluarga?validate_only=1`, {
-                method: "POST",
+            const isUpdate = formMode === "update";
+
+            const url = `/api/identitas_keluarga?validate_only=1`;
+
+            const method = isUpdate ? "PUT" : "POST";
+            const result = await fetchWithAuth(url, {
+                method: method,
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-TOKEN": "{{ csrf_token() }}"
@@ -924,6 +1151,7 @@
                 scrollToFirstError();
                 return;
             }
+
             try {
                 const identitasPayload = {
                     kelurahan_id: document.getElementById('kelurahan_id').value,
@@ -938,7 +1166,13 @@
                     const isLuarWilayah =
                         item.querySelector('.kk-luar-wilayah').checked ? 1 : 0;
 
+                    const keluargaId =
+                        item.getAttribute('data-keluarga-id') ||
+                        item.dataset.keluargaId ||
+                        null;
+
                     identitasPayload.keluarga.push({
+                        id: keluargaId,
                         is_luar_wilayah: isLuarWilayah,
                         no_kk: item.querySelector('[name="no_kk"]').value,
                         no_telepon: item.querySelector('[name="no_telepon"]').value,
@@ -953,10 +1187,18 @@
                         nik_kepala_keluarga: item.querySelector('[name="nik_kepala_keluarga"]').value,
                         nama_kepala_keluarga: item.querySelector('[name="nama_kepala_keluarga"]').value
                     });
+                    console.log("FINAL PAYLOAD UPDATE:", identitasPayload.keluarga);
                 });
 
-                const identitasResult = await fetchWithAuth(`/api/identitas_keluarga`, {
-                    method: "POST",
+                const url = "/api/identitas_keluarga";
+                const method = formMode === "update" ? "PUT" : "POST";
+
+                if (formMode === "update") {
+                    identitasPayload.id = selectedUnitId;
+                }
+
+                const identitasResult = await fetchWithAuth(url, {
+                    method: method,
                     headers: {
                         "Content-Type": "application/json",
                         "X-CSRF-TOKEN": "{{ csrf_token() }}"
@@ -1040,8 +1282,17 @@
             }
         });
 
+        function setDropdownLabel(id, text, fallback) {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            const label = el.querySelector('.dropdown-selected');
+            if (label) label.textContent = text || fallback;
+        }
+
         await initApp();
         initKelurahanPosyandu();
+        await loadKKDropdown();
     });
 </script>
 @endsection

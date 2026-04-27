@@ -85,6 +85,12 @@ class IdentitasKeluargaController extends Controller
             return response()->failed($request->validator->errors());
         }
 
+        if ($request->has('validate_only')) {
+            return response()->json([
+                'message' => 'Validasi berhasil'
+            ]);
+        }
+
         $payload = $request->only([
             'id',
             'kelurahan_id',
@@ -370,6 +376,19 @@ class IdentitasKeluargaController extends Controller
         return response()->json([
             'status'  => true,
             'message' => 'Data warga berhasil diimport'
+        ]);
+    }
+
+    public function listKK(Request $request)
+    {
+        $data = $this->helper->getAllKK([
+            'kelurahan_id' => $request->kelurahan_id,
+            'posyandu_id'  => $request->posyandu_id,
+            'keyword'      => $request->keyword,
+        ]);
+
+        return response()->success([
+            'list' => $data['data']
         ]);
     }
 }

@@ -136,8 +136,14 @@ class IdentitasAnggotaController extends Controller
 
     public function getByKeluarga($keluargaId)
     {
-        $anggota = AnggotaKeluargaModel::where('keluarga_id', $keluargaId)->get();
-
+        $anggota = AnggotaKeluargaModel::where('keluarga_id', $keluargaId)
+            ->whereDoesntHave('jawaban', function ($q) {
+                $q->whereHas('pertanyaan.section.kategori', function ($k) {
+                    $k->where('target_skrining', 'nik');
+                });
+            })
+            ->get();
+            
         return response()->success([
             'data' => IdentitasAnggotaResource::collection($anggota)
         ]);

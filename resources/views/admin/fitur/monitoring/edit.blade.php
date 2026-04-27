@@ -101,7 +101,7 @@
             <div id="contentSkriningNik" class="hidden"></div>
 
             <div class="flex justify-between mt-6">
-                <a href="{{ url('hasil-skrining') }}"
+                <a href="{{ url('admin/hasil-skrining') }}"
                     class="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 text-sm">
                     Kembali
                 </a>
@@ -122,16 +122,24 @@
 
     async function loadDetail() {
         try {
-            const res = await fetch(`/api/monitoring/hasil-skrining/${unitId}`);
-            const json = await res.json();
+            const result = await fetchWithAuth(`/api/monitoring/hasil-skrining/${unitId}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
 
-            if (json.status && json.data) {
-                setFormData(json.data);
-            } else {
+            if (!result || !result.status) {
                 console.error("Data kosong atau status false");
+                showErrorToast("Gagal mengambil detail data");
+                return;
             }
+
+            setFormData(result.data);
+
         } catch (err) {
             console.error("ERROR FETCH:", err);
+            showErrorToast("Terjadi kesalahan saat mengambil detail");
         }
     }
 
@@ -146,16 +154,23 @@
     let kaderData = [];
 
     async function loadKader() {
-        try {
-            const res = await fetch(`{{ url('api/users') }}`);
-            const json = await res.json();
+    try {
+        const result = await fetchWithAuth(`{{ url('api/users') }}`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        });
 
-            kaderData = (json.data.list || []).filter(u => u.role === 'kader');
-            renderKaderDropdown();
-        } catch (error) {
-            console.error('Gagal load kader:', error);
-        }
+        kaderData = (result.data.list || []).filter(u => u.role === 'kader');
+
+        renderKaderDropdown();
+
+    } catch (error) {
+        console.error('Gagal load kader:', error);
+        showErrorToast("Terjadi kesalahan saat mengambil data kader");
     }
+}
 
     function renderKaderDropdown() {
         const dropdown = document
@@ -191,8 +206,12 @@
     let kelurahanData = [];
 
     async function loadKelurahan() {
-        const res = await fetch(`{{ url('api/kelurahan') }}`);
-        const json = await res.json();
+        const json = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        });
 
         kelurahanData = json.data.list || [];
         renderKelurahanDropdown();
@@ -345,7 +364,6 @@
             let lastSection = null;
 
             skriningKk.pertanyaan.forEach((q, i) => {
-console.log(q);
                 if (q.section !== lastSection) {
                     html += `
                         <tr class="bg-gray-50">
@@ -641,7 +659,7 @@ console.log(q);
         document.getElementById('posyandu_id').value = unit.posyandu_id ?? '';
         setDropdownLabel('posyanduDropdown', unit.posyandu || 'Pilih Posyandu', 'Pilih Posyandu');
         setDropdownDisabled('posyanduDropdown', !unit.posyandu_id);
-        
+
     };
 
     document.addEventListener('DOMContentLoaded', () => {

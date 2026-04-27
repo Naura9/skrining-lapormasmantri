@@ -43,6 +43,11 @@ class KeluargaModel extends Model implements CrudInterface
             ->where('hubungan_keluarga', 'Kepala Keluarga');
     }
 
+    public function skrining()
+    {
+        return $this->hasMany(SkriningModel::class, 'keluarga_id', 'id');
+    }
+
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
         $skip = ($page * $itemPerPage) - $itemPerPage;

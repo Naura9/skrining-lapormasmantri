@@ -266,7 +266,6 @@
             try {
                 const res = await fetchWithAuth(`/api/identitas_keluarga`);
                 if (!res?.data) return;
-
                 const unitList = res.data.list || [];
 
                 kkData = [];
@@ -426,7 +425,6 @@
             setDropdownLabel('statusDropdown', a.status_perkawinan || '', 'Pilih Status');
 
             const nikInput = document.getElementById('selected_nik');
-            if (nikInput) nikInput.value = a.nik || '';
             if (nikInput) nikInput.value = a.nik || '';
         }
 
@@ -1012,10 +1010,6 @@
                 namaInput.removeAttribute('readonly');
                 nikInput.removeAttribute('readonly');
             }
-        });
-
-        observer.observe(hubunganLabel, {
-            childList: true
         });
 
         observer.observe(hubunganLabel, {

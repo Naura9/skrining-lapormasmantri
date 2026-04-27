@@ -121,13 +121,40 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        $user = $this->user->delete($id);
+        $result = $this->user->delete($id);
 
-        if (!$user) {
-            return response()->failed(['Mohon maaf data pengguna tidak ditemukan']);
+        if (!$result['status']) {
+            return response()->json([
+                'status' => false,
+                'message' => $result['message']
+            ], 400);
         }
 
-        return response()->success($user, 'User berhasil dihapus');
+        return response()->json([
+            'status' => true,
+            'message' => $result['message']
+        ]);
+    }
+
+    public function resetPassword(Request $request, $id)
+    {
+        $request->validate([
+            'password' => 'required|min:6'
+        ]);
+
+        $result = $this->user->resetPassword($id, $request->password);
+
+        if (!$result['status']) {
+            return response()->json([
+                'status' => false,
+                'message' => $result['message']
+            ], 400);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => $result['message']
+        ]);
     }
 
     public function import_kader(Request $request)
@@ -236,6 +263,7 @@ class UserController extends Controller
                 'id'          => $kaderId,
                 'user_id'     => $userId,
                 'posyandu_id' => $posyandu->id,
+                'no_telepon'  => $value['F'],
                 'status'      => 'aktif',
                 'created_at'  => now()
             ];
@@ -274,7 +302,7 @@ class UserController extends Controller
 
         return response()->json([
             'status'  => true,
-            'message' => 'Data kader berhasil diimport'
+            'message' => 'Data berhasil diimport'
         ]);
     }
 
@@ -423,7 +451,7 @@ class UserController extends Controller
 
         return response()->json([
             'status'  => true,
-            'message' => 'Data tenaga kesehatan berhasil diimport'
+            'message' => 'Data berhasil diimport'
         ]);
     }
 }

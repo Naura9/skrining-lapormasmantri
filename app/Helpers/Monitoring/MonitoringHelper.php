@@ -376,7 +376,7 @@ class MonitoringHelper extends Helper
                 'jawaban.anggota'
             ]);
 
-        if ($user->role === 'kader') {
+        if ($user && $user->role === 'kader') {
             $query->where('user_id', $user->id);
         }
 
@@ -1081,7 +1081,7 @@ class MonitoringHelper extends Helper
     {
         $allSiklus = DB::table('m_kategori')
             ->where('target_skrining', 'nik')
-            ->orderBy('created_at', 'asc')  
+            ->orderBy('created_at', 'asc')
             ->select('id', 'nama_kategori')
             ->get();
 
@@ -1111,7 +1111,7 @@ class MonitoringHelper extends Helper
 
         $raw = $query
             ->groupBy('kat.id')
-            ->pluck('jumlah_nik', 'siklus_id'); 
+            ->pluck('jumlah_nik', 'siklus_id');
 
         $data = $allSiklus->map(function ($s) use ($raw) {
             return [

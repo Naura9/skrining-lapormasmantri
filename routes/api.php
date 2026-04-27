@@ -88,9 +88,11 @@ Route::middleware(['auth.api'])->group(function () {
 
     Route::get('/identitas_keluarga', [IdentitasKeluargaController::class, 'index']);
     Route::get('/identitas_keluarga/{id}', [IdentitasKeluargaController::class, 'show']);
+    Route::get('/kk/list', [IdentitasKeluargaController::class, 'listKK']);
     Route::post('/identitas_keluarga', [IdentitasKeluargaController::class, 'store']);
     Route::put('/identitas_keluarga', [IdentitasKeluargaController::class, 'update']);
     Route::delete('/identitas_keluarga/{id}', [IdentitasKeluargaController::class, 'destroy']);
+
 
     Route::get('/identitas_anggota', [IdentitasAnggotaController::class, 'index']);
     Route::get('/identitas_anggota/{id}', [IdentitasAnggotaController::class, 'show']);
