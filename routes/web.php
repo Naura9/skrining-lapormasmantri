@@ -36,6 +36,8 @@ Route::view('/data-warga-nik', 'admin.fitur.data_warga.nik.index')->name('admin.
 Route::post('/admin/fitur/data_warga/kk/import', [IdentitasKeluargaController::class, 'import_data_keluarga'])->name('data-warga.kk.import');
 Route::post('/admin/fitur/data_warga/nik/import', [IdentitasAnggotaController::class, 'import_anggota'])->name('data-warga.nik.import');
 
+Route::view('/admin/profil', 'admin.fitur.profil')->name('admin.fitur.profil');
+
 //kader
 Route::view('/dashboard-kader', 'kader.dashboard_kader')->name('kader.dashboard_kader');
 

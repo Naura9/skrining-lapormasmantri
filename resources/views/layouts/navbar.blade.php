@@ -58,7 +58,6 @@
         const user = window.App?.user;
         if (!user) return;
 
-        // === PROFILE LINK LOGIC ===
         const profileLink = document.getElementById("profileLink");
 
         if (profileLink && user.role) {
@@ -71,8 +70,11 @@
                 case "nakes":
                     profileUrl = "/nakes/profil";
                     break;
+                case "admin":
+                    profileUrl = "/admin/profil";
+                    break;
                 default:
-                    profileUrl = "/profil";
+                    profileUrl = "/";
                     break;
             }
 

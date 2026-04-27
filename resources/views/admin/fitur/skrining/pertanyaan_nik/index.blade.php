@@ -125,13 +125,12 @@
 
         async function loadKategoriFilter() {
             try {
-                const res = await fetch(`{{ url('api/kategori') }}`);
-                const json = await res.json();
+                const result = await fetchWithAuth(`{{ url('api/kategori') }}`);
 
-                const list = json.data.list || [];
+                const list = result.data?.list || [];
 
                 kategoriList = list
-                    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at)) 
+                    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
                     .filter(k => k.target_skrining?.toLowerCase() === 'nik');
 
                 renderKategoriDropdown();
@@ -180,17 +179,8 @@
             }
 
             try {
-                const response = await fetch(`{{ url('api/pertanyaan') }}`, {
-                    headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    }
-                });
-
-                const result = await response.json();
-                if (!result || !result.data) return;
-
-                const list = result.data.list || [];
+                const result = await fetchWithAuth(`{{ url('api/pertanyaan') }}`);
+                const list = result.data?.list || [];
 
                 const filtered = list.filter(item =>
                     item.target_skrining?.toLowerCase() === 'nik' &&
@@ -289,25 +279,21 @@
             }, 300);
 
             try {
-                const res = await fetch(`/api/section/${id}/move`, {
+                const result = await fetchWithAuth(`/api/section/${id}/move`, {
                     method: "PUT",
                     headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
                         direction
                     })
                 });
 
-                const json = await res.json();
-
-                if (!res.ok || !json.status) {
-                    showErrorToast(json.message || "Tidak bisa dipindahkan");
+                if (!result || result.status_code) {
+                    showErrorToast(result?.message || "Tidak bisa dipindahkan");
                     await fetchPertanyaan();
                     return;
                 }
-
                 await fetchPertanyaan();
 
             } catch (error) {
@@ -315,6 +301,7 @@
                 fetchPertanyaan();
             }
         }
+
         window.moveSection = moveSection;
 
         async function movePertanyaan(id, sectionId, direction) {
@@ -372,25 +359,21 @@
             }, 300);
 
             try {
-                const res = await fetch(`/api/pertanyaan/${id}/move`, {
+                const result = await fetchWithAuth(`/api/pertanyaan/${id}/move`, {
                     method: "PUT",
                     headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
                         direction
                     })
                 });
 
-                const json = await res.json();
-
-                if (!res.ok || !json.status) {
-                    showErrorToast(json.message || "Tidak bisa dipindahkan");
+                if (!result || result.status_code) {
+                    showErrorToast(result?.message || "Tidak bisa dipindahkan");
                     await fetchPertanyaan();
                     return;
                 }
-
                 await fetchPertanyaan();
 
             } catch (error) {
@@ -668,22 +651,20 @@
 
                 showDeleteConfirmToast("Apakah Anda yakin ingin menghapus pertanyaan ini?", async () => {
                     try {
-                        const response = await fetch(`/api/pertanyaan/${id}`, {
-                            method: "DELETE",
-                            headers: {
-                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                            }
+                        const result = await fetchWithAuth(`/api/pertanyaan/${id}`, {
+                            method: "DELETE"
                         });
 
-                        const result = await response.json();
-
-                        if (!response.ok || result.status === false) {
-                            showErrorToast(result.message ?? "Pertanyaan tidak dapat dihapus");
+                        if (!result || result.status === false || result.status_code) {
+                            showErrorToast(
+                                "Terjadi kesalahan",
+                                result?.message || "Pertanyaan tidak dapat dihapus"
+                            );
                             return;
                         }
 
-                        showSuccessToast("Data berhasil dihapus!");
-                        fetchPertanyaan();
+                        showSuccessToast(result.message || "Data berhasil dihapus!");
+                        await fetchPertanyaan();
 
                     } catch (error) {
                         showErrorToast("Terjadi kesalahan pada server!");
@@ -694,22 +675,17 @@
             if (sectionBtn) {
                 const id = sectionBtn.dataset.id;
                 try {
-                    const res = await fetch(`/api/section/${id}`, {
-                        method: "DELETE",
-                        headers: {
-                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                        }
+                    const result = await fetchWithAuth(`/api/section/${id}`, {
+                        method: "DELETE"
                     });
 
-                    const json = await res.json();
-
-                    if (!res.ok || !json.status) {
-                        showErrorToast(json.message || "Gagal menghapus section");
+                    if (!result || result.status_code) {
+                        showErrorToast(result?.message || "Gagal menghapus section");
                         return;
                     }
 
-                    showSuccessToast("Section berhasil dihapus!");
-                    fetchPertanyaan();
+                    showSuccessToast(result.message || "Section berhasil dihapus!");
+                    await fetchPertanyaan();
 
                 } catch (error) {
                     showErrorToast("Terjadi kesalahan server!");
@@ -744,33 +720,53 @@
                     formData.append("_method", "PUT");
                 }
 
-                const res = await fetch(url, {
-                    method: method,
-                    body: formData
-                });
-                const data = await res.json();
+                try {
+                    let url = "{{ url('api/pertanyaan') }}";
 
-                if (!data.errors) {
-                    showSuccessToast("Data berhasil disimpan!");
-                    pertanyaanModalRef.classList.add("hidden");
-                    pertanyaanModalRef.classList.remove("flex");
-                    fetchPertanyaan();
-                } else {
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(key => {
+                    if (mode === "edit" && id) {
+                        formData.append("_method", "PUT");
+                    }
+
+                    const result = await fetchWithAuth(url, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (!result) return;
+
+                    document.querySelectorAll("[id^='error-']").forEach(el => {
+                        el.textContent = "";
+                        el.classList.add("hidden");
+                    });
+
+                    if (result.status_code === 422 && result.errors) {
+                        Object.keys(result.errors).forEach(key => {
                             const el = document.getElementById("error-" + key);
                             if (el) {
-                                el.textContent = data.errors[key][0];
+                                el.textContent = result.errors[key][0];
                                 el.classList.remove("hidden");
                             }
                         });
-                    } else {
-                        showErrorToast("Gagal menyimpan data!");
+                        return;
                     }
+
+                    if (result.status_code && result.status_code !== 200) {
+                        showErrorToast(result.message || "Gagal menyimpan data");
+                        return;
+                    }
+
+                    showSuccessToast(result.message || "Data berhasil disimpan!");
+                    pertanyaanModalRef.classList.add("hidden");
+                    pertanyaanModalRef.classList.remove("flex");
+                    fetchPertanyaan();
+
+                } catch (err) {
+                    console.error("Error:", err);
+                    showErrorToast("Terjadi kesalahan pada server!");
                 }
             } catch (err) {
                 console.error("Error:", err);
-                alert("Terjadi kesalahan pada server!");
+                showErrorToast("Terjadi kesalahan pada server!");
             }
         });
 
@@ -781,10 +777,9 @@
             if (mode === "edit" && id) {
                 pertanyaanModalTitle.textContent = "Edit Pertanyaan Skrining NIK";
                 try {
-                    const data = await fetch(`{{ url('api/pertanyaan') }}/${id}`);
-                    const json = await data.json();
+                    const result = await fetchWithAuth(`{{ url('api/pertanyaan') }}/${id}`);
 
-                    const item = json.data;
+                    const item = result.data;
                     setFormData(item);
 
                     formEditPertanyaan.setAttribute('data-mode', 'edit');
@@ -879,39 +874,47 @@
 
             try {
                 let url = "{{ url('api/section') }}";
-                let method = "POST";
 
                 if (mode === "edit" && id) {
                     formData.append("_method", "PUT");
                 }
 
-                const res = await fetch(url, {
-                    method: method,
+                const result = await fetchWithAuth(url, {
+                    method: "POST",
                     body: formData
                 });
-                const data = await res.json();
 
-                if (!data.errors) {
-                    showSuccessToast("Section berhasil diperbarui!");
-                    sectionModalRef.classList.add("hidden");
-                    sectionModalRef.classList.remove("flex");
-                    fetchPertanyaan();
-                } else {
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(key => {
-                            const el = document.getElementById("error-" + key);
-                            if (el) {
-                                el.textContent = data.errors[key][0];
-                                el.classList.remove("hidden");
-                            }
-                        });
-                    } else {
-                        showErrorToast("Gagal menyimpan data!");
-                    }
+                if (!result) return;
+
+                document.querySelectorAll("[id^='error-']").forEach(el => {
+                    el.textContent = "";
+                    el.classList.add("hidden");
+                });
+
+                if (result.status_code === 422 && result.errors) {
+                    Object.keys(result.errors).forEach(key => {
+                        const el = document.getElementById("error-" + key);
+                        if (el) {
+                            el.textContent = result.errors[key][0];
+                            el.classList.remove("hidden");
+                        }
+                    });
+                    return;
                 }
+
+                if (result.status_code && result.status_code !== 200) {
+                    showErrorToast(result.message || "Gagal menyimpan data");
+                    return;
+                }
+
+                showSuccessToast(result.message || "Section berhasil diperbarui!");
+                sectionModalRef.classList.add("hidden");
+                sectionModalRef.classList.remove("flex");
+                fetchPertanyaan();
+
             } catch (err) {
                 console.error("Error:", err);
-                alert("Terjadi kesalahan pada server!");
+                showErrorToast("Terjadi kesalahan pada server!");
             }
         });
 
@@ -924,10 +927,8 @@
                 sectionModalTitle.textContent = "Edit Section";
 
                 try {
-                    const res = await fetch(`{{ url('api/section') }}/${id}`);
-                    const json = await res.json();
-
-                    const item = json.data;
+                    const result = await fetchWithAuth(`{{ url('api/section') }}/${id}`);
+                    const item = result.data;
 
                     setFormSectionData(item);
 
@@ -936,7 +937,15 @@
 
                 } catch (err) {
                     console.error("Gagal mengambil data section:", err);
+                    showErrorToast("Terjadi kesalahan pada server!");
                 }
+            } else {
+                sectionModalTitle.textContent = "Tambah Section";
+
+                setFormSectionData(null);
+
+                formEditSection.removeAttribute('data-id');
+                formEditSection.setAttribute('data-mode', 'add');
             }
         };
 

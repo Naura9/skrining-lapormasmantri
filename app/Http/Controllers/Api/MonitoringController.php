@@ -34,6 +34,7 @@ class MonitoringController extends Controller
     public function monitoringNikPerKk(Request $request)
     {
         $filter = $request->only([
+            'search',
             'kelurahan_id',
             'posyandu_id'
         ]);
@@ -70,6 +71,20 @@ class MonitoringController extends Controller
         return response()->json($result);
     }
 
+    public function getHasilSkriningById($unitId)
+    {
+        $result = $this->monitoringHelper->getHasilSkriningById($unitId);
+        return response()->json($result);
+    }
+
+    public function edit($unitId)
+    {
+        $data = $this->monitoringHelper->getHasilSkriningById($unitId);
+
+        $data = $data['data'][0] ?? null;
+
+        return view('admin.fitur.monitoring.edit', compact('data'));
+    }
 
     public function exportHasilSkrining(Request $request)
     {
@@ -101,10 +116,10 @@ class MonitoringController extends Controller
         return response()->json($result);
     }
 
-    public function updateUnit(UpdateSkriningRequest $request, $unitId)
+    public function updateSkrining(UpdateSkriningRequest $request, $unitId)
     {
         try {
-            $result = $this->monitoringHelper->updateUnitSkrining($unitId, $request->validated());
+            $result = $this->monitoringHelper->updateSkrining($unitId, $request->validated());
 
             return response()->json([
                 "status" => true,
@@ -117,5 +132,17 @@ class MonitoringController extends Controller
                 "message" => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function chartMonitoringNikPerSiklus(Request $request)
+    {
+        $filter = $request->only([
+            'kelurahan_id',
+            'posyandu_id'
+        ]);
+
+        return response()->json(
+            $this->monitoringHelper->chartMonitoringNikPerSiklus($filter)
+        );
     }
 }

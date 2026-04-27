@@ -57,7 +57,10 @@
 
                         <p id="passwordError" class="text-[#E71D1D] text-sm mt-1 hidden"></p>
                     </div>
-                    <a href="" class="text-sm text-[#0A90FE] text-left mb-2">Lupa Password?</a>
+                    <a href="#" onclick="openForgotModal(event)"
+                        class="text-sm text-[#0A90FE] text-left mb-2">
+                        Lupa Password?
+                    </a>
                     <button type="submit"
                         class="w-full py-2 font-semibold text-white rounded-lg bg-[#61359C] cursor-pointer">
                         Masuk
@@ -68,6 +71,44 @@
         </div>
     </div>
 </body>
+<x-modal id="forgotModalRef" size="md">
+    <x-slot name="title">
+        <h3 class="text-lg font-bold">Lupa Password</h3>
+    </x-slot>
+
+    <form id="forgotForm" class="space-y-4">
+
+        <div class="text-left">
+            <label class="block text-sm font-semibold mb-1">Nama Lengkap</label>
+            <input type="text" id="fp_name"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                placeholder="Masukkan nama lengkap">
+        </div>
+
+        <div class="text-left">
+            <label class="block text-sm font-semibold mb-1">Role</label>
+            <x-dropdown
+                id="roleDropdown"
+                label="Pilih Role"
+                :options="['Kader', 'Nakes']"
+                width="w-full" />
+            <input type="hidden" id="fp_role">
+        </div>
+
+    </form>
+
+    <x-slot name="footer">
+        <button type="button" onclick="closeForgotModal()"
+            class="w-full px-6 py-2 rounded-lg bg-gray-400 text-white">
+            Batal
+        </button>
+
+        <button type="button" onclick="sendToWhatsApp()"
+            class="w-full px-6 py-2 rounded-lg bg-[#61359C] text-white">
+            Kirim
+        </button>
+    </x-slot>
+</x-modal>
 
 </html>
 
@@ -166,5 +207,52 @@
             icon.classList.remove("fa-eye-slash");
             icon.classList.add("fa-eye");
         }
+    }
+    const forgotModal = document.getElementById("forgotModalRef");
+
+    function openForgotModal(e) {
+        e.preventDefault();
+        forgotModal.classList.remove("hidden");
+        forgotModal.classList.add("flex");
+    }
+
+    function closeForgotModal() {
+        forgotModal.classList.add("hidden");
+    }
+
+    const roleDropdown = document.getElementById("roleDropdown");
+    const roleInput = document.getElementById("fp_role");
+
+    if (roleDropdown) {
+        roleDropdown.addEventListener("dropdown-changed", (e) => {
+            const val = e.detail.value;
+
+            if (val === "Kader") roleInput.value = "kader";
+            if (val === "Nakes") roleInput.value = "nakes";
+        });
+    }
+
+    function sendToWhatsApp() {
+        const name = document.getElementById("fp_name").value.trim();
+        const role = document.getElementById("fp_role").value;
+
+        if (!name || !role) {
+            showErrorToast("Nama dan Role wajib diisi");
+            return;
+        }
+
+        const adminNumber = "085219586741"; //nomor admin
+
+        const message =
+            `*RESET PASSWORD - LAPOR MAS MANTRI*%0A%0A` +
+            `Nama Lengkap : ${name}%0A` +
+            `Role : ${role.toUpperCase()}%0A%0A` +
+            `Mohon bantuannya untuk melakukan reset password akun saya.%0A%0A` +
+            `Terima kasih.%0A%0A` +
+            `_Pesan ini dikirim otomatis dari sistem Lapor Mas Mantri_`;
+
+        window.open(`https://wa.me/${adminNumber}?text=${message}`, "_blank");
+
+        closeForgotModal();
     }
 </script>

@@ -3,75 +3,121 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="flex flex-col gap-4 w-full max-w-3xl mx-auto text-base mt-5">
-    <div class="grid grid-cols-2 gap-3 mb-3">
-        <button id="btnSkriningKK"
-            class="h-14 rounded-full bg-[#61359C] text-white border-2 border-[#61359C]
-           flex items-center justify-center gap-3 px-4
-           hover:bg-[#4B1F8B] transition-all">
-            <i class="fa-solid fa-people-roof text-xl"></i>
-            <span class="text-sm font-semibold">Skrining KK</span>
-        </button>
+<div class="flex flex-col gap-4 w-full max-w-3xl mx-auto text-base py-5">
+    <div class="w-full mb-4">
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-[#61359C] text-white shadow-sm">
+                        <i class="fa-solid fa-chart-column"></i>
+                    </span>
 
-        <button id="btnSkriningNIK"
-            class="h-14 rounded-full bg-white text-[#61359C] border-2 border-[#61359C]/40
-           flex items-center justify-center gap-3 px-4
-           hover:bg-[#F4E8FF] transition-all">
-            <i class="fa-solid fa-user text-xl"></i>
-            <span class="text-sm font-semibold">Skrining NIK</span>
-        </button>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">
+                            NIK per Siklus
+                        </h2>
+                        <p class="text-xs text-gray-400">
+                            Distribusi berdasarkan siklus
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 w-full flex-wrap">
+                <x-dropdown
+                    id="kelurahanFilterDropdownChart"
+                    label="Semua Kelurahan"
+                    :options="[]"
+                    width="w-full sm:flex-1 h-10"
+                    data-dropdown="filter" />
+
+                <x-dropdown
+                    id="posyanduFilterDropdownChart"
+                    label="Pilih Posyandu"
+                    :options="[]"
+                    width="w-full sm:flex-1 h-10"
+                    data-dropdown="filter" />
+
+                <input type="hidden" id="kelurahan_id_chart">
+                <input type="hidden" id="posyandu_id_chart">
+            </div>
+
+            <div class="w-full h-[260px]">
+                <canvas id="nikSiklusChart"></canvas>
+            </div>
+        </div>
     </div>
 
-    <x-dropdown
-        id="nikCategoryDropdown"
-        label="Pilih Siklus"
-        :options="[]"
-        width="w-full h-10"
-        data-dropdown="filter" 
-        class="hidden"/>
+    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
+        <div class="grid grid-cols-2 gap-3 mb-8">
+            <button id="btnSkriningKK"
+                class="h-14 rounded-full bg-[#61359C] text-white border-2 border-[#61359C]
+                    flex items-center justify-center gap-3 px-4
+                    hover:bg-[#4B1F8B] transition-all">
+                <i class="fa-solid fa-people-roof text-xl"></i>
+                <span class="text-sm font-semibold">Skrining KK</span>
+            </button>
 
-    <x-dropdown
-        id="pertanyaanFilterDropdown"
-        label="Cari Pertanyaan"
-        :options="[]"
-        width="w-full h-10"
-        data-dropdown="filter" />
+            <button id="btnSkriningNIK"
+                class="h-14 rounded-full bg-white text-[#61359C] border-2 border-[#61359C]/40
+                    flex items-center justify-center gap-3 px-4
+                    hover:bg-[#F4E8FF] transition-all">
+                <i class="fa-solid fa-user text-xl"></i>
+                <span class="text-sm font-semibold">Skrining NIK</span>
+            </button>
+        </div>
 
-    <div class="flex flex-col sm:flex-row gap-3 w-full flex-wrap">
         <x-dropdown
-            id="kelurahanFilterDropdown"
-            label="Pilih Kelurahan"
+            id="nikCategoryDropdown"
+            label="Pilih Siklus"
             :options="[]"
-            width="w-full sm:flex-1 h-10"
+            width="w-full h-10"
+            data-dropdown="filter"
+            class="hidden" />
+
+        <x-dropdown
+            id="pertanyaanFilterDropdown"
+            label="Cari Pertanyaan"
+            :options="[]"
+            width="w-full h-10"
             data-dropdown="filter" />
 
-        <x-dropdown
-            id="posyanduFilterDropdown"
-            label="Pilih Posyandu"
-            :options="[]"
-            width="w-full sm:flex-1 h-10"
-            data-dropdown="filter" />
+        <div class="flex flex-col sm:flex-row gap-3 w-full flex-wrap">
+            <x-dropdown
+                id="kelurahanFilterDropdown"
+                label="Pilih Kelurahan"
+                :options="[]"
+                width="w-full sm:flex-1 h-10"
+                data-dropdown="filter" />
 
-        <button id="searchBtn"
-            class="h-9 px-4 bg-[#61359C] text-white text-sm rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200 w-full sm:w-auto flex items-center justify-center">
-            <i class="fa-solid fa-magnifying-glass mr-2"></i> Cari
-        </button>
+            <x-dropdown
+                id="posyanduFilterDropdown"
+                label="Pilih Posyandu"
+                :options="[]"
+                width="w-full sm:flex-1 h-10"
+                data-dropdown="filter" />
+
+            <button id="searchBtn"
+                class="h-9 px-4 bg-[#61359C] text-white text-sm rounded-lg shadow-sm hover:bg-[#4B1F8B] transition-all duration-200 w-full sm:w-auto flex items-center justify-center">
+                <i class="fa-solid fa-magnifying-glass mr-2"></i> Cari
+            </button>
+        </div>
+
+        <input type="hidden" id="skrining_type" value="">
+        <input type="hidden" id="pertanyaan_id" value="">
+        <input type="hidden" id="kelurahan_id" value="">
+        <input type="hidden" id="posyandu_id" value="">
+
+        <div id="noJawabanText" class="mt-10 text-center text-sm text-gray-500 hidden">
+            Tidak ada jawaban untuk pertanyaan ini
+        </div>
+
+        <div class="mt-4 mx-auto w-full max-w-xs">
+            <canvas id="jawabanPieChart"></canvas>
+        </div>
+
+        <div id="skriningTableContainer" class="mt-4 w-full !max-w-full overflow-x-auto text-sm"></div>
     </div>
-
-    <input type="hidden" id="skrining_type" value="">
-    <input type="hidden" id="pertanyaan_id" value="">
-    <input type="hidden" id="kelurahan_id" value="">
-    <input type="hidden" id="posyandu_id" value="">
-
-    <div id="noJawabanText" class="mt-4 text-center text-sm text-gray-500 hidden">
-        Tidak ada jawaban untuk pertanyaan ini
-    </div>
-
-    <div class="mt-4 mx-auto w-full max-w-xs" style="height:250px;">
-        <canvas id="jawabanPieChart"></canvas>
-    </div>
-
-    <div id="skriningTableContainer" class="mt-4 w-full !max-w-full overflow-x-auto text-sm"></div>
 </div>
 
 <div id="skriningDetailModal" class="fixed inset-0 bg-slate-950/30 hidden items-center justify-center z-50 px-4">
@@ -90,6 +136,7 @@
         </div>
     </div>
 </div>
+
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
         let pertanyaanData = [];
@@ -797,10 +844,210 @@
             renderNikCategoryDropdown();
         });
 
+        function renderNikSiklusChart(data) {
+            const labels = data.map(item => item.siklus);
+            const values = data.map(item => item.jumlah_nik);
+
+            const colorPalette = [
+                '#6366F1',
+                '#22C55E',
+                '#F59E0B',
+                '#EF4444',
+                '#3B82F6',
+                '#f65cdf',
+                '#14B8A6',
+                '#F97316',
+            ];
+
+            const backgroundColors = values.map((v, i) => {
+                if (v === 0) return '#F3F4F6'; 
+                return colorPalette[i % colorPalette.length];
+            });
+
+            const ctx = document.getElementById('nikSiklusChart').getContext('2d');
+
+            if (window.nikSiklusChart instanceof Chart) {
+                window.nikSiklusChart.destroy();
+            }
+
+            window.nikSiklusChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Jumlah NIK',
+                        data: values,
+                        backgroundColor: backgroundColors,
+                        borderRadius: 8, 
+                        borderSkipped: false,
+                        barThickness: 28, 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 800,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#111827',
+                            padding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw;
+                                    return val === 0 ?
+                                        'Tidak ada data' :
+                                        `Jumlah: ${val}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false 
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#E5E7EB' 
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadNikSiklusChart() {
+            const url = new URL("{{ url('api/monitoring/nik-per-siklus-chart') }}");
+
+            const kelurahanId = document.getElementById("kelurahan_id_chart").value;
+            const posyanduId = document.getElementById("posyandu_id_chart").value;
+
+            if (kelurahanId) url.searchParams.append("kelurahan_id", kelurahanId);
+            if (posyanduId) url.searchParams.append("posyandu_id", posyanduId);
+
+            const result = await fetchWithAuth(url.toString());
+
+            if (!result.status) return;
+
+            renderNikSiklusChart(result.data);
+        }
+
+        function renderKelurahanDropdownChart() {
+            const dropdown = document
+                .getElementById('kelurahanFilterDropdownChart')
+                .querySelector('.dropdown-menu');
+
+            dropdown.innerHTML = '';
+
+            const btnAll = document.createElement('button');
+            btnAll.type = 'button';
+            btnAll.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100 font-semibold text-[#61359C]';
+            btnAll.textContent = 'Semua Kelurahan';
+
+            btnAll.onclick = () => {
+                setDropdownLabel('kelurahanFilterDropdownChart', 'Semua Kelurahan', 'Pilih Kelurahan');
+
+                document.getElementById('kelurahan_id_chart').value = '';
+                document.getElementById('posyandu_id_chart').value = '';
+
+                setDropdownDisabled('posyanduFilterDropdownChart', true);
+                setDropdownLabel('posyanduFilterDropdownChart', null, 'Pilih Posyandu');
+
+                loadNikSiklusChart();
+            };
+
+            dropdown.appendChild(btnAll);
+
+            kelurahanData.forEach(kel => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
+                btn.textContent = kel.nama_kelurahan;
+
+                btn.onclick = () => {
+                    setDropdownLabel('kelurahanFilterDropdownChart', kel.nama_kelurahan, 'Pilih Kelurahan');
+
+                    document.getElementById('kelurahan_id_chart').value = kel.id;
+
+                    setDropdownDisabled('posyanduFilterDropdownChart', false);
+                    renderPosyanduDropdownChart(kel.posyandu);
+
+                    loadNikSiklusChart();
+                };
+
+                dropdown.appendChild(btn);
+            });
+        }
+
+        function renderPosyanduDropdownChart(posyanduList = []) {
+            const dropdownWrapper = document.getElementById('posyanduFilterDropdownChart');
+            const dropdown = dropdownWrapper.querySelector('.dropdown-menu');
+
+            dropdown.innerHTML = '';
+
+            document.getElementById('posyandu_id_chart').value = '';
+
+            setDropdownLabel('posyanduFilterDropdownChart', null, 'Pilih Posyandu');
+
+            if (!posyanduList.length) {
+                setDropdownDisabled('posyanduFilterDropdownChart', true);
+                dropdown.innerHTML = `
+                <div class="px-4 py-2 text-sm text-gray-400 text-center">
+                    Tidak ada posyandu
+                </div>`;
+                return;
+            }
+
+            posyanduList.forEach(p => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
+                btn.textContent = p.nama_posyandu;
+
+                btn.onclick = () => {
+                    setDropdownLabel('posyanduFilterDropdownChart', p.nama_posyandu, 'Pilih Posyandu');
+
+                    document.getElementById('posyandu_id_chart').value = p.id;
+
+                    loadNikSiklusChart();
+                };
+
+                dropdown.appendChild(btn);
+            });
+        }
+
         await initApp();
-        loadPertanyaan();
-        loadKelurahan();
+        await loadPertanyaan();
+        await loadKelurahan();
         setDropdownDisabled('posyanduFilterDropdown', true);
+
+        renderKelurahanDropdownChart();
+        setDropdownLabel(
+            'kelurahanFilterDropdownChart',
+            'Semua Kelurahan',
+            'Pilih Kelurahan'
+        );
+
+        document.getElementById('kelurahan_id_chart').value = '';
+        document.getElementById('posyandu_id_chart').value = '';
+        setDropdownDisabled('posyanduFilterDropdownChart', true);
+        loadNikSiklusChart();
     });
 </script>
 @endsection
