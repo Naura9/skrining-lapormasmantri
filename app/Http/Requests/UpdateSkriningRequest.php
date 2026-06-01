@@ -6,7 +6,7 @@ use App\Models\AnggotaKeluargaModel;
 use App\Models\KeluargaModel;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateSkriningRequest extends FormRequest
 {
@@ -17,9 +17,15 @@ class UpdateSkriningRequest extends FormRequest
         return true;
     }
 
-    public function failedValidation(Validator $validator)
+    protected function failedValidation(Validator $validator)
     {
-        $this->validator = $validator;
+        throw new HttpResponseException(
+            response()->json([
+                'status' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422)
+        );
     }
 
     public function rules(): array
@@ -36,8 +42,8 @@ class UpdateSkriningRequest extends FormRequest
             "unit.rw" => "required|string",
 
             "skrining_kk" => "nullable|array",
-            "skrining_kk.*.pertanyaan_id" => "required_with:skrining_kk|string|exists:m_pertanyaan,id",
-            "skrining_kk.*.jawaban" => "required_with:skrining_kk|string",
+            "skrining_kk.*.pertanyaan_id" => "required|string|exists:m_pertanyaan,id",
+            "skrining_kk.*.jawaban" => "present",
             "keluarga" => "required|array|min:1",
             "keluarga.*.keluarga_id" => "required|uuid|exists:m_keluarga,id",
 
@@ -60,14 +66,57 @@ class UpdateSkriningRequest extends FormRequest
             "keluarga.*.identitas.alamat" => "nullable|string",
             "keluarga.*.identitas.rt" => "nullable|string",
             "keluarga.*.identitas.rw" => "nullable|string",
-            "keluarga.*.identitas.no_telepon" => "nullable|string",
+            "keluarga.*.identitas.no_telepon" => "required|string",
+
+            "keluarga.*.identitas.is_luar_wilayah" => "nullable|in:0,1",
+            "keluarga.*.identitas.alamat_ktp" => [
+                "nullable",
+                function ($attribute, $value, $fail) {
+                    preg_match('/keluarga\.(\d+)\.identitas\.alamat_ktp/', $attribute, $m);
+                    $index = $m[1] ?? null;
+
+                    $isLuar = $this->input("keluarga.$index.identitas.is_luar_wilayah");
+
+                    if ($isLuar == "1" && empty($value)) {
+                        $fail("Alamat KTP wajib diisi jika KK luar wilayah.");
+                    }
+                }
+            ],
+
+            "keluarga.*.identitas.rt_ktp" => [
+                "nullable",
+                function ($attribute, $value, $fail) {
+                    preg_match('/keluarga\.(\d+)\.identitas\.rt_ktp/', $attribute, $m);
+                    $index = $m[1] ?? null;
+
+                    $isLuar = $this->input("keluarga.$index.identitas.is_luar_wilayah");
+
+                    if ($isLuar == "1" && empty($value)) {
+                        $fail("RT KTP wajib diisi jika KK luar wilayah.");
+                    }
+                }
+            ],
+
+            "keluarga.*.identitas.rw_ktp" => [
+                "nullable",
+                function ($attribute, $value, $fail) {
+                    preg_match('/keluarga\.(\d+)\.identitas\.rw_ktp/', $attribute, $m);
+                    $index = $m[1] ?? null;
+
+                    $isLuar = $this->input("keluarga.$index.identitas.is_luar_wilayah");
+
+                    if ($isLuar == "1" && empty($value)) {
+                        $fail("RW KTP wajib diisi jika KK luar wilayah.");
+                    }
+                }
+            ],
 
             "keluarga.*.skrining_nik" => "nullable|array",
 
             "keluarga.*.skrining_nik.*.anggota_id" =>
             "required_with:keluarga.*.skrining_nik|uuid|exists:m_anggota_keluarga,id",
 
-            "keluarga.*.skrining_nik.*.identitas.nama" => "nullable|string",
+            "keluarga.*.skrining_nik.*.identitas.nama" => "required|string",
             "keluarga.*.skrining_nik.*.identitas.nik" => [
                 "required",
                 "digits:16",
@@ -85,19 +134,49 @@ class UpdateSkriningRequest extends FormRequest
                     }
                 }
             ],
-            "keluarga.*.skrining_nik.*.identitas.tempat_lahir" => "nullable|string",
-            "keluarga.*.skrining_nik.*.identitas.tanggal_lahir" => "nullable|date",
-            "keluarga.*.skrining_nik.*.identitas.jenis_kelamin" => "nullable|string",
-            "keluarga.*.skrining_nik.*.identitas.hubungan_keluarga" => "nullable|string",
-            "keluarga.*.skrining_nik.*.identitas.pendidikan_terakhir" => "nullable|string",
-            "keluarga.*.skrining_nik.*.identitas.pekerjaan" => "nullable|string",
-            "keluarga.*.skrining_nik.*.identitas.status_perkawinan" => "nullable|string",
+
+            "keluarga.*.skrining_nik.*.identitas.tempat_lahir" => "required|string",
+            "keluarga.*.skrining_nik.*.identitas.tanggal_lahir" => "required|date",
+            "keluarga.*.skrining_nik.*.identitas.jenis_kelamin" => "required|string",
+            "keluarga.*.skrining_nik.*.identitas.hubungan_keluarga" => [
+                "required",
+                "string",
+                function ($attribute, $value, $fail) {
+
+                    if (strtolower(trim($value)) !== 'kepala keluarga') {
+                        return;
+                    }
+
+                    preg_match('/keluarga\.(\d+)\./', $attribute, $matches);
+
+                    $keluargaIndex = $matches[1] ?? null;
+
+                    $anggotaList = $this->input("keluarga.$keluargaIndex.skrining_nik", []);
+
+                    $jumlahKepalaKeluarga = collect($anggotaList)
+                        ->filter(function ($anggota) {
+
+                            $hubungan = strtolower(
+                                trim($anggota['identitas']['hubungan_keluarga'] ?? '')
+                            );
+
+                            return $hubungan === 'kepala keluarga';
+                        })
+                        ->count();
+
+                    if ($jumlahKepalaKeluarga > 1) {
+                        $fail('Kepala keluarga hanya boleh 1 dalam satu KK.');
+                    }
+                }
+            ],
+            "keluarga.*.skrining_nik.*.identitas.pendidikan_terakhir" => "required|string",
+            "keluarga.*.skrining_nik.*.identitas.pekerjaan" => "required|string",
+            "keluarga.*.skrining_nik.*.identitas.status_perkawinan" => "required|string",
 
             "keluarga.*.skrining_nik.*.jawaban_list" => "nullable|array",
             "keluarga.*.skrining_nik.*.jawaban_list.*.pertanyaan_id" =>
             "required_with:keluarga.*.skrining_nik.*.jawaban_list|string|exists:m_pertanyaan,id",
-            "keluarga.*.skrining_nik.*.jawaban_list.*.jawaban" =>
-            "required_with:keluarga.*.skrining_nik.*.jawaban_list|string",
+            "keluarga.*.skrining_nik.*.jawaban_list.*.jawaban" => "nullable",
         ];
     }
 
@@ -105,7 +184,11 @@ class UpdateSkriningRequest extends FormRequest
     {
         return [
             "tanggal_skrining.required" => "Tanggal skrining wajib diisi.",
+            "tanggal_skrining.date" => "Format tanggal skrining tidak valid.",
+
             "user_id.required" => "User ID (kader) wajib diisi.",
+            "user_id.uuid" => "User ID tidak valid.",
+            "user_id.exists" => "User ID tidak ditemukan.",
 
             "unit.required" => "Unit wajib diisi.",
             "unit.kelurahan_id.required" => "Kelurahan wajib dipilih.",
@@ -116,21 +199,72 @@ class UpdateSkriningRequest extends FormRequest
             "unit.rt.required" => "RT unit wajib diisi.",
             "unit.rw.required" => "RW unit wajib diisi.",
 
-            "skrining_kk.*.pertanyaan_id.required_with" => "Pertanyaan skrining KK wajib.",
-            "skrining_kk.*.jawaban.required_with" => "Jawaban skrining KK wajib.",
-
             "keluarga.required" => "Minimal harus ada 1 keluarga.",
-            "keluarga.*.keluarga_id.required" => "ID keluarga wajib.",
+            "keluarga.min" => "Minimal harus ada 1 keluarga.",
+
+            "keluarga.*.keluarga_id.required" => "ID keluarga wajib diisi.",
             "keluarga.*.keluarga_id.exists" => "ID keluarga tidak ditemukan.",
+
+            "keluarga.*.identitas.no_kk.required" => "No KK wajib diisi.",
+            "keluarga.*.identitas.no_kk.string" => "No KK harus berupa teks.",
             "keluarga.*.identitas.no_kk.unique" => "No KK sudah terdaftar.",
 
+            "keluarga.*.identitas.no_telepon.required" => "No telepon wajib diisi.",
+            "keluarga.*.identitas.no_telepon.string" => "No telepon tidak valid.",
+
+            "keluarga.*.identitas.is_luar_wilayah.boolean" => "Status luar wilayah tidak valid.",
+
+            "keluarga.*.identitas.alamat_ktp.required_if" =>
+            "Alamat KTP wajib diisi jika KK luar wilayah.",
+            "keluarga.*.identitas.rt_ktp.required_if" =>
+            "RT KTP wajib diisi jika KK luar wilayah.",
+            "keluarga.*.identitas.rw_ktp.required_if" =>
+            "RW KTP wajib diisi jika KK luar wilayah.",
+
+            "keluarga.*.skrining_nik.required" => "Data anggota keluarga wajib diisi.",
+            "keluarga.*.skrining_nik.array" => "Format data anggota tidak valid.",
+
             "keluarga.*.skrining_nik.*.anggota_id.required_with" =>
-            "ID anggota wajib diisi untuk skrining NIK.",
-            "keluarga.*.skrining_nik.*.identitas.nik.unique" => "NIK sudah terdaftar.",
+            "ID anggota wajib diisi.",
+            "keluarga.*.skrining_nik.*.anggota_id.uuid" =>
+            "ID anggota tidak valid.",
+            "keluarga.*.skrining_nik.*.anggota_id.exists" =>
+            "Anggota tidak ditemukan.",
+
+            "keluarga.*.skrining_nik.*.identitas.nama.required" =>
+            "Nama wajib diisi.",
+
+            "keluarga.*.skrining_nik.*.identitas.nik.required" =>
+            "NIK wajib diisi.",
+            "keluarga.*.skrining_nik.*.identitas.nik.digits" =>
+            "NIK harus 16 digit.",
+            "keluarga.*.skrining_nik.*.identitas.nik.unique" =>
+            "NIK sudah terdaftar.",
+
+            "keluarga.*.skrining_nik.*.identitas.tempat_lahir.required" =>
+            "Tempat lahir wajib diisi.",
+            "keluarga.*.skrining_nik.*.identitas.tanggal_lahir.required" =>
+            "Tanggal lahir wajib diisi.",
+            "keluarga.*.skrining_nik.*.identitas.tanggal_lahir.date" =>
+            "Tanggal lahir tidak valid.",
+
+            "keluarga.*.skrining_nik.*.identitas.jenis_kelamin.required" =>
+            "Jenis kelamin wajib diisi.",
+            "keluarga.*.skrining_nik.*.identitas.hubungan_keluarga.required" =>
+            "Hubungan keluarga wajib diisi.",
+            "keluarga.*.skrining_nik.*.identitas.pendidikan_terakhir.required" =>
+            "Pendidikan terakhir wajib diisi.",
+            "keluarga.*.skrining_nik.*.identitas.pekerjaan.required" =>
+            "Pekerjaan wajib diisi.",
+            "keluarga.*.skrining_nik.*.identitas.status_perkawinan.required" =>
+            "Status perkawinan wajib diisi.",
+
+            "keluarga.*.skrining_nik.*.jawaban_list.array" =>
+            "Format jawaban tidak valid.",
             "keluarga.*.skrining_nik.*.jawaban_list.*.pertanyaan_id.required_with" =>
-            "Pertanyaan ID wajib pada jawaban anggota.",
-            "keluarga.*.skrining_nik.*.jawaban_list.*.jawaban.required_with" =>
-            "Jawaban wajib pada skrining anggota.",
+            "Pertanyaan wajib diisi.",
+            "keluarga.*.skrining_nik.*.jawaban_list.*.pertanyaan_id.exists" =>
+            "Pertanyaan tidak valid.",
         ];
     }
 }

@@ -380,6 +380,12 @@ class MonitoringHelper extends Helper
             $query->where('user_id', $user->id);
         }
 
+        if ($user->role === 'nakes') {
+            $query->whereHas('keluarga.unitRumah.posyandu.kelurahan', function ($q) use ($user) {
+                $q->where('id', $user->nakesDetail->kelurahan_id);
+            });
+        }
+
         if (!empty($filter['kelurahan_id'])) {
             $query->whereHas('keluarga.unitRumah.posyandu', function ($q) use ($filter) {
                 $q->where('kelurahan_id', $filter['kelurahan_id']);
@@ -679,14 +685,39 @@ class MonitoringHelper extends Helper
                                             return [
                                                 'id' => $agt->id,
                                                 'nama' => $agt->nama,
+                                                'nik' => $agt->nik,
+                                                'tempat_lahir' => $agt->tempat_lahir,
+                                                'tanggal_lahir' => $agt->tanggal_lahir,
+                                                'jenis_kelamin' => $agt->jenis_kelamin,
+                                                'hubungan_keluarga' => $agt->hubungan_keluarga,
+                                                'status_perkawinan' => $agt->status_perkawinan,
+                                                'pendidikan_terakhir' => $agt->pendidikan_terakhir,
+                                                'pekerjaan' => $agt->pekerjaan,
                                                 'tanggal_skrining_nik' => $tanggal,
                                                 'pertanyaan' => collect($items)->map(function ($i) {
                                                     return [
+                                                        'pertanyaan_id' => optional($i['jawaban']->pertanyaan)->id,
+                                                        'jawaban_id' => $i['jawaban']->id,
+                                                        'section_no_urut' => optional($i['jawaban']->pertanyaan->section)->no_urut,
                                                         'section' => optional($i['jawaban']->pertanyaan->section)->judul_section,
+                                                        'no_urut' => optional($i['jawaban']->pertanyaan)->no_urut,
                                                         'pertanyaan' => optional($i['jawaban']->pertanyaan)->pertanyaan,
+                                                        'keterangan' => optional($i['jawaban']->pertanyaan)->keterangan,
+                                                        'jenis_jawaban' => optional($i['jawaban']->pertanyaan)->jenis_jawaban,
+                                                        'opsi_jawaban' => optional($i['jawaban']->pertanyaan)->opsi_jawaban ?? [],
+                                                        'opsi_lain' => optional($i['jawaban']->pertanyaan)->opsi_lain ?? false,
+                                                        'is_required' => optional($i['jawaban']->pertanyaan)->is_required ?? false,
                                                         'jawaban' => $i['jawaban']->value_jawaban
                                                     ];
                                                 })->values()
+                                            ];
+                                        })
+                                        ->sortBy(function ($item) {
+                                            $isKepala = strtolower($item['hubungan_keluarga'] ?? '') === 'kepala keluarga';
+
+                                            return [
+                                                $isKepala ? 0 : 1,
+                                                strtolower($item['nama'] ?? '')
                                             ];
                                         })
                                         ->values();
@@ -703,8 +734,17 @@ class MonitoringHelper extends Helper
                                     'target_skrining' => $target,
                                     'pertanyaan' => collect($groupItems)->map(function ($item) {
                                         return [
+                                            'pertanyaan_id' => optional($item['jawaban']->pertanyaan)->id,
+                                            'jawaban_id' => $item['jawaban']->id,
+                                            'section_no_urut' => optional($item['jawaban']->pertanyaan->section)->no_urut,
                                             'section' => optional($item['jawaban']->pertanyaan->section)->judul_section,
+                                            'no_urut' => optional($item['jawaban']->pertanyaan)->no_urut,
                                             'pertanyaan' => optional($item['jawaban']->pertanyaan)->pertanyaan,
+                                            'keterangan' => optional($item['jawaban']->pertanyaan)->keterangan,
+                                            'jenis_jawaban' => optional($item['jawaban']->pertanyaan)->jenis_jawaban,
+                                            'opsi_jawaban' => optional($item['jawaban']->pertanyaan)->opsi_jawaban ?? [],
+                                            'opsi_lain' => optional($item['jawaban']->pertanyaan)->opsi_lain ?? false,
+                                            'is_required' => optional($item['jawaban']->pertanyaan)->is_required ?? false,
                                             'jawaban' => $item['jawaban']->value_jawaban
                                         ];
                                     })->values()
@@ -728,6 +768,7 @@ class MonitoringHelper extends Helper
                         });
 
                         return [
+                            'keluarga_id' => $keluarga->id,
                             'no_kk' => $keluarga->no_kk,
                             'kepala_keluarga' => $kepala->nama,
                             'nik_kepala_keluarga' => $kepala->nik,
@@ -787,18 +828,41 @@ class MonitoringHelper extends Helper
                 'user_id' => $data['user_id']
             ]);
 
+            $skriningKks = SkriningModel::whereHas('keluarga', function ($q) use ($unitId) {
+                $q->where('unit_rumah_id', $unitId);
+            })->pluck('id');
+
+
             if (!empty($data['skrining_kk'])) {
                 foreach ($data['skrining_kk'] as $kk) {
+                    $jawaban = $kk['jawaban'] ?? null;
 
-                    JawabanModel::whereNull('anggota_keluarga_id')
-                        ->whereHas('skrining', function ($q) use ($unitId) {
-                            $q->whereHas('keluarga', function ($q2) use ($unitId) {
-                                $q2->where('unit_rumah_id', $unitId);
-                            });
-                        })
+                    if (is_array($jawaban)) {
+
+                        $filteredJawaban = array_values(array_filter(
+                            $jawaban,
+                            fn($v) => $v !== 'lainnya'
+                        ));
+
+                        $lainnya = $kk['jawaban_lainnya'] ?? null;
+
+                        if (!empty($lainnya)) {
+                            $filteredJawaban[] = $lainnya;
+                        }
+
+                        $jawaban = json_encode($filteredJawaban);
+                    } else if (
+                        $jawaban === 'lainnya' &&
+                        !empty($kk['jawaban_lainnya'])
+                    ) {
+
+                        $jawaban = $kk['jawaban_lainnya'];
+                    }
+
+                    JawabanModel::whereIn('skrining_id', $skriningKks)
                         ->where('pertanyaan_id', $kk['pertanyaan_id'])
                         ->update([
-                            'value_jawaban' => $kk['jawaban']
+                            'value_jawaban' => $jawaban
                         ]);
                 }
             }
@@ -839,15 +903,15 @@ class MonitoringHelper extends Helper
             foreach ($data['keluarga'] as $kel) {
                 $identitas = $kel['identitas'] ?? [];
 
-                $isLuarWilayah = !empty($identitas['alamat']) && !empty($identitas['rt']) && !empty($identitas['rw']);
-
+                $isLuarWilayah = (int) ($identitas['is_luar_wilayah'] ?? 0);
                 KeluargaModel::where('id', $kel['keluarga_id'])->update([
                     'no_kk' => $identitas['no_kk'] ?? null,
-                    'alamat_ktp' => $identitas['alamat'] ?? null,
-                    'rt_ktp' => $identitas['rt'] ?? null,
-                    'rw_ktp' => $identitas['rw'] ?? null,
                     'no_telepon' => $identitas['no_telepon'] ?? null,
-                    'is_luar_wilayah' => $isLuarWilayah
+                    'is_luar_wilayah' => $isLuarWilayah,
+
+                    'alamat_ktp' => $isLuarWilayah ? ($identitas['alamat_ktp'] ?? null) : null,
+                    'rt_ktp'     => $isLuarWilayah ? ($identitas['rt_ktp'] ?? null) : null,
+                    'rw_ktp'     => $isLuarWilayah ? ($identitas['rw_ktp'] ?? null) : null,
                 ]);
 
                 if (!empty($kel['skrining_nik'])) {
@@ -870,7 +934,6 @@ class MonitoringHelper extends Helper
                                 ->toArray();
 
                             if (!empty($skriningIds)) {
-
                                 JawabanModel::whereIn('skrining_id', $skriningIds)->delete();
 
                                 SkriningModel::whereIn('id', $skriningIds)->delete();
@@ -893,24 +956,127 @@ class MonitoringHelper extends Helper
                                 ]);
                         }
 
-                        foreach ($nikData['jawaban_list'] as $n) {
-                            JawabanModel::whereHas('skrining', function ($q) use ($kel) {
-                                $q->where('keluarga_id', $kel['keluarga_id']);
-                            })
-                                ->where('anggota_keluarga_id', $nikData['anggota_id'])
-                                ->where('pertanyaan_id', $n['pertanyaan_id'])
-                                ->update([
-                                    'value_jawaban' => $n['jawaban']
-                                ]);
+                        if (!empty($nikData['jawaban_list'])) {
+
+                            foreach ($nikData['jawaban_list'] as $n) {
+
+                                $jawaban = $n['jawaban'] ?? null;
+
+                                if (is_array($jawaban)) {
+
+                                    $filteredJawaban = array_values(array_filter(
+                                        $jawaban,
+                                        fn($v) => $v !== 'lainnya'
+                                    ));
+
+                                    $lainnya = $n['jawaban_lainnya'] ?? null;
+
+                                    if (!empty($lainnya)) {
+                                        $filteredJawaban[] = $lainnya;
+                                    }
+
+                                    $jawaban = json_encode($filteredJawaban);
+                                } else if (
+                                    $jawaban === 'lainnya' &&
+                                    !empty($n['jawaban_lainnya'])
+
+                                ) {
+
+                                    $jawaban = $n['jawaban_lainnya'];
+                                }
+
+                                JawabanModel::where('anggota_keluarga_id', $nikData['anggota_id'])
+                                    ->where('pertanyaan_id', $n['pertanyaan_id'])
+                                    ->update([
+                                        'value_jawaban' => $jawaban
+                                    ]);
+                            }
                         }
                     }
                 }
             }
-
             DB::commit();
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public static function deleteAllKkByUnit($unitId)
+    {
+        DB::beginTransaction();
+
+        try {
+            $skriningIds = SkriningModel::whereHas('keluarga', function ($q) use ($unitId) {
+                $q->where('unit_rumah_id', $unitId);
+            })
+                ->whereHas('jawaban', function ($q) {
+                    $q->whereNull('anggota_keluarga_id');
+                })
+                ->pluck('id');
+
+            if ($skriningIds->isEmpty()) {
+                DB::rollBack();
+                return false;
+            }
+
+            $deletedJawaban = JawabanModel::whereIn('skrining_id', $skriningIds)
+                ->whereNull('anggota_keluarga_id')
+                ->delete();
+
+            $deletedSkrining = SkriningModel::whereIn('id', $skriningIds)
+                ->delete();
+
+            DB::commit();
+
+            return [
+                'skrining_ids' => $skriningIds,
+                'deleted_jawaban' => $deletedJawaban,
+                'deleted_skrining' => $deletedSkrining
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function deleteHasilSkriningByUnit($unitId)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $skriningIds = SkriningModel::whereHas('keluarga', function ($q) use ($unitId) {
+                $q->where('unit_rumah_id', $unitId);
+            })->pluck('id');
+
+            if ($skriningIds->isEmpty()) {
+
+                DB::rollBack();
+
+                return [
+                    'status' => false,
+                    'message' => 'Data skrining tidak ditemukan'
+                ];
+            }
+
+            JawabanModel::whereIn('skrining_id', $skriningIds)
+                ->delete();
+
+            SkriningModel::whereIn('id', $skriningIds)
+                ->delete();
+
+            DB::commit();
+
+            return [
+                'status' => true,
+                'message' => 'Semua hasil skrining berhasil dihapus'
+            ];
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
             throw $e;
         }
     }

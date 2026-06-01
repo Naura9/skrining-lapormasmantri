@@ -1,4 +1,4 @@
-function showSuccessToast(title, text = "") {
+function showSuccessToast(title, text = "", callback = null) {
   hideLoadingToast();
 
   const overlay = document.createElement("div");
@@ -21,6 +21,9 @@ function showSuccessToast(title, text = "") {
     className: "toast-custom bg-white text-center rounded-2xl shadow-xl min-w-[300px] max-w-[250px] min-h-[160px] sm:min-h-[260px]",
     callback: function () {
       overlay.remove();
+      if (callback && typeof callback === "function") {
+        callback();
+      }
     },
   });
 

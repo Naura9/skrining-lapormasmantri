@@ -117,7 +117,8 @@ Route::middleware(['auth.api'])->group(function () {
     Route::get('/download/hasil-skrining', [MonitoringController::class, 'exportHasilSkrining']);
     Route::get('/monitoring/hasil-skrining-chart', [MonitoringController::class, 'chartHasilSkrining']);
     Route::put('/monitoring/hasil-skrining/{unit_id}', [MonitoringController::class, 'updateSkrining']);
-
+    Route::delete('/monitoring/hasil-skrining/{unitId}/delete-kk-all', [MonitoringController::class, 'deleteAllKk']);
+    Route::delete('/monitoring/hasil-skrining/{unitId}', [MonitoringController::class, 'deleteHasilSkrining']);
     Route::get('/monitoring/nik-per-siklus-chart', [MonitoringController::class, 'chartMonitoringNikPerSiklus']);
 });
 

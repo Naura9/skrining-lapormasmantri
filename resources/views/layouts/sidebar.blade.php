@@ -90,12 +90,75 @@
             </ul>
 
             @php
+            $isDataWargaActive = request()->routeIs([
+            'admin.data_warga',
+            'admin.data_warga_kk',
+            'admin.data_warga_nik',
+            ]);
+            @endphp
+
+            <a href="#" id="dataWargaMenuToggle"
+                class="group flex items-center justify-between gap-3 px-2 py-2.5 rounded-lg transition font-semibold
+                {{ $isDataWargaActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-address-book text-lg transition w-5 text-center
+                    {{ $isDataWargaActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                    </i>
+                    <span>Data Warga</span>
+                </div>
+            </a>
+
+            <ul id="dataWargaSubMenu" class="pl-5 mt-1 space-y-1 {{ $isDataWargaActive ? 'block' : 'hidden' }}">
+                <li>
+                    <a href="{{ route('admin.fitur.data_warga.kk') }}"
+                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.data_warga.kk')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-users text-lg w-5 text-center
+                        {{ request()->routeIs('admin.fitur.data_warga.kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+
+                        <span>KK</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.fitur.data_warga.nik') }}"
+                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.data_warga.nik')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-user text-lg w-5 text-center
+                        {{ request()->routeIs('admin.fitur.data_warga.nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+
+                        <span>NIK</span>
+                    </a>
+                </li>
+            </ul>
+
+            <a href="{{ route('admin.fitur.data_wilayah') }}"
+                class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
+            {{ request()->routeIs('admin.fitur.data_wilayah') 
+                ? 'bg-[#61359C]/65 text-white font-semibold' 
+                : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
+
+                <i class="fa-solid fa-map-location-dot text-lg w-5 text-center
+            {{ request()->routeIs('admin.fitur.data_wilayah') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                </i>
+                <span>Data Wilayah</span>
+            </a>
+
+            @php
             $isSkriningActive = request()->routeIs([
             'admin.skrining',
             'admin.skrining.kategori',
             'admin.skrining.pertanyaan_kk',
             'admin.skrining.pertanyaan_nik',
-            'admin.monitoring.hasil_skrining',
+            'admin.hasil_skrining.index',
             ]);
             @endphp
 
@@ -133,7 +196,7 @@
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                        <i class="fa-solid fa-people-roof text-lg w-5 text-center
+                        <i class="fa-solid fa-users text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.skrining.pertanyaan_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                         </i>
 
@@ -155,33 +218,20 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.fitur.monitoring.hasil_skrining') }}"
+                    <a href="{{ route('admin.fitur.hasil_skrining.index') }}"
                         class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
-                        {{ request()->routeIs('admin.fitur.monitoring.hasil_skrining')
+                        {{ request()->routeIs('admin.fitur.hasil_skrining.index')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
                         <i class="fa-solid fa-file-lines text-lg w-5 text-center
-                        {{ request()->routeIs('admin.fitur.monitoring.hasil_skrining') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        {{ request()->routeIs('admin.fitur.hasil_skrining.index') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                         </i>
 
                         <span>Hasil Skrining</span>
                     </a>
                 </li>
             </ul>
-
-            <a href="{{ route('admin.fitur.data_wilayah') }}"
-                class="group flex items-center gap-3 px-2 py-2.5 rounded-lg transition
-            {{ request()->routeIs('admin.fitur.data_wilayah') 
-                ? 'bg-[#61359C]/65 text-white font-semibold' 
-                : 'text-[#00000080] font-semibold hover:bg-[#61359C] hover:text-white' }}">
-
-                <i class="fa-solid fa-map-location-dot text-lg w-5 text-center
-            {{ request()->routeIs('admin.fitur.data_wilayah') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
-                </i>
-                <span>Data Wilayah</span>
-            </a>
-
 
             @php
             $isMonitoringActive = request()->routeIs([
@@ -245,57 +295,6 @@
                     </a>
                 </li>
             </ul>
-
-            @php
-            $isDataWargaActive = request()->routeIs([
-            'admin.data_warga',
-            'admin.data_warga_kk',
-            'admin.data_warga_nik',
-            ]);
-            @endphp
-
-            <a href="#" id="dataWargaMenuToggle"
-                class="group flex items-center justify-between gap-3 px-2 py-2.5 rounded-lg transition font-semibold
-                {{ $isDataWargaActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
-
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-address-book text-lg transition w-5 text-center
-                    {{ $isDataWargaActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
-                    </i>
-                    <span>Data Warga</span>
-                </div>
-            </a>
-
-            <ul id="dataWargaSubMenu" class="pl-5 mt-1 space-y-1 {{ $isDataWargaActive ? 'block' : 'hidden' }}">
-                <li>
-                    <a href="{{ route('admin.fitur.data_warga.kk') }}"
-                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
-                        {{ request()->routeIs('admin.fitur.data_warga.kk')
-                            ? 'bg-[#61359C]/65 text-white'
-                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
-
-                        <i class="fa-solid fa-people-roof text-lg w-5 text-center
-                        {{ request()->routeIs('admin.fitur.data_warga.kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
-                        </i>
-
-                        <span>KK</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.fitur.data_warga.nik') }}"
-                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
-                        {{ request()->routeIs('admin.fitur.data_warga.nik')
-                            ? 'bg-[#61359C]/65 text-white'
-                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
-
-                        <i class="fa-solid fa-user text-lg w-5 text-center
-                        {{ request()->routeIs('admin.fitur.data_warga.nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
-                        </i>
-
-                        <span>NIK</span>
-                    </a>
-                </li>
-            </ul>
         </div>
 
         <div id="menu-kader" class="space-y-2" style="display:none;">
@@ -339,7 +338,7 @@
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                        <i class="fa-solid fa-people-roof text-lg w-5 text-center
+                        <i class="fa-solid fa-users text-lg w-5 text-center
                         {{ request()->routeIs('kader.fitur.skrining_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                         </i>
 
@@ -368,7 +367,7 @@
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                <i class="fa-solid fa-file-lines text-lg w-5 text-center
+                <i class="fa-solid fa-clock-rotate-left text-lg w-5 text-center
                         {{ request()->routeIs('kader.fitur.skrining.riwayat_skrining') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                 </i>
 
@@ -390,14 +389,14 @@
                 <span>Dashboard</span>
             </a>
 
-            <a href="{{ route('nakes.fitur.hasil_skrining') }}"
+            <a href="{{ route('nakes.fitur.hasil_skrining.index') }}"
                 class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
-                        {{ request()->routeIs('nakes.fitur.hasil_skrining')
+                        {{ request()->routeIs('nakes.fitur.hasil_skrining.index')
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
                 <i class="fa-solid fa-file-lines text-lg w-5 text-center
-                        {{ request()->routeIs('nakes.fitur.hasil_skrining') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        {{ request()->routeIs('nakes.fitur.hasil_skrining.index') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                 </i>
 
                 <span>Hasil Skrining</span>

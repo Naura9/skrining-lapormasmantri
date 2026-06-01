@@ -77,13 +77,20 @@ class MonitoringController extends Controller
         return response()->json($result);
     }
 
-    public function edit($unitId)
+    public function editAdmin($unitId)
     {
         $data = $this->monitoringHelper->getHasilSkriningById($unitId);
-
         $data = $data['data'][0] ?? null;
 
-        return view('admin.fitur.monitoring.edit', compact('data'));
+        return view('admin.fitur.hasil_skrining.edit', compact('data'));
+    }
+
+    public function editNakes($unitId)
+    {
+        $data = $this->monitoringHelper->getHasilSkriningById($unitId);
+        $data = $data['data'][0] ?? null;
+
+        return view('nakes.fitur.hasil_skrining.edit', compact('data'));
     }
 
     public function exportHasilSkrining(Request $request)
@@ -119,17 +126,68 @@ class MonitoringController extends Controller
     public function updateSkrining(UpdateSkriningRequest $request, $unitId)
     {
         try {
-            $result = $this->monitoringHelper->updateSkrining($unitId, $request->validated());
+            $result = $this->monitoringHelper->updateSkrining(
+                $unitId,
+                $request->validated()
+            );
+
+            if (
+                is_array($result) &&
+                isset($result['status']) &&
+                !$result['status']
+            ) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => $result['message'] ?? 'Gagal memperbarui data'
+                ], 400);
+            }
 
             return response()->json([
-                "status" => true,
-                "message" => "Data skrining berhasil diperbarui",
-                "data" => $result
+                'status' => true,
+                'message' => 'Data skrining berhasil diperbarui',
+                'data' => $result
+            ]);
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteAllKk($unitId)
+    {
+        try {
+            $result = MonitoringHelper::deleteAllKkByUnit($unitId);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Semua skrining KK berhasil dihapus',
+                'data' => $result
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                "status" => false,
-                "message" => $e->getMessage()
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteHasilSkrining($unitId)
+    {
+        try {
+
+            $result = $this->monitoringHelper
+                ->deleteHasilSkriningByUnit($unitId);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
             ], 500);
         }
     }

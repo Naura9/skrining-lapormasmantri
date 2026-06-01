@@ -27,9 +27,9 @@ Route::view('/monitoring-kader', 'admin.fitur.monitoring.kader')->name('admin.fi
 Route::view('/monitoring-nik-per-siklus', 'admin.fitur.monitoring.nik_per_siklus')->name('admin.fitur.monitoring.nik_per_siklus');
 Route::view('/monitoring-nik-per-kk', 'admin.fitur.monitoring.nik_per_kk')->name('admin.fitur.monitoring.nik_per_kk');
 
-Route::view('/admin/hasil-skrining', 'admin.fitur.monitoring.hasil_skrining')->name('admin.fitur.monitoring.hasil_skrining');
+Route::view('/admin/hasil-skrining', 'admin.fitur.hasil_skrining.index')->name('admin.fitur.hasil_skrining.index');
+Route::get('/admin/hasil-skrining/edit/{unitId}', [MonitoringController::class, 'editAdmin'])->name('admin.fitur.hasil_skrining.edit');
 Route::get('/download/hasil-skrining', [MonitoringController::class, 'exportHasilskrining'])->name('hasil_skrining.download');
-Route::get('/hasil-skrining/edit/{unit_id}', [MonitoringController::class, 'edit'])->name('hasil-skrining.edit');
 
 Route::view('/data-warga-kk', 'admin.fitur.data_warga.kk.index')->name('admin.fitur.data_warga.kk');
 Route::view('/data-warga-nik', 'admin.fitur.data_warga.nik.index')->name('admin.fitur.data_warga.nik');
@@ -50,9 +50,9 @@ Route::view('/kader/profil', 'kader.fitur.profil')->name('kader.fitur.profil');
 
 //nakes
 Route::view('/dashboard-nakes', 'nakes.dashboard_nakes')->name('nakes.dashboard_nakes');
-Route::view('/nakes/hasil-skrining', 'nakes.fitur.hasil_skrining')->name('nakes.fitur.hasil_skrining');
+Route::view('/nakes/hasil-skrining', 'nakes.fitur.hasil_skrining.index')->name('nakes.fitur.hasil_skrining.index');
+Route::get('/nakes/hasil-skrining/edit/{unitId}', [MonitoringController::class, 'editNakes'])->name('nakes.fitur.hasil_skrining.edit');
 Route::view('/nakes/monitoring-kader', 'nakes.fitur.monitoring.kader')->name('nakes.fitur.monitoring.kader');
 Route::view('/nakes/monitoring-nik-per-siklus', 'nakes.fitur.monitoring.nik_per_siklus')->name('nakes.fitur.monitoring.nik_per_siklus');
 Route::view('/nakes/monitoring-nik-per-kk', 'nakes.fitur.monitoring.nik_per_kk')->name('nakes.fitur.monitoring.nik_per_kk');
-
 Route::view('/nakes/profil', 'nakes.fitur.profil')->name('nakes.fitur.profil');

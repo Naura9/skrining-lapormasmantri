@@ -14,18 +14,14 @@
                    focus:outline-none focus:ring-2 focus:ring-[#61359C]/50 w-full sm:w-70">
 
             <x-dropdown
-                id="kelurahanFilterDropdown"
-                label="Pilih Kelurahan"
-                :options="[]"
-                width="w-full sm:w-48 h-9"
-                data-dropdown="filter" />
-
-            <x-dropdown
                 id="posyanduFilterDropdown"
                 label="Pilih Posyandu"
                 :options="[]"
                 width="w-full sm:w-48 h-9"
                 data-dropdown="filter" />
+
+            <input type="hidden" id="kelurahan_id" value="">
+            <input type="hidden" id="posyandu_id" value="">
 
             <button id="searchBtn"
                 class="h-9 flex items-center justify-center bg-[#61359C] text-white
@@ -44,8 +40,7 @@
                 Export Excel
             </button>
 
-            <input type="hidden" id="kelurahan_id" value="">
-            <input type="hidden" id="posyandu_id" value="">
+            
         </div> -->
     </div>
     </div>
@@ -55,10 +50,9 @@
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>
                     <th class="px-3 py-2 border border-[#00000033] w-[10%] text-center">Tanggal</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[15%]">Kelurahan</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[15%]">Posyandu</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[15%]">Nama Kader</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[35%] text-left break-words">Alamat</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[45%]break-words">Alamat</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[10%] text-center">Aksi</th>
                 </tr>
             </thead>
@@ -154,7 +148,6 @@
 
                     tr.innerHTML = `
                         <td class="border border-[#00000033] px-3 py-2 text-center">${formatTanggal(tanggal)}</td>
-                        <td class="border border-[#00000033] px-3 py-2">${unit.kelurahan ?? "-"}</td>
                         <td class="border border-[#00000033] px-3 py-2">${unit.posyandu ?? "-"}</td>
                         <td class="border border-[#00000033] px-3 py-2">${item.nama_kader}</td>
                         <td class="border border-[#00000033] px-3 py-2 max-w-xs break-words">${unit.alamat_unit ?? "-"}</td>
@@ -166,15 +159,14 @@
                                     Detail
                                 </button>
                                 
-                                <a href="/hasil-skrining/edit/${unit.unit_rumah_id}"
+                                <a href="/nakes/hasil-skrining/edit/${unit.unit_rumah_id}"
                                     class="px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition">
                                     Edit
                                 </a>
 
                                 <button
                                     class="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-btn"
-                                    data-id="${item.id}"
-                                    data-name="${item.nama_kelurahan}">
+                                    data-unit-id="${unit.unit_rumah_id}">
                                     Hapus
                                 </button>
                             </div>
@@ -255,29 +247,50 @@
 
                             let lastSection = null;
 
-                            skr.pertanyaan?.forEach((p, i) => {
+                            const grouped = (skr.pertanyaan || []).reduce((acc, p) => {
 
-                                if (p.section !== lastSection) {
-                                    kkTableRows += `
+                                const key = p.section || 'Tanpa Section';
+
+                                if (!acc[key]) {
+                                    acc[key] = [];
+                                }
+
+                                acc[key].push(p);
+
+                                return acc;
+
+                            }, {});
+
+                            Object.entries(grouped).forEach(([section, items]) => {
+                                kkTableRows += `
                                     <tr class="bg-gray-50">
                                         <td colspan="3" class="px-3 py-2 font-semibold border-t">
-                                            ${p.section ?? "-"}
+                                            ${section}
                                         </td>
                                     </tr>
                                 `;
-                                    lastSection = p.section;
-                                }
 
-                                kkTableRows += `
-                                <tr>
-                                    <td class="border border-[#00000033] px-3 py-2 text-center w-[40px]">${i + 1}</td>
-                                    <td class="border border-[#00000033] px-3 py-2">${p.pertanyaan ?? "-"}</td>
-                                    <td class="border border-[#00000033] px-3 py-2">${p.jawaban ?? "-"}</td>
-                                </tr>
-                            `;
+                                items.forEach((p, i) => {
+                                    kkTableRows += `
+                                        <tr>
+                                            <td class="border border-[#00000033] px-3 py-2 text-center w-[40px]">
+                                                ${i + 1}
+                                            </td>
+                                            <td class="border border-[#00000033] px-3 py-2">
+                                                ${p.pertanyaan ?? "-"}
+                                            </td>
+                                            <td class="border border-[#00000033] px-3 py-2">
+                                                ${formatJawaban(p.jawaban)}
+                                            </td>
+                                        </tr>
+                                    `;
+                                });
                             });
+
+
                         });
                     };
+
                     detailBody.innerHTML += `
                         <div class="overflow-hidden mt-3">
                             <div class="flex items-center justify-between cursor-pointer toggle-rumah
@@ -337,7 +350,7 @@
                                         <tr>
                                             <td class="border border-[#00000033] px-3 py-2 text-center w-[40px]">${i + 1}</td>
                                             <td class="border border-[#00000033] px-3 py-2">${p.pertanyaan ?? "-"}</td>
-                                            <td class="border border-[#00000033] px-3 py-2">${p.jawaban ?? "-"}</td>
+                                            <td class="border border-[#00000033] px-3 py-2">${formatJawaban(p.jawaban)}</td>
                                         </tr>`;
                                     });
 
@@ -506,6 +519,41 @@
             });
         }
 
+        document.addEventListener("click", function (e) {
+            const btn = e.target.closest(".delete-btn");
+            if (!btn) return;
+
+            const unitId = btn.dataset.unitId;
+
+            showDeleteConfirmToast(
+                "Yakin ingin menghapus semua hasil skrining KK dan skrining NIK?",
+                async () => {
+                    try {
+                        const result = await fetchWithAuth(
+                            `/api/monitoring/hasil-skrining/${unitId}`,
+                            {
+                                method: "DELETE",
+                                headers: {
+                                    "Accept": "application/json"
+                                }
+                            }
+                        );
+
+                        if (!result?.status) {
+                            showErrorToast(result?.message || "Gagal menghapus data");
+                            return;
+                        }
+
+                        showSuccessToast("Data skrining berhasil dihapus");
+                        fetchHasilWithFilter();
+                    } catch (err) {
+                        console.error(err);
+                        showErrorToast("Terjadi kesalahan saat menghapus data");
+                    }
+                }
+            );
+        });
+        
         function formatTanggal(tgl) {
             if (!tgl) return "-";
 
@@ -530,9 +578,20 @@
             if (label) label.textContent = text || fallback;
         }
 
-        let kelurahanData = [];
+        function getKelurahanId() {
+            return window.App?.user?.nakesDetail?.kelurahan_id ?? null;
+        }
 
-        async function loadKelurahan() {
+        let posyanduData = [];
+
+        async function loadPosyandu() {
+            const kelurahanId = getKelurahanId();
+
+            if (!kelurahanId) {
+                showErrorToast("Kelurahan tidak ditemukan di akun Anda");
+                return;
+            }
+
             const json = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
                 method: "GET",
                 headers: {
@@ -540,37 +599,21 @@
                 }
             });
 
-            kelurahanData = json.data.list || [];
-            renderKelurahanDropdown();
-        }
+            const kelurahan = (json.data.list || []).find(k => k.id === kelurahanId);
 
-        function renderKelurahanDropdown() {
-            const dropdown = document
-                .getElementById('kelurahanFilterDropdown')
-                .querySelector('.dropdown-menu');
+            if (!kelurahan) {
+                showErrorToast("Kelurahan tidak valid");
+                return;
+            }
 
-            dropdown.innerHTML = '';
+            document.getElementById("kelurahan_id").value = kelurahan.id;
 
-            kelurahanData.forEach(kel => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
-                btn.textContent = kel.nama_kelurahan;
-
-                btn.onclick = () => {
-                    setDropdownLabel('kelurahanFilterDropdown', kel.nama_kelurahan, 'Pilih Kelurahan');
-                    document.getElementById('kelurahan_id').value = kel.id;
-
-                    setDropdownDisabled('posyanduFilterDropdown', false);
-                    renderPosyanduDropdown(kel.posyandu);
-                };
-
-                dropdown.appendChild(btn);
-            });
+            posyanduData = kelurahan.posyandu || [];
+            renderPosyanduDropdown(posyanduData);
         }
 
         function renderPosyanduDropdown(posyanduList = []) {
-            const dropdownWrapper = document.getElementById('posyanduFilterDropdown'); // <- ubah di sini
+            const dropdownWrapper = document.getElementById('posyanduFilterDropdown');
             const dropdown = dropdownWrapper.querySelector('.dropdown-menu');
 
             dropdown.innerHTML = '';
@@ -578,7 +621,6 @@
             setDropdownLabel('posyanduFilterDropdown', null, 'Pilih Posyandu');
 
             if (!posyanduList.length) {
-                setDropdownDisabled('posyanduFilterDropdown', true);
                 dropdown.innerHTML = `
             <div class="px-4 py-2 text-sm text-gray-400 text-center">
                 Tidak ada posyandu
@@ -599,23 +641,6 @@
 
                 dropdown.appendChild(btn);
             });
-        }
-
-        function setDropdownDisabled(id, disabled = true) {
-            const wrapper = document.getElementById(id);
-            if (!wrapper) return;
-
-            const button = wrapper.querySelector('button');
-            const menu = wrapper.querySelector('.dropdown-menu');
-
-            if (disabled) {
-                button.classList.add('opacity-50', 'cursor-not-allowed');
-                button.setAttribute('disabled', true);
-                if (menu) menu.classList.add('hidden');
-            } else {
-                button.classList.remove('opacity-50', 'cursor-not-allowed');
-                button.removeAttribute('disabled');
-            }
         }
 
         document.getElementById("searchBtn").addEventListener("click", () => {
@@ -658,6 +683,30 @@
             }
         }
 
+        function formatJawaban(jawaban) {
+            if (!jawaban) return "-";
+
+            try {
+                if (typeof jawaban === "string") {
+                    if (jawaban.startsWith("[")) {
+                        const parsed = JSON.parse(jawaban);
+                        if (Array.isArray(parsed)) {
+                            return parsed.join(", ");
+                        }
+                    }
+                    return jawaban;
+                }
+
+                if (Array.isArray(jawaban)) {
+                    return jawaban.join(", ");
+                }
+
+                return jawaban;
+
+            } catch (e) {
+                return jawaban;
+            }
+        }
         // document.getElementById("downloadSkriningBtn").addEventListener("click", () => {
         //     const token = localStorage.getItem('token');
 
@@ -669,8 +718,7 @@
         // });
 
         fetchHasil();
-        loadKelurahan();
-        setDropdownDisabled('posyanduFilterDropdown', true);
+        loadPosyandu();
     });
 </script>
 @endsection
