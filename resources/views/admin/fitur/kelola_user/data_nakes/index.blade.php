@@ -151,18 +151,24 @@
         <h3 class="text-lg font-bold">Reset Password</h3>
     </x-slot>
 
-    <form id="formResetPassword" class="space-y-4 px-2">
+    <form id="formResetPassword" class="space-y-4">
         <input type="hidden" id="reset_user_id">
 
+        <div class="text-left w-full">
+            <label class="block text-sm font-medium mb-1">Nama Tenaga Kesehatan</label>
+            <input type="text" id="reset_nama"
+                class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+                readonly>
+        </div>
         <div class="text-left w-full relative">
             <label class="block text-sm font-medium mb-1">Password Baru</label>
             <input type="password" id="reset_password"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
                 placeholder="Masukkan password baru">
             <button type="button"
-                onclick="togglePassword()"
+                onclick="toggleResetPassword()"
                 class="absolute right-3 top-[30px] text-gray-500 hover:text-gray-700">
-                <i id="eye-icon" class="fa-solid fa-eye-slash"></i>
+                <i id="eye-icon-reset" class="fa-solid fa-eye-slash"></i>
             </button>
             <p id="error-reset_password" class="text-red-500 text-xs mt-1 hidden"></p>
         </div>
@@ -275,7 +281,7 @@
                                 Edit
                             </button>
                             <button
-                                onclick="openResetPasswordModal('${item.id}')"
+                                onclick="openResetPasswordModal('${item.id}', '${item.nama}')"
                                 class="px-3 py-1 text-xs rounded bg-gray-500 text-white hover:bg-gray-600 transition">
                                 Reset Password
                             </button>
@@ -426,17 +432,19 @@
             resetModal.classList.remove("flex");
         });
 
-        window.openResetPasswordModal = function(id) {
+         window.openResetPasswordModal = function(id, nama) {
             document.getElementById("reset_user_id").value = id;
             document.getElementById("reset_password").value = "";
+
+            document.getElementById("reset_nama").value = nama;
 
             resetModal.classList.remove("hidden");
             resetModal.classList.add("flex");
         };
 
-        window.togglePassword = function() {
+        window.toggleResetPassword = function() {
             const input = document.getElementById("reset_password");
-            const icon = document.getElementById("eye-icon");
+            const icon = document.getElementById("eye-icon-reset");
 
             if (input.type === "password") {
                 input.type = "text";

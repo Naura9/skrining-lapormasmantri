@@ -33,9 +33,9 @@
             placeholder="Masukkan password">
 
         <button type="button"
-            onclick="togglePassword()"
+            onclick="toggleFormPassword()"
             class="absolute right-3 top-[30px] text-gray-500 hover:text-gray-700">
-            <i id="eye-icon" class="fa-solid fa-eye-slash"></i>
+            <i id="eye-icon-form" class="fa-solid fa-eye-slash"></i>
         </button>
         <p class="text-red-500 text-xs mt-1 hidden" id="error-password"></p>
     </div>
@@ -115,9 +115,9 @@
 <script>
     const jenisKelaminDropdown = document.getElementById('jenisKelaminDropdown');
 
-    function togglePassword() {
+    function toggleFormPassword() {
         const input = document.getElementById("password");
-        const icon = document.getElementById("eye-icon");
+        const icon = document.getElementById("eye-icon-form");
 
         if (input.type === "password") {
             input.type = "text";

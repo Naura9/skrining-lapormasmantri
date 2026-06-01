@@ -1,18 +1,35 @@
 @extends('layouts.main')
 
-@section('title', 'Riwayat Skrining')
+@section('title', 'Hasil Skrining')
 
 @section('content')
 <section class="p-2 mb-10">
-    <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Riwayat Skrining</h2>
+    <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">Hasil Skrining</h2>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-center gap-4 mb-5 flex-wrap">
         <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <input id="searchInput" type="text"
                 placeholder="Cari berdasarkan nama, No KK, atau NIK..."
                 class="h-9 bg-white border border-[#00000033] rounded-lg px-3 text-sm
-                   focus:outline-none focus:ring-2 focus:ring-[#61359C]/50 w-full sm:w-75">
+                   focus:outline-none focus:ring-2 focus:ring-[#61359C]/50 w-full sm:w-70">
 
+            <x-dropdown
+                id="kelurahanFilterDropdown"
+                label="Pilih Kelurahan"
+                :options="[]"
+                width="w-full sm:w-48 h-9"
+                data-dropdown="filter" />
+
+            <x-dropdown
+                id="posyanduFilterDropdown"
+                label="Pilih Posyandu"
+                :options="[]"
+                width="w-full sm:w-48 h-9"
+                data-dropdown="filter" />
+
+            <input type="hidden" id="kelurahan_id" value="">
+            <input type="hidden" id="posyandu_id" value="">
+            
             <button id="searchBtn"
                 class="h-9 flex items-center justify-center bg-[#61359C] text-white
                    border border-[#00000033] px-3 rounded-lg text-sm
@@ -20,18 +37,31 @@
                 <i class="fa-solid fa-magnifying-glass"></i>
             </button>
         </div>
+        <!-- <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
+
+            <button id="downloadSkriningBtn"
+                class="h-9 flex items-center gap-2 bg-[#61359C] text-white
+                    text-sm px-4 rounded-lg hover:bg-[#61359C]/80
+                    transition w-full sm:w-auto justify-center">
+                <i class="fa-solid fa-file-excel"></i>
+                Export Excel
+            </button>
+
+            
+        </div> -->
+    </div>
     </div>
 
     <div class="overflow-x-auto">
         <table class="min-w-full border border-[#00000033] text-sm text-left text-gray-700">
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>
-                    <th class="px-3 py-2 border border-[#00000033] w-[12%]">Tanggal</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[38%] break-words">Alamat</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[10%]">RT/RW</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[10%]">Jumlah KK</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[10%]">Luar Wilayah</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[10%]">Aksi</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[10%] text-center">Tanggal</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[15%]">Kelurahan</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[15%]">Posyandu</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[15%]">Nama Kader</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[35%] break-words">Alamat</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[10%] text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody id="hasilTableBody"></tbody>
@@ -72,16 +102,28 @@
 
         async function fetchHasil() {
             try {
-                const result = await fetchWithAuth(`{{ url('api/monitoring/hasil-skrining') }}`);
+                const result = await fetchWithAuth(`{{ url('api/monitoring/hasil-skrining') }}`, {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                });
 
-                if (result?.status_code && result.status_code !== 200) return;
+                if (!result || !result.data) return;
 
                 const hasil = result.data || [];
+
                 renderTable(hasil);
 
             } catch (error) {
                 console.error("Gagal memuat data hasil skrining:", error);
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500 py-4">Gagal memuat data</td></tr>`;
+
+                tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-red-500 py-4">
+                    Gagal memuat data
+                </td>
+            </tr>`;
             }
         }
 
@@ -89,7 +131,7 @@
             tbody.innerHTML = "";
 
             if (!list.length) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-500 py-4">Tidak ada data hasil skrining.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-500 py-4">Tidak ada hasil.</td></tr>`;
                 return;
             }
 
@@ -114,16 +156,27 @@
 
                     tr.innerHTML = `
                         <td class="border border-[#00000033] px-3 py-2 text-center">${formatTanggal(tanggal)}</td>
+                        <td class="border border-[#00000033] px-3 py-2">${unit.kelurahan ?? "-"}</td>
+                        <td class="border border-[#00000033] px-3 py-2">${unit.posyandu ?? "-"}</td>
+                        <td class="border border-[#00000033] px-3 py-2">${item.nama_kader}</td>
                         <td class="border border-[#00000033] px-3 py-2 max-w-xs break-words">${unit.alamat_unit ?? "-"}</td>
-                        <td class="border border-[#00000033] px-3 py-2 text-center">${unit.rt_unit ?? "-"}/${unit.rw_unit ?? "-"}</td>
-                        <td class="border border-[#00000033] px-3 py-2 text-center">${unit.jumlah_kk ?? "-"}</td>
-                        <td class="border border-[#00000033] px-3 py-2 text-center">${unit.jumlah_kk_luar_wilayah ?? 0}</td>
                         <td class="border border-[#00000033] px-3 py-2 text-center">
                             <div class="flex justify-center gap-1">
                                 <button
                                     class="px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition open-detail"
                                     data-index="${i}" data-unit="${index}">
                                     Detail
+                                </button>
+                                
+                                <a href="/admin/hasil-skrining/edit/${unit.unit_rumah_id}"
+                                    class="px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition">
+                                    Edit
+                                </a>
+
+                                <button
+                                    class="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition delete-btn"
+                                    data-unit-id="${unit.unit_rumah_id}">
+                                    Hapus
                                 </button>
                             </div>
                         </td>
@@ -149,7 +202,7 @@
                         <div class="space-y-2 text-sm">
                             <div class="grid grid-cols-[120px_1fr]">
                                 <span class="font-semibold">Tanggal Skrining</span>
-                                <span>: ${formatTanggal(tanggal)}</span>
+                                <span>: ${tanggal}</span>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 mt-3 gap-y-1">
@@ -203,31 +256,50 @@
 
                             let lastSection = null;
 
-                            skr.pertanyaan?.forEach((p, i) => {
+                            const grouped = (skr.pertanyaan || []).reduce((acc, p) => {
 
-                                if (p.section !== lastSection) {
-                                    kkTableRows += `
+                                const key = p.section || 'Tanpa Section';
+
+                                if (!acc[key]) {
+                                    acc[key] = [];
+                                }
+
+                                acc[key].push(p);
+
+                                return acc;
+
+                            }, {});
+
+                            Object.entries(grouped).forEach(([section, items]) => {
+                                kkTableRows += `
                                     <tr class="bg-gray-50">
                                         <td colspan="3" class="px-3 py-2 font-semibold border-t">
-                                            ${p.section ?? "-"}
+                                            ${section}
                                         </td>
                                     </tr>
                                 `;
-                                    lastSection = p.section;
-                                }
 
-                                kkTableRows += `
-                                <tr>
-                                    <td class="border border-[#00000033] px-3 py-2 text-center w-[40px]">${i + 1}</td>
-                                    <td class="border border-[#00000033] px-3 py-2">${p.pertanyaan ?? "-"}</td>
-                                    <td class="border border-[#00000033] px-3 py-2">${p.jawaban ?? "-"}</td>
-                                </tr>
-                            `;
+                                items.forEach((p, i) => {
+                                    kkTableRows += `
+                                        <tr>
+                                            <td class="border border-[#00000033] px-3 py-2 text-center w-[40px]">
+                                                ${i + 1}
+                                            </td>
+                                            <td class="border border-[#00000033] px-3 py-2">
+                                                ${p.pertanyaan ?? "-"}
+                                            </td>
+                                            <td class="border border-[#00000033] px-3 py-2">
+                                                ${formatJawaban(p.jawaban)}
+                                            </td>
+                                        </tr>
+                                    `;
+                                });
                             });
                         });
                     };
+
                     detailBody.innerHTML += `
-                        <div class="overflow-hidden mt-3">
+                        <div class="mt-3">
                             <div class="flex items-center justify-between cursor-pointer toggle-rumah
                                 font-semibold text-[#61359C] bg-[#61359C]/22 px-2 py-1 rounded-lg"
                                 data-target="skrining-rumah">
@@ -237,8 +309,8 @@
 
                             <div id="skrining-rumah" class="hidden mt-2">
                                 <div class="overflow-x-auto">
-                                    <table class="min-w-full text-sm border border-[#00000033] rounded-lg">
-                                        <thead class="bg-gray-100">
+                                    <table class="min-w-[700px] text-sm border border-[#00000033] rounded-lg">
+                                        <thead class="bg-gray-100 whitespace-nowrap">
                                             <tr>
                                                 <th class="px-3 py-2 border border-[#00000033] w-[40px]">No</th>
                                                 <th class="px-3 py-2 border border-[#00000033]">Pertanyaan</th>
@@ -285,7 +357,7 @@
                                         <tr>
                                             <td class="border border-[#00000033] px-3 py-2 text-center w-[40px]">${i + 1}</td>
                                             <td class="border border-[#00000033] px-3 py-2">${p.pertanyaan ?? "-"}</td>
-                                            <td class="border border-[#00000033] px-3 py-2">${p.jawaban ?? "-"}</td>
+                                            <td class="border border-[#00000033] px-3 py-2">${formatJawaban(p.jawaban)}</td>
                                         </tr>`;
                                     });
 
@@ -312,18 +384,18 @@
                                                     </div>
 
                                                     <div class="grid grid-cols-[125px_1fr]">
-                                                        <span class="font-semibold">Tempat Lahir</span>
-                                                        <span>: ${detailAgt?.tempat_lahir ?? '-'}</span>
+                                                        <span class="font-semibold">Tanggal Lahir</span>
+                                                        <span>: ${detailAgt?.tanggal_lahir ?? '-'}</span>
                                                     </div>
 
                                                     <div class="grid grid-cols-[125px_1fr]">
                                                         <span class="font-semibold">Pekerjaan</span>
                                                         <span>: ${detailAgt?.pekerjaan ?? '-'}</span>
-                                                    </div>                                                  
+                                                    </div>
                                                     
                                                     <div class="grid grid-cols-[125px_1fr]">
-                                                        <span class="font-semibold">Tanggal Lahir</span>
-                                                        <span>: ${detailAgt?.tanggal_lahir ?? '-'}</span>
+                                                        <span class="font-semibold">Tempat Lahir</span>
+                                                        <span>: ${detailAgt?.tempat_lahir ?? '-'}</span>
                                                     </div>
 
                                                     <div class="grid grid-cols-[125px_1fr]">
@@ -343,8 +415,8 @@
                                                 </div>
                                         
                                                 <div class="overflow-x-auto mt-2">
-                                                    <table class="min-w-full text-sm border border-[#00000033] rounded-lg">
-                                                        <thead class="bg-gray-100">
+                                                    <table class="min-w-[700px] text-sm border border-[#00000033] rounded-lg">
+                                                        <thead class="bg-gray-100 whitespace-nowrap">
                                                             <tr>
                                                                 <th class="px-3 py-2 border border-[#00000033] w-[40px]">No</th>
                                                                 <th class="px-3 py-2 border border-[#00000033]">Pertanyaan</th>
@@ -454,6 +526,41 @@
             });
         }
 
+        document.addEventListener("click", function (e) {
+            const btn = e.target.closest(".delete-btn");
+            if (!btn) return;
+
+            const unitId = btn.dataset.unitId;
+
+            showDeleteConfirmToast(
+                "Yakin ingin menghapus semua hasil skrining KK dan skrining NIK?",
+                async () => {
+                    try {
+                        const result = await fetchWithAuth(
+                            `/api/monitoring/hasil-skrining/${unitId}`,
+                            {
+                                method: "DELETE",
+                                headers: {
+                                    "Accept": "application/json"
+                                }
+                            }
+                        );
+
+                        if (!result?.status) {
+                            showErrorToast(result?.message || "Gagal menghapus data");
+                            return;
+                        }
+
+                        showSuccessToast("Data skrining berhasil dihapus");
+                        fetchHasilWithFilter();
+                    } catch (err) {
+                        console.error(err);
+                        showErrorToast("Terjadi kesalahan saat menghapus data");
+                    }
+                }
+            );
+        });
+
         function formatTanggal(tgl) {
             if (!tgl) return "-";
 
@@ -478,6 +585,94 @@
             if (label) label.textContent = text || fallback;
         }
 
+        let kelurahanData = [];
+
+        async function loadKelurahan() {
+            const json = await fetchWithAuth(`{{ url('api/kelurahan') }}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+
+            kelurahanData = json.data.list || [];
+            renderKelurahanDropdown();
+        }
+
+        function renderKelurahanDropdown() {
+            const dropdown = document
+                .getElementById('kelurahanFilterDropdown')
+                .querySelector('.dropdown-menu');
+
+            dropdown.innerHTML = '';
+
+            kelurahanData.forEach(kel => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
+                btn.textContent = kel.nama_kelurahan;
+
+                btn.onclick = () => {
+                    setDropdownLabel('kelurahanFilterDropdown', kel.nama_kelurahan, 'Pilih Kelurahan');
+                    document.getElementById('kelurahan_id').value = kel.id;
+
+                    setDropdownDisabled('posyanduFilterDropdown', false);
+                    renderPosyanduDropdown(kel.posyandu);
+                };
+
+                dropdown.appendChild(btn);
+            });
+        }
+
+        function renderPosyanduDropdown(posyanduList = []) {
+            const dropdownWrapper = document.getElementById('posyanduFilterDropdown'); // <- ubah di sini
+            const dropdown = dropdownWrapper.querySelector('.dropdown-menu');
+
+            dropdown.innerHTML = '';
+            document.getElementById('posyandu_id').value = '';
+            setDropdownLabel('posyanduFilterDropdown', null, 'Pilih Posyandu');
+
+            if (!posyanduList.length) {
+                setDropdownDisabled('posyanduFilterDropdown', true);
+                dropdown.innerHTML = `
+            <div class="px-4 py-2 text-sm text-gray-400 text-center">
+                Tidak ada posyandu
+            </div>`;
+                return;
+            }
+
+            posyanduList.forEach(p => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
+                btn.textContent = p.nama_posyandu;
+
+                btn.onclick = () => {
+                    setDropdownLabel('posyanduFilterDropdown', p.nama_posyandu, 'Pilih Posyandu');
+                    document.getElementById('posyandu_id').value = p.id;
+                };
+
+                dropdown.appendChild(btn);
+            });
+        }
+
+        function setDropdownDisabled(id, disabled = true) {
+            const wrapper = document.getElementById(id);
+            if (!wrapper) return;
+
+            const button = wrapper.querySelector('button');
+            const menu = wrapper.querySelector('.dropdown-menu');
+
+            if (disabled) {
+                button.classList.add('opacity-50', 'cursor-not-allowed');
+                button.setAttribute('disabled', true);
+                if (menu) menu.classList.add('hidden');
+            } else {
+                button.classList.remove('opacity-50', 'cursor-not-allowed');
+                button.removeAttribute('disabled');
+            }
+        }
+
         document.getElementById("searchBtn").addEventListener("click", () => {
             fetchHasilWithFilter();
         });
@@ -488,24 +683,73 @@
 
         async function fetchHasilWithFilter() {
             const search = document.getElementById("searchInput").value || "";
+            const kelurahan_id = document.getElementById("kelurahan_id").value || "";
+            const posyandu_id = document.getElementById("posyandu_id").value || "";
 
             try {
-                const url = new URL("{{ url('api/monitoring/hasil-skrining') }}", window.location.origin);
+                const url = new URL("{{ url('api/monitoring/hasil-skrining') }}");
 
                 if (search) url.searchParams.append("search", search);
+                if (kelurahan_id) url.searchParams.append("kelurahan_id", kelurahan_id);
+                if (posyandu_id) url.searchParams.append("posyandu_id", posyandu_id);
 
-                const result = await fetchWithAuth(url.toString());
+                const result = await fetchWithAuth(url.toString(), {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                });
 
-                if (result?.status_code && result.status_code !== 200) return;
+                if (!result || !result.status) {
+                    showErrorToast("Gagal memuat data");
+                    return;
+                }
 
                 renderTable(result.data || []);
 
             } catch (err) {
                 console.error("Gagal memuat data:", err);
+                showErrorToast("Terjadi kesalahan saat mengambil data");
             }
         }
 
+        function formatJawaban(jawaban) {
+            if (!jawaban) return "-";
+
+            try {
+                if (typeof jawaban === "string") {
+                    if (jawaban.startsWith("[")) {
+                        const parsed = JSON.parse(jawaban);
+                        if (Array.isArray(parsed)) {
+                            return parsed.join(", ");
+                        }
+                    }
+                    return jawaban;
+                }
+
+                if (Array.isArray(jawaban)) {
+                    return jawaban.join(", ");
+                }
+
+                return jawaban;
+
+            } catch (e) {
+                return jawaban;
+            }
+        }
+        // document.getElementById("downloadSkriningBtn").addEventListener("click", () => {
+        //     const token = localStorage.getItem('token');
+
+        //     const url = new URL("{{ url('/download/hasil-skrining') }}");
+
+        //     if (token) url.searchParams.append("token", token);
+
+        //     window.location.href = url.toString();
+        // });
+
         fetchHasil();
+        loadKelurahan();
+        setDropdownDisabled('posyanduFilterDropdown', true);
     });
 </script>
 @endsection

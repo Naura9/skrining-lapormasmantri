@@ -40,13 +40,13 @@
                 <form id="loginForm" class="flex flex-col gap-4">
                     <div class="w-full">
                         <input type="text" name="username" placeholder="Username"
-                            class="w-full px-4 py-2 border border-[#C5CACF] rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200">
+                            class="w-full px-4 py-2 border border-[#C5CACF] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
                         <p id="usernameError" class="text-[#E71D1D] text-sm mt-1 hidden"></p>
                     </div>
                     <div class="w-full">
                         <div class="relative">
                             <input id="password" type="password" name="password" placeholder="Password"
-                                class="w-full px-4 py-2 border border-[#C5CACF] rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200">
+                                class="w-full px-4 py-2 border border-[#C5CACF] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
 
                             <button type="button"
                                 onclick="togglePassword('password', 'eye-icon1')"
@@ -81,7 +81,7 @@
         <div class="text-left">
             <label class="block text-sm font-semibold mb-1">Nama Lengkap</label>
             <input type="text" id="fp_name"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                class="w-full px-4 py-2 border border-[#C5CACF] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
                 placeholder="Masukkan nama lengkap">
         </div>
 
@@ -90,7 +90,7 @@
             <x-dropdown
                 id="roleDropdown"
                 label="Pilih Role"
-                :options="['Kader', 'Nakes']"
+                :options="['Kader', 'Tenaga Kesehatan']"
                 width="w-full" />
             <input type="hidden" id="fp_role">
         </div>
@@ -227,8 +227,8 @@
         roleDropdown.addEventListener("dropdown-changed", (e) => {
             const val = e.detail.value;
 
-            if (val === "Kader") roleInput.value = "kader";
-            if (val === "Nakes") roleInput.value = "nakes";
+            if (val === "Kader") roleInput.value = "Kader";
+            if (val === "Tenaga Kesehatan") roleInput.value = "Tenaga Kesehatan";
         });
     }
 

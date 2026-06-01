@@ -9,39 +9,13 @@
             placeholder="Masukkan nama kategori">
         <p class="text-red-500 text-xs mt-1 hidden" id="error-nama_kategori"></p>
     </div>
-
-    <div class="text-left">
-        <label for="target_skrining" class="block text-sm font-semibold mb-1">
-            Target Skrining
-        </label>
-        <x-dropdown
-            id="targetSkriningDropdown"
-            label="Pilih Target Skrining"
-            :options="['KK', 'NIK']"
-            width="w-full"
-            data-dropdown="filter" />
-        <p class="text-red-500 text-xs mt-1 hidden" id="error-target_skrining"></p>
-        <input type="hidden" name="target_skrining" id="target_skrining">
-    </div>
+    <input type="hidden" id="target_skrining" name="target_skrining">
 </form>
 
 <script>
     const targetSkriningDropdown = document.getElementById('targetSkriningDropdown');
 
-    const tSDropdown = document.getElementById('targetSkriningDropdown');
     const tSInput = document.getElementById('target_skrining');
-
-    if (tSDropdown) {
-        tSDropdown.addEventListener('dropdown-changed', (e) => {
-            const label = e.detail.value;
-
-            if (label === 'KK') {
-                tSInput.value = 'kk';
-            } else if (label === 'NIK') {
-                tSInput.value = 'nik';
-            }
-        });
-    }
 
     const formModel = {
         id: "",
@@ -52,32 +26,14 @@
     window.setFormData = (item) => {
         if (item) {
             formEdit.querySelector('[name="nama_kategori"]').value = item.nama_kategori ?? '';
-            document.getElementById('target_skrining').value = item.target_skrining ?? '';
-
-            const targetSkriningDropdown = document.querySelector('[data-dropdown="filter"]');
-            if (targetSkriningDropdown) {
-                const label = targetSkriningDropdown.querySelector('.dropdown-selected');
-                if (label) {
-                    label.textContent =
-                        item.target_skrining === 'kk' ?
-                        'KK' :
-                        item.target_skrining === 'nik' ?
-                        'NIK' :
-                        'Pilih Target Skrining';
-                }
-            }
+            document.getElementById('target_skrining').value = 'nik';
         } else {
             formModel.id = "";
-            formModel.nama_kelurahan = "";
+            formModel.nama_kategori = "";
             formModel.target_skrining = "";
-
+            
             formEdit.reset();
-
-            const targetSkriningDropdown = document.querySelector('[data-dropdown="filter"]');
-            if (targetSkriningDropdown) {
-                const label = targetSkriningDropdown.querySelector('.dropdown-selected');
-                if (label) label.textContent = 'Pilih Target Skrining';
-            }
+            document.getElementById('target_skrining').value = 'nik';
         }
     };
 </script>

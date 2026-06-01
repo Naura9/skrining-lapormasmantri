@@ -128,14 +128,14 @@
                 <div class="luar-wilayah-field hidden mt-6">
                     <div class="grid md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold mb-1">Alamat (KTP)</label>
+                            <label class="block text-sm font-semibold mb-1">Alamat KTP</label>
                             <textarea name="alamat_ktp"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
                                         focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"></textarea>
                             <p class="text-red-500 text-xs mt-1 hidden" data-key="alamat_ktp"></p>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold mb-1">RT (KTP)</label>
+                            <label class="block text-sm font-semibold mb-1">RT KTP</label>
                             <input type="text"
                                 name="rt_ktp"
                                 inputmode="numeric"
@@ -146,7 +146,7 @@
                             <p class="text-red-500 text-xs mt-1 hidden" data-key="rt_ktp"></p>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold mb-1">RW (KTP)</label>
+                            <label class="block text-sm font-semibold mb-1">RW KTP</label>
                             <input type="text"
                                 name="rw_ktp"
                                 inputmode="numeric"

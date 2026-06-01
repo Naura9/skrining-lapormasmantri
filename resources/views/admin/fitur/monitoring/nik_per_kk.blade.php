@@ -142,7 +142,7 @@
                         container.innerHTML = "";
                         container.dataset.currentIdx = "";
                     }
-                    
+
                     const noKk = btn.dataset.id;
 
                     let kkData;
@@ -159,9 +159,17 @@
                     const detailBody = document.getElementById("modal-detail-body");
                     detailBody.innerHTML = `
                         <div class="space-y-2 text-sm">
-                            <div class="grid grid-cols-[120px_1fr]">
-                                <span class="font-semibold">Jumlah NIK</span>
-                                <span>: ${kkData.anggota?.length ?? 0}</span>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="grid grid-cols-[120px_1fr]">
+                                    <span class="font-semibold">Jumlah NIK</span>
+                                    <span>: ${kkData.anggota?.length ?? 0}</span>
+                                </div>
+
+                                ${kkData.is_luar_wilayah ? `
+                                    <span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full">
+                                        Luar Wilayah
+                                    </span>
+                                ` : ''}
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 mt-3 gap-y-1">
@@ -184,19 +192,34 @@
                                     <span class="font-semibold">Posyandu</span>
                                     <span>: ${kkData.posyandu ?? '-'}</span>
                                 </div>
+                                </div>
 
+                                <div class="mt-3 space-y-1">
                                 <div class="grid grid-cols-[120px_1fr]">
-                                    <span class="font-semibold">Alamat</span>
-                                    <span>: ${kkData.alamat ?? '-'}</span>
+                                    <span class="font-semibold">Alamat Domisili</span>
+                                    <span>: ${kkData.alamat_unit ?? '-'}</span>
                                 </div>
 
                                 <div class="grid grid-cols-[120px_1fr]">
-                                    <span class="font-semibold">RT / RW</span>
-                                    <span>: ${kkData.rt ?? '-'} / ${kkData.rw ?? '-'}</span>
+                                    <span class="font-semibold">RT / RW Domisili</span>
+                                    <span>: ${kkData.rt_unit ?? '-'} / ${kkData.rw_unit ?? '-'}</span>
                                 </div>
                             </div>
-                            <div class="border-t border-gray-300 my-2"></div>
-                        </div>
+
+                            ${kkData.is_luar_wilayah ? `
+                                <div>
+                                    <div class="grid grid-cols-[120px_1fr]">
+                                        <span class="font-semibold">Alamat KTP</span>
+                                        <span>: ${kkData.alamat_ktp ?? '-'}</span>
+                                    </div>
+
+                                    <div class="grid grid-cols-[120px_1fr]">
+                                        <span class="font-semibold">RT / RW KTP</span>
+                                        <span>: ${kkData.rt_ktp ?? '-'} / ${kkData.rw_ktp ?? '-'}</span>
+                                    </div>
+                                </div>
+                            ` : ''}                        
+                            </div>
                         `;
 
                     if (kkData.anggota && kkData.anggota.some(a => a.no_nik)) {

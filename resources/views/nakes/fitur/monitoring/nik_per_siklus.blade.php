@@ -42,7 +42,7 @@
         </div>
     </div>
 
-    <div class="overflow-x-auto px-0 md:px-15 lg:px-20">
+    <div class="overflow-x-auto">
         <table class="w-full table-fixed border border-[#00000033] text-sm text-gray-700">
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>

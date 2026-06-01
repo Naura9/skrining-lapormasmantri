@@ -68,7 +68,6 @@
 
         <form id="formIdentitas">
             <div id="contentIdentitas">
-
                 <div class="bg-white border border-[#61359C] rounded-2xl p-6 mb-4 space-y-6">
                     <div>
                         <label class="block text-sm font-semibold mb-1">
@@ -342,6 +341,7 @@
 
         function renderNikDropdown() {
             const wrapper = document.getElementById('nikDropdown');
+
             const dropdown = wrapper.querySelector('.dropdown-menu');
 
             const searchEl = dropdown.querySelector('input') ?
@@ -349,55 +349,101 @@
                 null;
 
             dropdown.innerHTML = '';
+
             if (searchEl) dropdown.appendChild(searchEl);
 
             if (!anggotaKk.length) {
                 dropdown.innerHTML += `
-                    <div class="px-3 py-1 text-sm text-gray-400">Tidak ada NIK dalam KK ini</div>
+                    <div class="px-3 py-1 text-sm text-gray-400">
+                        Tidak ada NIK dalam KK ini
+                    </div>
                 `;
-                return;
             }
 
             anggotaKk.forEach(a => {
                 const btn = document.createElement('button');
+
                 btn.type = 'button';
-                btn.className = "dropdown-item block w-full text-sm px-3 py-1 hover:bg-gray-100";
+
+                btn.className =
+                    "dropdown-item block w-full text-sm px-3 py-1 hover:bg-gray-100";
+
                 btn.textContent = `${a.nik} - ${a.nama}`;
 
                 btn.onclick = () => {
                     setDropdownLabel('nikDropdown', a.nik, 'Pilih NIK');
+
                     document.getElementById('selected_nik').value = a.nik;
+
                     document.getElementById('selected_anggota_id').value = a.id;
 
-                    const dropdownLabel = document.querySelector('#nikDropdown .dropdown-selected');
-                    if (dropdownLabel) dropdownLabel.dataset.nik = a.nik;
+                    const dropdownLabel = document.querySelector(
+                        '#nikDropdown .dropdown-selected'
+                    );
+
+                    if (dropdownLabel) {
+                        dropdownLabel.dataset.nik = a.nik;
+                    }
 
                     autofillIdentitas(a);
+
                     dropdown.classList.add('hidden');
                 };
+
                 dropdown.appendChild(btn);
             });
 
             const otherBtn = document.createElement('button');
+
             otherBtn.type = 'button';
-            otherBtn.className = "dropdown-item block w-full text-center px-4 py-1 text-sm text-gray-700 hover:bg-gray-100 transition";
-            otherBtn.textContent = "Lainnya";
+
+            otherBtn.className =
+                "dropdown-item block w-full text-center px-4 py-1 text-sm text-gray-700 hover:bg-gray-100 transition";
+
+            otherBtn.textContent = "+ Tambah NIK";
+
             otherBtn.onclick = () => {
+
+                if (dropdown.querySelector('.dropdown-other-wrapper')) {
+                    return;
+                }
+
                 const wrapperOther = document.createElement('div');
-                wrapperOther.className = 'dropdown-other-wrapper mt-2 pt-3 border-t border-gray-200 px-3 pb-2';
+
+                wrapperOther.className =
+                    'dropdown-other-wrapper mt-2 pt-3 border-t border-gray-200 px-3 pb-2';
+
                 wrapperOther.innerHTML = `
-                    <div class="text-xs text-gray-500 mb-1">Lainnya</div>
-                    <input type="text" id="manual_nik" class="dropdown-other w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50" placeholder="Ketik NIK manual...">
+                    <input
+                        type="number"
+                        id="manual_nik"
+                        class="
+                            dropdown-other
+                            w-full border border-gray-300 rounded-lg
+                            px-3 py-1.5 text-sm
+                            focus:outline-none focus:ring-2
+                            focus:ring-[#61359C]/50
+                        "
+                        placeholder="Ketik NIK..."
+                    >
                 `;
+
                 dropdown.appendChild(wrapperOther);
 
-                wrapper.querySelector('.dropdown-selected').textContent = 'Lainnya';
+                const manualInput =
+                    wrapperOther.querySelector('#manual_nik');
 
-                const manualInput = wrapperOther.querySelector('#manual_nik');
+                manualInput.focus();
+
                 manualInput.addEventListener('input', (e) => {
-                    document.getElementById('selected_nik').value = e.target.value.trim();
+
+                    document.getElementById('selected_nik').value =
+                        e.target.value.trim();
+
+                    document.getElementById('selected_anggota_id').value = '';
                 });
             };
+
             dropdown.appendChild(otherBtn);
         }
 

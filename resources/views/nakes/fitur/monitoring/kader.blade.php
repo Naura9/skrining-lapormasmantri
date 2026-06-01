@@ -37,12 +37,11 @@
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>
                     <th class="px-3 py-2 border border-[#00000033] w-[5%] text-center">No</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[25%]">Nama Kader</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[20%]">Kelurahan</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[20%]">Posyandu</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[35%]">Nama Kader</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[25%]">Posyandu</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[10%] text-center">Skrining KK</th>
                     <th class="px-3 py-2 border border-[#00000033] w-[10%] text-center">Skrining NIK</th>
-                    <th class="px-3 py-2 border border-[#00000033] w-[10%] text-center">Aksi</th>
+                    <th class="px-3 py-2 border border-[#00000033] w-[15%] text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody id="kaderTableBody"></tbody>
@@ -110,7 +109,6 @@
                 tr.innerHTML = `
                     <td class="border border-[#00000033] text-center px-3 py-3">${index + 1}</td>
                     <td class="border border-[#00000033] px-3 py-3">${item.nama_kader}</td>
-                    <td class="border border-[#00000033] px-3 py-2">${item.kelurahan ?? '-'}</td>
                     <td class="border border-[#00000033] px-3 py-2">${item.posyandu ?? '-'}</td>
                     <td class="border border-[#00000033] px-3 py-2 text-center">${item.jumlah_skrining_kk}</td>
                     <td class="border border-[#00000033] px-3 py-2 text-center">${item.jumlah_skrining_nik}</td>
