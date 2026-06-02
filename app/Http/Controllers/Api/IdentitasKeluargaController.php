@@ -75,7 +75,7 @@ class IdentitasKeluargaController extends Controller
 
         return response()->success(
             new IdentitasKeluargaResource($result['data']),
-            'Data keluarga berhasil ditambahkan'
+            'Data berhasil ditambahkan'
         );
     }
 
@@ -128,7 +128,7 @@ class IdentitasKeluargaController extends Controller
 
         return response()->success(
             new IdentitasKeluargaResource($result['data']),
-            'Identitas berhasil diubah'
+            'Data berhasil diubah!'
         );
     }
 

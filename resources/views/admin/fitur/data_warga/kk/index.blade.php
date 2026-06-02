@@ -277,7 +277,7 @@
                     const id = btn.dataset.id;
 
                     showDeleteConfirmToast("Apakah Anda yakin ingin menghapus data ini?", async () => {
-                         try {
+                        try {
                             const result = await fetchWithAuth(`{{ url('api/identitas_keluarga') }}/${id}`, {
                                 method: "DELETE"
                             });
@@ -297,11 +297,28 @@
         formEdit.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            document.querySelectorAll('[id^="error-"]').forEach(el => {
+            document.querySelectorAll('p[data-key]').forEach(el => {
                 el.textContent = "";
                 el.classList.add("hidden");
             });
 
+            document.addEventListener('input', function(e) {
+                const field = e.target.name;
+
+                if (!field) return;
+
+                const container = e.target.closest('.kk-item');
+
+                if (container) {
+                    const errorEl = container.querySelector(`p[data-key="${field}"]`);
+
+                    if (errorEl) {
+                        errorEl.textContent = '';
+                        errorEl.classList.add('hidden');
+                    }
+                }
+            });
+            
             const mode = formEdit.getAttribute("data-mode");
             const id = formEdit.getAttribute("data-id");
 

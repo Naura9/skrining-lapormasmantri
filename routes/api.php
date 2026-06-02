@@ -73,19 +73,7 @@ Route::middleware(['auth.api'])->group(function () {
     Route::post('/unit_rumah', [UnitController::class, 'store']);
     Route::put('/unit_rumah', [UnitController::class, 'update']);
     Route::delete('/unit_rumah/{id}', [UnitController::class, 'destroy']);
-
-    Route::get('/data_keluarga', [KeluargaController::class, 'index']);
-    Route::get('/data_keluarga/{id}', [KeluargaController::class, 'show']);
-    Route::post('/data_keluarga', [KeluargaController::class, 'store']);
-    Route::put('/data_keluarga', [KeluargaController::class, 'update']);
-    Route::delete('/data_keluarga/{id}', [KeluargaController::class, 'destroy']);
-
-    Route::get('/data_anggota', [AnggotaKeluargaController::class, 'index']);
-    Route::get('/data_anggota/{id}', [AnggotaKeluargaController::class, 'show']);
-    Route::post('/data_anggota', [AnggotaKeluargaController::class, 'store']);
-    Route::put('/data_anggota', [AnggotaKeluargaController::class, 'update']);
-    Route::delete('/data_anggota/{id}', [AnggotaKeluargaController::class, 'destroy']);
-
+    
     Route::get('/identitas_keluarga', [IdentitasKeluargaController::class, 'index']);
     Route::get('/identitas_keluarga/{id}', [IdentitasKeluargaController::class, 'show']);
     Route::get('/kk/list', [IdentitasKeluargaController::class, 'listKK']);

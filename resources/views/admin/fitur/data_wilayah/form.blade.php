@@ -74,12 +74,16 @@
                     value="0"
                     class="posyandu-updated">
 
-                <input type="text"
-                    name="posyandu[${index}][nama_posyandu]"
-                    class="posyandu-name flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm
-                        focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
-                    placeholder="Nama posyandu"
-                    value="${data.nama_posyandu ?? ''}">
+                <div class="flex-1">
+                    <input type="text"
+                        name="posyandu[${index}][nama_posyandu]"
+                        class="posyandu-name w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                            focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+                        placeholder="Nama posyandu"
+                        value="${data.nama_posyandu ?? ''}">
+
+                    <p class="text-red-500 text-xs mt-1 hidden posyandu-error"></p>
+                </div>
 
                 <button type="button"
                     class="remove-posyandu text-red-600 hover:text-red-800 font-bold text-lg">

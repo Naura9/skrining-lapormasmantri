@@ -8,8 +8,8 @@
             label="Pilih Siklus"
             :options="[]"
             width="w-full" />
-
         <input type="hidden" name="kategori_id" id="kategori_id">
+        <p class="text-red-500 text-xs mt-1 hidden" id="error-kategori_id"></p>
     </div>
     <div class="text-left">
         <label for="section_id" class="block text-sm font-semibold mb-1">
@@ -100,6 +100,7 @@
             width="w-full"
             disabled />
         <input type="hidden" name="jenis_jawaban" id="jenis_jawaban">
+        <p class="text-red-500 text-xs mt-1 hidden" id="error-jenis_jawaban"></p>
     </div>
 
     <div id="opsiContainer" class="hidden">

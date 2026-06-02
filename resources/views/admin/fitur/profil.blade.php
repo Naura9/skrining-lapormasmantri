@@ -71,7 +71,7 @@
             <div class="flex justify-end gap-3 pt-4 border-t mt-8">
                 <button type="submit"
                     class="px-4 py-2 text-sm rounded-lg bg-[#61359C] text-white hover:bg-[#512c82] transition">
-                    Simpan Perubahan
+                    Simpan
                 </button>
             </div>
         </form>
@@ -238,7 +238,7 @@
                 return;
             }
 
-            showSuccessToast("Profil berhasil diperbarui");
+            showSuccessToast("Profil berhasil diperbarui!");
             await loadProfile();
 
         } catch (err) {

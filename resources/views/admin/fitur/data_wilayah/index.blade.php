@@ -307,7 +307,29 @@
 
                 if (result?.status_code === 422) {
                     Object.keys(result.errors).forEach(key => {
+
+                        if (key.startsWith('posyandu.')) {
+
+                            const parts = key.split('.');
+                            const index = parts[1];
+
+                            const rows = document.querySelectorAll('#posyanduWrapper > div');
+                            const row = rows[index];
+
+                            if (row) {
+                                const errorEl = row.querySelector('.posyandu-error');
+
+                                if (errorEl) {
+                                    errorEl.textContent = result.errors[key][0];
+                                    errorEl.classList.remove('hidden');
+                                }
+                            }
+
+                            return;
+                        }
+
                         const el = document.getElementById("error-" + key);
+
                         if (el) {
                             el.textContent = result.errors[key][0];
                             el.classList.remove("hidden");

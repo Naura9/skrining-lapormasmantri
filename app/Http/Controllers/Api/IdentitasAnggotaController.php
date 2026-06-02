@@ -73,7 +73,7 @@ class IdentitasAnggotaController extends Controller
 
         return response()->success(
             $result['data'],
-            'Anggota keluarga berhasil ditambahkan'
+            'Data berhasil ditambahkan'
         );
     }
 
@@ -105,7 +105,7 @@ class IdentitasAnggotaController extends Controller
 
         return response()->success(
             new IdentitasAnggotaResource($result['data']),
-            'Identitas berhasil diubah'
+            'Data berhasil diubah!'
         );
     }
 
@@ -143,7 +143,7 @@ class IdentitasAnggotaController extends Controller
                 });
             })
             ->get();
-            
+
         return response()->success([
             'data' => IdentitasAnggotaResource::collection($anggota)
         ]);
@@ -175,7 +175,8 @@ class IdentitasAnggotaController extends Controller
         $hasInvalidKK       = false;
         $hasInvalidGender   = false;
         $hasInvalidNIK      = false;
-        $hasDuplicateNIK    = false;
+        $hasDuplicateNIKInFile = false;
+        $hasExistingNIKInDB = false;
         $hasHeaderMismatch  = false;
 
         $expectedHeader = [
@@ -239,12 +240,16 @@ class IdentitasAnggotaController extends Controller
             }
 
             if (in_array($nik, $nikList)) {
-                $hasDuplicateNIK = true;
+                $hasDuplicateNIKInFile = true;
                 continue;
             }
 
-            if (AnggotaKeluargaModel::where('nik', $nik)->exists()) {
-                $hasDuplicateNIK = true;
+            if (
+                AnggotaKeluargaModel::withTrashed()
+                    ->where('nik', $nik)
+                    ->exists()
+            ) {
+                $hasExistingNIKInDB = true;
                 continue;
             }
 
@@ -293,7 +298,8 @@ class IdentitasAnggotaController extends Controller
         if ($hasEmptyField)      $errors[] = 'Terdapat kolom yang kosong.';
         if ($hasInvalidKK)       $errors[] = 'No KK tidak ditemukan di database.';
         if ($hasInvalidNIK)      $errors[] = 'Terdapat NIK yang tidak valid (harus 16 digit).';
-        if ($hasDuplicateNIK)    $errors[] = 'Terdapat NIK yang duplikat atau sudah terdaftar.';
+        if ($hasDuplicateNIKInFile) $errors[] = 'Terdapat NIK yang duplikat pada file import.';
+        if ($hasExistingNIKInDB)    $errors[] = 'Terdapat NIK yang sudah terdaftar di database.';
         if ($hasInvalidGender)   $errors[] = 'Format Jenis Kelamin tidak sesuai.';
 
         if (!empty($errors)) {
@@ -310,7 +316,7 @@ class IdentitasAnggotaController extends Controller
 
         return response()->json([
             'status'  => true,
-            'message' => 'Data anggota keluarga berhasil diimport'
+            'message' => 'Import berhasil!'
         ]);
     }
 }

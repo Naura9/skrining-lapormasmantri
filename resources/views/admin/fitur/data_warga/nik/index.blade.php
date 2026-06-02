@@ -332,7 +332,7 @@
         formEdit.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            document.querySelectorAll('[id^="error-"]').forEach(el => {
+            document.querySelectorAll('p[data-key]').forEach(el => {
                 el.textContent = "";
                 el.classList.add("hidden");
             });

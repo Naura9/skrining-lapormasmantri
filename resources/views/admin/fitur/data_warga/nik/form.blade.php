@@ -38,7 +38,7 @@
         <label for="nik" class="block text-sm font-semibold mb-1">
             NIK
         </label>
-        <input type="text" id="nik" name="nik"
+        <input type="number" id="nik" name="nik"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
                    focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
             placeholder="Masukkan NIK">
@@ -193,6 +193,8 @@
                 });
             });
 
+            window.kkData.sort((a, b) => a.no_kk.localeCompare(b.no_kk));
+            
             renderKKDropdown();
 
         } catch (err) {
@@ -208,12 +210,12 @@
             .querySelector('.dropdown-menu');
 
         dropdown.innerHTML = `
-        <input type="text"
-            placeholder="Cari Nomor KK..."
-            class="dropdown-search w-full px-3 py-2 mb-2 text-sm border border-gray-300 rounded-lg
-                   focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
-            onkeyup="filterDropdownInput(this)">
-    `;
+            <input type="text"
+                placeholder="Cari Nomor KK..."
+                class="dropdown-search w-full px-3 py-2 mb-2 text-sm border border-gray-300 rounded-lg
+                    focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+                onkeyup="filterDropdownInput(this)">
+        `;
 
         kkData.forEach(k => {
             const btn = document.createElement('button');

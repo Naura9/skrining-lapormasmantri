@@ -70,7 +70,7 @@ class PertanyaanController extends Controller
             return response()->failed($pertanyaan['error']);
         }
 
-        return response()->success(new PertanyaanResource($pertanyaan['data']), 'Pertanyaan berhasil ditambahkan');
+        return response()->success(new PertanyaanResource($pertanyaan['data']), 'Pertanyaan berhasil ditambahkan!');
     }
 
     public function update(PertanyaanRequest $request)
@@ -86,7 +86,7 @@ class PertanyaanController extends Controller
 
         $pertanyaan = $this->pertanyaan->update($payload, $payload['id']);
 
-        return response()->success(new PertanyaanResource($pertanyaan['data']), 'Pertanyaan berhasil diubah');
+        return response()->success(new PertanyaanResource($pertanyaan['data']), 'Pertanyaan berhasil diubah!');
     }
 
     public function destroy($id)
@@ -102,7 +102,7 @@ class PertanyaanController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Pertanyaan berhasil dihapus'
+            'message' => 'Pertanyaan berhasil dihapus!'
         ]);
     }
 

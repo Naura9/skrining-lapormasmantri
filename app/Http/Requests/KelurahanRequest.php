@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests;
 
 use App\Http\Resources\Kelurahan\KelurahanResource;
@@ -32,6 +33,9 @@ class KelurahanRequest extends FormRequest
     {
         return [
             'nama_kelurahan' => 'required|max:100',
+
+            'posyandu' => 'required|array|min:1',
+            'posyandu.*.nama_posyandu' => 'required|max:100',
         ];
     }
 
@@ -39,6 +43,9 @@ class KelurahanRequest extends FormRequest
     {
         return [
             'nama_kelurahan' => 'required|max:100',
+
+            'posyandu' => 'required|array|min:1',
+            'posyandu.*.nama_posyandu' => 'required|max:100',
         ];
     }
 
@@ -46,6 +53,10 @@ class KelurahanRequest extends FormRequest
     {
         return [
             'nama_kelurahan.required' => 'Nama kelurahan wajib diisi.',
+
+            'posyandu.required' => 'Minimal harus ada 1 posyandu.',
+            'posyandu.*.nama_posyandu.required' => 'Nama posyandu wajib diisi.',
+            'posyandu.*.nama_posyandu.max' => 'Nama posyandu maksimal 100 karakter.',
         ];
     }
 }

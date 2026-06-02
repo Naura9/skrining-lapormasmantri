@@ -74,7 +74,7 @@ class SectionController extends Controller
         $payload = $request->only(['id', 'kategori_id', 'judul_section', 'no_urut']);
         $section = $this->sectionHelper->update($payload, $payload['id']);
 
-        return response()->success(new SectionResource($section['data']), 'Section berhasil diubah');
+        return response()->success(new SectionResource($section['data']), 'Section berhasil diubah!');
     }
 
     public function destroy($id)
