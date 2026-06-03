@@ -74,11 +74,9 @@ class IdentitasKeluargaRequest extends FormRequest
 
             'keluarga.*.nik_kepala_keluarga' => [
                 'required',
-                'string',
                 'digits:16',
                 'distinct',
-                Rule::unique('m_anggota_keluarga', 'nik')
-                    ->whereNull('deleted_at')
+                Rule::unique('m_anggota_keluarga', 'nik'),
             ],
 
             'keluarga.*.nama_kepala_keluarga' => 'required|string|max:150',
@@ -117,6 +115,7 @@ class IdentitasKeluargaRequest extends FormRequest
                 'required',
                 'string',
                 'digits:16',
+                'distinct',
                 function ($attribute, $value, $fail) {
                     $index = explode('.', $attribute)[1];
                     $id = $this->input("keluarga.$index.id");
@@ -135,23 +134,18 @@ class IdentitasKeluargaRequest extends FormRequest
 
             'keluarga.*.nik_kepala_keluarga' => [
                 'required',
-                'string',
                 'digits:16',
                 'distinct',
                 function ($attribute, $value, $fail) {
+
                     $index = explode('.', $attribute)[1];
-                    $keluargaId = $this->input("keluarga.$index.id");
+                    $currentId = $this->input("keluarga.$index.id");
 
                     $query = AnggotaKeluargaModel::where('nik', $value)
                         ->whereNull('deleted_at');
 
-                    if ($keluargaId) {
-                        $query->whereNotIn('id', function ($sub) use ($keluargaId) {
-                            $sub->select('id')
-                                ->from('m_anggota_keluarga')
-                                ->where('keluarga_id', $keluargaId)
-                                ->where('hubungan_keluarga', 'Kepala Keluarga');
-                        });
+                    if ($currentId) {
+                        $query->where('keluarga_id', '!=', $currentId);
                     }
 
                     if ($query->exists()) {

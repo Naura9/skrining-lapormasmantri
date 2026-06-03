@@ -203,27 +203,57 @@
 
                             let lastSection = null;
 
-                            skr.pertanyaan?.forEach((p, i) => {
+                            const grouped = (skr.pertanyaan || []).reduce((acc, p) => {
+                                const key = p.section || 'Tanpa Section';
 
-                                if (p.section !== lastSection) {
-                                    kkTableRows += `
-                                    <tr class="bg-gray-50">
-                                        <td colspan="3" class="px-3 py-2 font-semibold border-t">
-                                            ${p.section ?? "-"}
-                                        </td>
-                                    </tr>
-                                `;
-                                    lastSection = p.section;
+                                if (!acc[key]) {
+                                    acc[key] = {
+                                        section: key,
+                                        no_urut: p.section_no_urut ?? 9999,
+                                        items: []
+                                    };
                                 }
 
-                                kkTableRows += `
-                                <tr>
-                                    <td class="border border-[#00000033] px-3 py-2 text-center w-[40px]">${i + 1}</td>
-                                    <td class="border border-[#00000033] px-3 py-2">${p.pertanyaan ?? "-"}</td>
-                                    <td class="border border-[#00000033] px-3 py-2">${p.jawaban ?? "-"}</td>
-                                </tr>
-                            `;
-                            });
+                                acc[key].items.push(p);
+
+                                return acc;
+
+                            }, {});
+
+                            let no = 1;
+
+                            Object.values(grouped)
+                                .sort((a, b) => a.no_urut - b.no_urut)
+                                .forEach(group => {
+
+                                    kkTableRows += `
+                                        <tr class="bg-gray-50">
+                                            <td colspan="3" class="px-3 py-2 font-semibold border-t">
+                                                ${group.section}
+                                            </td>
+                                        </tr>
+                                    `;
+
+                                    let no = 1; 
+
+                                    group.items
+                                        .sort((a, b) => (a.no_urut ?? 9999) - (b.no_urut ?? 9999))
+                                        .forEach(p => {
+                                            kkTableRows += `
+                                                <tr>
+                                                    <td class="border border-[#00000033] px-3 py-2 text-center w-[40px]">
+                                                        ${no++}
+                                                    </td>
+                                                    <td class="border border-[#00000033] px-3 py-2">
+                                                        ${p.pertanyaan ?? "-"}
+                                                    </td>
+                                                    <td class="border border-[#00000033] px-3 py-2">
+                                                        ${formatJawaban(p.jawaban)}
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        });
+                                });                        
                         });
                     };
                     detailBody.innerHTML += `
@@ -502,6 +532,31 @@
 
             } catch (err) {
                 console.error("Gagal memuat data:", err);
+            }
+        }
+
+        function formatJawaban(jawaban) {
+            if (!jawaban) return "-";
+
+            try {
+                if (typeof jawaban === "string") {
+                    if (jawaban.startsWith("[")) {
+                        const parsed = JSON.parse(jawaban);
+                        if (Array.isArray(parsed)) {
+                            return parsed.join(", ");
+                        }
+                    }
+                    return jawaban;
+                }
+
+                if (Array.isArray(jawaban)) {
+                    return jawaban.join(", ");
+                }
+
+                return jawaban;
+
+            } catch (e) {
+                return jawaban;
             }
         }
 

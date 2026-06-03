@@ -56,7 +56,6 @@ class UserModel extends Authenticatable implements CrudInterface, JWTSubject
         }
 
         if (!empty($filter['role'])) {
-
             if ($filter['role'] === 'kader') {
                 if (!empty($filter['kelurahan'])) {
                     $user->whereHas('kaderDetail.posyandu.kelurahan', function ($q) use ($filter) {
@@ -88,6 +87,10 @@ class UserModel extends Authenticatable implements CrudInterface, JWTSubject
                     });
                 }
             }
+        }
+
+        if (!empty($filter['role'])) {
+            $user->where('role', $filter['role']);
         }
 
         $total = $user->count();

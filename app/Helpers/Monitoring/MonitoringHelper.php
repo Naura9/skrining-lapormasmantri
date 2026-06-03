@@ -521,7 +521,9 @@ class MonitoringHelper extends Helper
                                     'pertanyaan' => collect($groupItems)->map(function ($item) {
                                         return [
                                             'section' => optional($item['jawaban']->pertanyaan->section)->judul_section,
+                                            'section_no_urut' => optional($item['jawaban']->pertanyaan->section)->no_urut,
                                             'pertanyaan' => optional($item['jawaban']->pertanyaan)->pertanyaan,
+                                            'no_urut' => optional($item['jawaban']->pertanyaan)->no_urut,
                                             'jawaban' => $item['jawaban']->value_jawaban
                                         ];
                                     })->values()

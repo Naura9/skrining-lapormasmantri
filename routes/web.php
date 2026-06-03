@@ -20,6 +20,7 @@ Route::post('/admin/fitur/kelola_user/data_nakes/import', [UserController::class
 Route::view('/kategori-skrining', 'admin.fitur.skrining.kategori.index')->name('admin.fitur.skrining.kategori');
 Route::view('/pertanyaan-kk', 'admin.fitur.skrining.pertanyaan_kk.index')->name('admin.fitur.skrining.pertanyaan_kk');
 Route::view('/pertanyaan-nik', 'admin.fitur.skrining.pertanyaan_nik.index')->name('admin.fitur.skrining.pertanyaan_nik');
+Route::view('/admin/skrining-kk', 'admin.fitur.skrining.skrining_kk')->name('admin.fitur.skrining_kk');
 
 Route::view('/data-wilayah', 'admin.fitur.data_wilayah.index')->name('admin.fitur.data_wilayah');
 
@@ -38,11 +39,12 @@ Route::post('/admin/fitur/data_warga/nik/import', [IdentitasAnggotaController::c
 
 Route::view('/admin/profil', 'admin.fitur.profil')->name('admin.fitur.profil');
 
+
 //kader
 Route::view('/dashboard-kader', 'kader.dashboard_kader')->name('kader.dashboard_kader');
 
-Route::view('/skrining-kk', 'kader.fitur.skrining.skrining_kk')->name('kader.fitur.skrining_kk');
-Route::view('/skrining-nik', 'kader.fitur.skrining.skrining_nik')->name('kader.fitur.skrining_nik');
+Route::view('/kader/skrining-kk', 'kader.fitur.skrining.skrining_kk')->name('kader.fitur.skrining_kk');
+Route::view('/kader/skrining-nik', 'kader.fitur.skrining.skrining_nik')->name('kader.fitur.skrining_nik');
 Route::view('/riwayat-skrining', 'kader.fitur.skrining.riwayat_skrining')->name('kader.fitur.skrining.riwayat_skrining');
 
 Route::view('/kader/profil', 'kader.fitur.profil')->name('kader.fitur.profil');

@@ -162,7 +162,7 @@
             const token = data.data.access_token;
             const user = data.data.user;
 
-            showSuccessToast("Login Berhasil");
+            showSuccessToast("Login Berhasil!");
 
             localStorage.setItem("token", token);
             localStorage.setItem("role", user.role);

@@ -196,7 +196,7 @@
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                        <i class="fa-solid fa-users text-lg w-5 text-center
+                        <i class="fa-solid fa-clipboard-list text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.skrining.pertanyaan_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                         </i>
 
@@ -210,11 +210,25 @@
                             ? 'bg-[#61359C]/65 text-white'
                             : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
-                        <i class="fa-solid fa-user text-lg w-5 text-center
+                        <i class="fa-solid fa-id-badge text-lg w-5 text-center
                         {{ request()->routeIs('admin.fitur.skrining.pertanyaan_nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                         </i>
 
                         <span>Pertanyaan NIK</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.fitur.skrining_kk') }}"
+                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.skrining_kk')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-users text-lg w-5 text-center
+                        {{ request()->routeIs('admin.fitur.skrining_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+
+                        <span>Skrining KK</span>
                     </a>
                 </li>
                 <li>

@@ -54,7 +54,9 @@ class SkriningHelper extends Helper
         try {
             $skrining = $this->skriningModel->store([
                 'keluarga_id' => $payload['keluarga_id'],
-                'user_id' => auth()->user()->id,
+                'user_id' => auth()->user()->role === 'admin'
+                    ? $payload['user_id']
+                    : auth()->id(),
                 'tanggal_skrining' => $payload['tanggal_skrining'],
             ]);
 
@@ -81,17 +83,6 @@ class SkriningHelper extends Helper
         }
     }
 
-
-    public function delete(string $id): bool
-    {
-        try {
-            $this->skriningModel->drop($id);
-            return true;
-        } catch (\Throwable $th) {
-            return false;
-        }
-    }
-
     public function updateWithJawaban(array $payload, string $id): array
     {
         DB::beginTransaction();
@@ -99,18 +90,12 @@ class SkriningHelper extends Helper
         try {
             $skrining = SkriningModel::findOrFail($id);
 
-            // ---------------------------------
-            // 1. UPDATE DATA SKRINING
-            // ---------------------------------
             $skrining->update([
                 'keluarga_id'      => $payload['keluarga_id'],
                 'user_id'          => $payload['user_id'],
                 'tanggal_skrining' => $payload['tanggal_skrining'],
             ]);
 
-            // ---------------------------------
-            // 2. UPDATE IDENTITAS KELUARGA
-            // ---------------------------------
             if (isset($payload['identitas_keluarga'])) {
                 $keluarga = KeluargaModel::findOrFail($payload['keluarga_id']);
 
@@ -123,9 +108,6 @@ class SkriningHelper extends Helper
                 ]);
             }
 
-            // ---------------------------------
-            // 3. UPDATE ANGGOTA KELUARGA
-            // ---------------------------------
             if (isset($payload['anggota'])) {
                 foreach ($payload['anggota'] as $ag) {
                     $anggota = AnggotaKeluargaModel::findOrFail($ag['id']);
@@ -144,21 +126,13 @@ class SkriningHelper extends Helper
                 }
             }
 
-            // ---------------------------------
-            // 4. UPDATE JAWABAN SKRINING
-            // ---------------------------------
-
-            // Ambil ID jawaban terkini (yang dikirim FE)
             $newAnswerIds = collect($payload['jawaban'])->pluck('id')->filter()->toArray();
 
-            // Hapus jawaban lama yang tidak ada di payload
             JawabanModel::where('skrining_id', $id)
                 ->whereNotIn('id', $newAnswerIds)
                 ->delete();
 
-            // Update atau insert jawaban baru
             foreach ($payload['jawaban'] as $jwb) {
-
                 JawabanModel::updateOrCreate(
                     [
                         'id' => $jwb['id'] ?? null
@@ -192,6 +166,16 @@ class SkriningHelper extends Helper
                 'status' => false,
                 'error'  => $th->getMessage(),
             ];
+        }
+    }
+
+    public function delete(string $id): bool
+    {
+        try {
+            $this->skriningModel->drop($id);
+            return true;
+        } catch (\Throwable $th) {
+            return false;
         }
     }
 }

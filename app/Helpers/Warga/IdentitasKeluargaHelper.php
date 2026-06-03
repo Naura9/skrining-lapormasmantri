@@ -21,13 +21,13 @@ class IdentitasKeluargaHelper extends Helper
         ]);
 
         if ($user->role === 'kader') {
-    $posyanduId = $user->kaderDetail?->posyandu_id;
+            $posyanduId = $user->kaderDetail?->posyandu_id;
 
-    if ($posyanduId) {
-        $query->where('posyandu_id', $posyanduId);
-    }
-}
-        
+            if ($posyanduId) {
+                $query->where('posyandu_id', $posyanduId);
+            }
+        }
+
         if (!empty($filter['kelurahan_id'])) {
             $query->where('kelurahan_id', $filter['kelurahan_id']);
         }
@@ -76,9 +76,8 @@ class IdentitasKeluargaHelper extends Helper
     {
         $user = auth()->user();
 
-        $kelurahanId = null;
-        $posyanduId = null;
-
+        $kelurahanId = $filter['kelurahan_id'] ?? null;
+        $posyanduId  = $filter['posyandu_id'] ?? null;
         if ($user->role === 'kader') {
             $kelurahanId = $user->kaderDetail?->kelurahan_id;
             $posyanduId  = $user->kaderDetail?->posyandu_id;

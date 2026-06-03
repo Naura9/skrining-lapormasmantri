@@ -31,7 +31,12 @@ class SkriningRequest extends FormRequest
 
     private function createRules(): array
     {
+        $user = auth()->user();
+        
         return [
+            'user_id' => $user->role === 'admin'
+            ? 'required|uuid|exists:m_user,id'
+            : 'nullable',
             'keluarga_id' => 'required|uuid|exists:m_keluarga,id',
             'tanggal_skrining' => 'required|date',
 

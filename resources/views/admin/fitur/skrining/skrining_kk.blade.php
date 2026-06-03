@@ -27,6 +27,15 @@
             <div class="bg-white border border-[#61359C] rounded-2xl p-4 mb-4">
                 <div class="mb-4">
                     <x-dropdown
+                        id="kaderDropdown"
+                        label="Pilih Kader"
+                        :options="[]"
+                        width="w-full" />
+
+                    <input type="hidden" name="user_id" id="selected_user_id">
+                </div>
+                <div class="mb-4">
+                    <x-dropdown
                         id="kkDropdown"
                         label="Pilih Alamat"
                         :options="[]"
@@ -193,11 +202,11 @@
                             </div>
                             <button type="button"
                                 class="btn-remove hidden absolute top-4 right-4
-                                    flex items-center gap-1
-                                    bg-red-50 text-red-600
-                                    px-3 py-1 rounded-lg
-                                    hover:bg-red-100
-                                    transition text-sm font-semibold">
+                            flex items-center gap-1
+                            bg-red-50 text-red-600
+                            px-3 py-1 rounded-lg
+                            hover:bg-red-100
+                            transition text-sm font-semibold">
                                 <i class="fa-solid fa-trash"></i>
                                 Hapus
                             </button>
@@ -208,10 +217,10 @@
                         <button type="button"
                             id="btnAddKK"
                             class="flex items-center gap-2 
-                        border border-[#61359C] text-[#61359C]
-                        text-sm font-semibold px-3 py-1.5 rounded-lg
-                        hover:bg-[#61359C] hover:text-white
-                        transition duration-200">
+                                border border-[#61359C] text-[#61359C]
+                                text-sm font-semibold px-3 py-1.5 rounded-lg
+                                hover:bg-[#61359C] hover:text-white
+                                transition duration-200">
                             <i class="fa-solid fa-plus"></i>
                             Tambah KK
                         </button>
@@ -254,13 +263,95 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
+        let userList = [];
+        let selectedKader = null;
+
+        async function loadUser() {
+            try {
+                const result = await fetchWithAuth('/api/users?role=kader');
+
+                userList = result?.data?.list || [];
+
+                renderUserDropdown();
+
+            } catch (err) {
+                showErrorToast('Gagal load user', err);
+                userList = [];
+            }
+        }
+
+        function renderUserDropdown() {
+            const dropdown = document
+                .getElementById('kaderDropdown')
+                .querySelector('.dropdown-menu');
+
+            dropdown.innerHTML = '';
+
+            if (!userList.length) {
+                dropdown.innerHTML = `
+                    <div class="px-4 py-2 text-sm text-gray-400 text-center">
+                        Tidak ada data user
+                    </div>
+                `;
+                return;
+            }
+
+            userList.forEach(user => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className =
+                    'dropdown-item block w-full text-center px-4 py-1 text-sm hover:bg-gray-100';
+
+                btn.textContent = user.nama;
+
+                btn.onclick = () => {
+                    setDropdownLabel(
+                        'kaderDropdown',
+                        user.nama,
+                        'Pilih Kader'
+                    );
+
+                    document.getElementById('selected_user_id').value = user.id;
+
+                    document.getElementById('kelurahan_id').value =
+                        user.kaderDetail?.kelurahan_id || '';
+
+                    document.getElementById('kelurahan_text').value =
+                        user.kaderDetail?.nama_kelurahan || '-';
+
+                    document.getElementById('posyandu_id').value =
+                        user.kaderDetail?.posyandu_id || '';
+
+                    document.getElementById('posyandu_text').value =
+                        user.kaderDetail?.nama_posyandu || '-';
+
+                    selectedKader = user;
+                    loadKKDropdown(user);
+                };
+
+                dropdown.appendChild(btn);
+            });
+        }
+
         let kkList = [];
         let formMode = "create";
         let selectedUnitId = null;
 
-        async function loadKKDropdown() {
+        async function loadKKDropdown(user = null) {
             try {
-                const res = await fetchWithAuth(`/api/kk/list`);
+
+                let url = '/api/kk/list';
+
+                if (user?.kaderDetail) {
+                    const params = new URLSearchParams({
+                        kelurahan_id: user.kaderDetail.kelurahan_id,
+                        posyandu_id: user.kaderDetail.posyandu_id
+                    });
+
+                    url += `?${params}`;
+                }
+
+                const res = await fetchWithAuth(url);
 
                 const units = res?.data?.list || [];
 
@@ -272,7 +363,7 @@
                 renderKKDropdown();
 
             } catch (err) {
-                console.error('Gagal load KK', err);
+                showErrorToast('Gagal load KK', err);
             }
         }
 
@@ -283,13 +374,21 @@
             const dropdown = wrapper.querySelector('.dropdown-menu');
 
             const searchInput = dropdown.querySelector('input[type="text"]');
-
             const searchHTML = searchInput ? searchInput.outerHTML : '';
 
             dropdown.innerHTML = '';
 
             if (searchHTML) {
                 dropdown.innerHTML += searchHTML;
+            }
+
+            if (!selectedKader) {
+                dropdown.innerHTML += `
+                    <div class="px-3 py-2 text-sm text-gray-400 text-center">
+                        Pilih kader terlebih dahulu
+                    </div>
+                `;
+                return;
             }
 
             if (!unitList.length) {
@@ -353,6 +452,23 @@
 
             otherBtn.onclick = () => {
                 resetFormKK();
+
+                const kader = selectedKader;
+
+                if (kader?.kaderDetail) {
+                    document.getElementById('kelurahan_id').value =
+                        kader.kaderDetail.kelurahan_id;
+
+                    document.getElementById('kelurahan_text').value =
+                        kader.kaderDetail.nama_kelurahan;
+
+                    document.getElementById('posyandu_id').value =
+                        kader.kaderDetail.posyandu_id;
+
+                    document.getElementById('posyandu_text').value =
+                        kader.kaderDetail.nama_posyandu;
+                }
+
                 setDropdownLabel('kkDropdown', '', 'Tambah KK Baru');
 
                 formMode = "create";
@@ -569,21 +685,11 @@
 
         //tab identitas keluarga
         function initKelurahanPosyandu() {
-            const user = window.App.user;
-            if (!user) return;
+            document.getElementById('kelurahan_id').value = '';
+            document.getElementById('posyandu_id').value = '';
 
-            if (user.role === 'kader') {
-                const kader = user.kaderDetail;
-
-                document.getElementById('kelurahan_id').value = kader?.kelurahan_id || '';
-                document.getElementById('posyandu_id').value = kader?.posyandu_id || '';
-
-                document.getElementById('kelurahan_text').value = kader?.nama_kelurahan || '-';
-                document.getElementById('posyandu_text').value = kader?.nama_posyandu || '-';
-
-                return;
-            }
-
+            document.getElementById('kelurahan_text').value = '-';
+            document.getElementById('posyandu_text').value = '-';
         }
 
         //tab pertanyaan
@@ -937,6 +1043,7 @@
 
             const keluargaId = document.getElementById('selected_keluarga_id').value || null;
             const identitasPayload = {
+                user_id: document.getElementById('selected_user_id').value,
                 kelurahan_id: document.getElementById('kelurahan_id').value.trim(),
                 posyandu_id: document.getElementById('posyandu_id').value.trim(),
                 alamat: document.querySelector('[name="alamat"]').value.trim(),
@@ -955,7 +1062,8 @@
                     null;
 
                 identitasPayload.keluarga.push({
-                    id: keluargaId,
+                    id: keluargaId || null, 
+                    is_new: !keluargaId,
                     is_luar_wilayah: isLuarWilayah,
                     no_kk: item.querySelector('[name="no_kk"]').value.trim(),
                     no_telepon: item.querySelector('[name="no_telepon"]').value.trim(),
@@ -1159,6 +1267,7 @@
 
             try {
                 const identitasPayload = {
+                    user_id: document.getElementById('selected_user_id').value,
                     kelurahan_id: document.getElementById('kelurahan_id').value,
                     posyandu_id: document.getElementById('posyandu_id').value,
                     alamat: document.querySelector('[name="alamat"]').value,
@@ -1177,7 +1286,8 @@
                         null;
 
                     identitasPayload.keluarga.push({
-                        id: keluargaId,
+                        id: keluargaId || null,
+                        is_new: !keluargaId,
                         is_luar_wilayah: isLuarWilayah,
                         no_kk: item.querySelector('[name="no_kk"]').value,
                         no_telepon: item.querySelector('[name="no_telepon"]').value,
@@ -1192,7 +1302,6 @@
                         nik_kepala_keluarga: item.querySelector('[name="nik_kepala_keluarga"]').value,
                         nama_kepala_keluarga: item.querySelector('[name="nama_kepala_keluarga"]').value
                     });
-                    console.log("FINAL PAYLOAD UPDATE:", identitasPayload.keluarga);
                 });
 
                 const url = "/api/identitas_keluarga";
@@ -1258,6 +1367,7 @@
 
                 for (const keluarga of keluargaList) {
                     const skriningPayload = {
+                        user_id: document.getElementById('selected_user_id').value,
                         keluarga_id: keluarga.id,
                         tanggal_skrining: new Date().toISOString().split('T')[0],
                         jawaban: jawaban
@@ -1297,7 +1407,8 @@
 
         await initApp();
         initKelurahanPosyandu();
-        await loadKKDropdown();
+        await loadUser();
+        renderKKDropdown();
     });
 </script>
 @endsection

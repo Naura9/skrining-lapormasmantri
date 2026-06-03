@@ -38,7 +38,20 @@ class IdentitasAnggotaRequest extends FormRequest
             'nik' => [
                 'required',
                 'digits:16',
-                Rule::unique('m_anggota_keluarga', 'nik'),
+                Rule::unique('m_anggota_keluarga', 'nik')
+                    ->whereNull('deleted_at'),
+                function ($attribute, $value, $fail) {
+
+                    $keluargaId = $this->input('keluarga_id');
+
+                    $existsInSameKK = AnggotaKeluargaModel::where('keluarga_id', $keluargaId)
+                        ->where('nik', $value)
+                        ->exists();
+
+                    if ($existsInSameKK) {
+                        $fail('NIK sudah terdaftar di KK ini.');
+                    }
+                }
             ],
 
             'nama' => 'required|string|max:150',
@@ -74,16 +87,8 @@ class IdentitasAnggotaRequest extends FormRequest
             'nik' => [
                 'required',
                 'digits:16',
-                function ($attribute, $value, $fail) {
-                    $id = $this->input('id');
-                    $query = AnggotaKeluargaModel::where('nik', $value);
-                    if ($id) {
-                        $query->where('id', '!=', $id);
-                    }
-                    if ($query->exists()) {
-                        $fail('NIK sudah terdaftar.');
-                    }
-                }
+                Rule::unique('m_anggota_keluarga', 'nik')
+                    ->ignore($this->route('id')),
             ],
 
             'nama' => 'required|string|max:150',
