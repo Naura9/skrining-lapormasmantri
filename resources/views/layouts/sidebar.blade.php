@@ -158,6 +158,8 @@
             'admin.skrining.kategori',
             'admin.skrining.pertanyaan_kk',
             'admin.skrining.pertanyaan_nik',
+            'admin.skrining.skrining_kk',
+            'admin.skrining.skrining_nik',
             'admin.hasil_skrining.index',
             ]);
             @endphp
@@ -229,6 +231,20 @@
                         </i>
 
                         <span>Skrining KK</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.fitur.skrining_nik') }}"
+                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
+                        {{ request()->routeIs('admin.fitur.skrining_nik')
+                            ? 'bg-[#61359C]/65 text-white'
+                            : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-user text-lg w-5 text-center
+                        {{ request()->routeIs('admin.fitur.skrining_nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+
+                        <span>Skrining NIK</span>
                     </a>
                 </li>
                 <li>
@@ -430,7 +446,7 @@
                 {{ $isMonitoringNakesActive ? 'bg-[#61359C]/65 text-white' : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
 
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-square-poll-vertical text-lg transition w-5 text-center
+                    <i class="fa-solid fa-chart-simple text-lg transition w-5 text-center
                     {{ $isMonitoringNakesActive ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                     </i>
                     <span>Monitoring</span>

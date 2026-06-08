@@ -121,6 +121,10 @@ class UpdateSkriningRequest extends FormRequest
                 "required",
                 "digits:16",
                 function ($attribute, $value, $fail) {
+                    if ($value === '0000000000000000') {
+                        return;
+                    }
+
                     preg_match('/keluarga\.(\d+)\.skrining_nik\.(\d+)\.identitas\.nik/', $attribute, $matches);
                     $kelIndex = $matches[1] ?? null;
                     $anggotaIndex = $matches[2] ?? null;

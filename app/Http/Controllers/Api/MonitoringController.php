@@ -164,7 +164,7 @@ class MonitoringController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => 'Semua skrining KK berhasil dihapus',
+                'message' => 'Skrining KK berhasil dihapus!',
                 'data' => $result
             ]);
         } catch (\Exception $e) {

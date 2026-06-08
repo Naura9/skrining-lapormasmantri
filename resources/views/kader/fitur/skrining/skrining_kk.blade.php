@@ -115,7 +115,7 @@
 
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">Nomor Kartu Keluarga</label>
+                                    <label class="block text-sm font-semibold mb-1">No KK</label>
                                     <input type="text"
                                         name="no_kk"
                                         inputmode="numeric"
@@ -1192,7 +1192,6 @@
                         nik_kepala_keluarga: item.querySelector('[name="nik_kepala_keluarga"]').value,
                         nama_kepala_keluarga: item.querySelector('[name="nama_kepala_keluarga"]').value
                     });
-                    console.log("FINAL PAYLOAD UPDATE:", identitasPayload.keluarga);
                 });
 
                 const url = "/api/identitas_keluarga";

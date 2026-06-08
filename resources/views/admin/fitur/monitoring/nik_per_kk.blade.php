@@ -272,43 +272,52 @@
                             container.dataset.currentIdx = idx;
 
                             const agtDetail = `
-                                <div class="p-2 border border-[#00000033] rounded bg-gray-50 space-y-2 text-sm">
-                                    <div class="grid grid-cols-[130px_1fr] gap-2">
-                                        <span class="font-semibold">NIK</span><span>: ${agt.no_nik}</span>
-                                    </div>
-
-                                    <div class="grid grid-cols-[130px_1fr] gap-2">
-                                        <span class="font-semibold">Nama</span><span>: ${agt.nama_lengkap}</span>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
-                                        <div class="grid grid-cols-[130px_1fr] gap-2">
-                                            <span class="font-semibold">Tempat Lahir</span><span>: ${agt.tempat_lahir ?? '-'}</span>
+                                <div class="p-3 border border-[#00000033] rounded bg-gray-50">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6 text-sm">
+                                        <div class="grid grid-cols-[130px_1fr]">
+                                            <span class="font-semibold">NIK</span>
+                                            <span>: ${agt.no_nik ?? '-'}</span>
                                         </div>
-                                        <div class="grid grid-cols-[130px_1fr] gap-2">
-                                            <span class="font-semibold">Tanggal Lahir</span><span>: ${agt.tanggal_lahir ?? '-'}</span>
+
+                                        <div class="grid grid-cols-[130px_1fr]">
+                                            <span class="font-semibold">Nama</span>
+                                            <span>: ${agt.nama_lengkap ?? '-'}</span>
                                         </div>
-                                    </div>
 
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                        <div class="grid grid-cols-[130px_1fr] gap-2">
-                                            <span class="font-semibold">Jenis Kelamin</span><span>: ${agt.jenis_kelamin ?? '-'}</span>
+                                        <div class="grid grid-cols-[130px_1fr]">
+                                            <span class="font-semibold">Tempat Lahir</span>
+                                            <span>: ${agt.tempat_lahir ?? '-'}</span>
                                         </div>
-                                        <div class="grid grid-cols-[130px_1fr] gap-2">
-                                            <span class="font-semibold">Pekerjaan</span><span>: ${agt.pekerjaan ?? '-'}</span>
+
+                                        <div class="grid grid-cols-[130px_1fr]">
+                                            <span class="font-semibold">Tanggal Lahir</span>
+                                            <span>: ${agt.tanggal_lahir ?? '-'}</span>
                                         </div>
-                                    </div>
 
-                                    <div class="grid grid-cols-[130px_1fr] gap-2 mt-4">
-                                        <span class="font-semibold">Pendidikan Terakhir</span><span>: ${agt.pendidikan_terakhir ?? '-'}</span>
-                                    </div>
+                                        <div class="grid grid-cols-[130px_1fr]">
+                                            <span class="font-semibold">Jenis Kelamin</span>
+                                            <span>: ${agt.jenis_kelamin ?? '-'}</span>
+                                        </div>
 
-                                    <div class="grid grid-cols-[130px_1fr] gap-2">
-                                        <span class="font-semibold">Hubungan Keluarga</span><span>: ${agt.hubungan_keluarga ?? '-'}</span>
-                                    </div>
+                                        <div class="grid grid-cols-[130px_1fr]">
+                                            <span class="font-semibold">Pekerjaan</span>
+                                            <span>: ${agt.pekerjaan ?? '-'}</span>
+                                        </div>
 
-                                    <div class="grid grid-cols-[130px_1fr] gap-2">
-                                        <span class="font-semibold">Status Perkawinan</span><span>: ${agt.status_perkawinan ?? '-'}</span>
+                                        <div class="grid grid-cols-[130px_1fr]">
+                                            <span class="font-semibold">Pendidikan Terakhir</span>
+                                            <span>: ${agt.pendidikan_terakhir ?? '-'}</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-[130px_1fr]">
+                                            <span class="font-semibold">Hubungan Keluarga</span>
+                                            <span>: ${agt.hubungan_keluarga ?? '-'}</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-[130px_1fr]">
+                                            <span class="font-semibold">Status Perkawinan</span>
+                                            <span>: ${agt.status_perkawinan ?? '-'}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 `;

@@ -38,18 +38,15 @@ class IdentitasAnggotaRequest extends FormRequest
             'nik' => [
                 'required',
                 'digits:16',
-                Rule::unique('m_anggota_keluarga', 'nik')
-                    ->whereNull('deleted_at'),
                 function ($attribute, $value, $fail) {
+                    if ($value === '0000000000000000') {
+                        return;
+                    }
 
-                    $keluargaId = $this->input('keluarga_id');
-
-                    $existsInSameKK = AnggotaKeluargaModel::where('keluarga_id', $keluargaId)
-                        ->where('nik', $value)
-                        ->exists();
-
-                    if ($existsInSameKK) {
-                        $fail('NIK sudah terdaftar di KK ini.');
+                    if (
+                        AnggotaKeluargaModel::where('nik', $value)->exists()
+                    ) {
+                        $fail('NIK sudah terdaftar.');
                     }
                 }
             ],
@@ -88,7 +85,7 @@ class IdentitasAnggotaRequest extends FormRequest
                 'required',
                 'digits:16',
                 Rule::unique('m_anggota_keluarga', 'nik')
-                    ->ignore($this->route('id')),
+                    ->ignore($this->input('id')),
             ],
 
             'nama' => 'required|string|max:150',
@@ -99,16 +96,16 @@ class IdentitasAnggotaRequest extends FormRequest
                 'required',
                 'string',
                 function ($attribute, $value, $fail) {
-                    if ($value === 'Kepala Keluarga') {
-                        $keluargaId = $this->input('keluarga_id');
-                        $id = $this->input('id');
-                        $exists = AnggotaKeluargaModel::where('keluarga_id', $keluargaId)
-                            ->where('hubungan_keluarga', 'Kepala Keluarga')
-                            ->where('id', '!=', $id)
-                            ->exists();
-                        if ($exists) {
-                            $fail('Hanya boleh ada 1 Kepala Keluarga per KK.');
-                        }
+                    if ($value === '0000000000000000') {
+                        return;
+                    }
+
+                    $exists = AnggotaKeluargaModel::where('nik', $value)
+                        ->where('id', '!=', $this->input('id'))
+                        ->exists();
+
+                    if ($exists) {
+                        $fail('NIK sudah terdaftar.');
                     }
                 }
             ],

@@ -488,7 +488,6 @@ class MonitoringHelper extends Helper
                                             return optional($item['jawaban']->anggota)->id;
                                         })
                                         ->map(function ($items) {
-
                                             $first = $items->first();
                                             $agt = $first['jawaban']->anggota;
                                             $tanggal = optional($first['skrining'])->tanggal_skrining;
@@ -506,8 +505,8 @@ class MonitoringHelper extends Helper
                                                 })->values()
                                             ];
                                         })
+                                        ->sortBy('nama', SORT_NATURAL | SORT_FLAG_CASE)
                                         ->values();
-
                                     return [
                                         'siklus' => $siklusName,
                                         'target_skrining' => $target,

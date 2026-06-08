@@ -21,6 +21,7 @@ Route::view('/kategori-skrining', 'admin.fitur.skrining.kategori.index')->name('
 Route::view('/pertanyaan-kk', 'admin.fitur.skrining.pertanyaan_kk.index')->name('admin.fitur.skrining.pertanyaan_kk');
 Route::view('/pertanyaan-nik', 'admin.fitur.skrining.pertanyaan_nik.index')->name('admin.fitur.skrining.pertanyaan_nik');
 Route::view('/admin/skrining-kk', 'admin.fitur.skrining.skrining_kk')->name('admin.fitur.skrining_kk');
+Route::view('/admin/skrining-nik', 'admin.fitur.skrining.skrining_nik')->name('admin.fitur.skrining_nik');
 
 Route::view('/data-wilayah', 'admin.fitur.data_wilayah.index')->name('admin.fitur.data_wilayah');
 

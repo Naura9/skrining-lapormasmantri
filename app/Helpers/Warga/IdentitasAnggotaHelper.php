@@ -106,7 +106,9 @@ class IdentitasAnggotaHelper extends Helper
                 ];
             }
 
-            $existing = AnggotaKeluargaModel::where('nik', $payload['nik'])->first();
+            $existing = $payload['nik'] === '0000000000000000'
+                ? null
+                : AnggotaKeluargaModel::where('nik', $payload['nik'])->first();
 
             if ($existing) {
                 $existing->update([

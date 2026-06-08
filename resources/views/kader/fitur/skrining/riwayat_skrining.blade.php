@@ -267,8 +267,8 @@
 
                             <div id="skrining-rumah" class="hidden mt-2">
                                 <div class="overflow-x-auto">
-                                    <table class="min-w-full text-sm border border-[#00000033] rounded-lg">
-                                        <thead class="bg-gray-100">
+                                    <table class="w-full min-w-[700px] text-sm border border-[#00000033] rounded-lg">
+                                        <thead class="bg-gray-100 whitespace-nowrap">
                                             <tr>
                                                 <th class="px-3 py-2 border border-[#00000033] w-[40px]">No</th>
                                                 <th class="px-3 py-2 border border-[#00000033]">Pertanyaan</th>
@@ -285,7 +285,6 @@
                         `;
 
                     unit.keluarga?.forEach((kk, index) => {
-
                         let skriningHtml = "";
 
                         kk.skrining?.forEach((skr, sIndex) => {
@@ -294,29 +293,56 @@
                                 let anggotaHtml = "";
 
                                 skr.anggota?.forEach((agt, aIndex) => {
+                                let nikRows = "";
 
-                                    let nikRows = "";
-                                    let lastSection = null;
+                                const grouped = (agt.pertanyaan || []).reduce((acc, p) => {
+                                    const key = p.section || 'Tanpa Section';
 
-                                    agt.pertanyaan?.forEach((p, i) => {
+                                    if (!acc[key]) {
+                                        acc[key] = {
+                                            section: key,
+                                            no_urut: p.section_no_urut ?? 9999,
+                                            items: []
+                                        };
+                                    }
 
-                                        if (p.section !== lastSection) {
-                                            nikRows += `
-                                                <tr class="bg-gray-50">
-                                                    <td colspan="3" class="px-3 py-2 font-semibold border-t">
-                                                        ${p.section ?? "-"}
-                                                    </td>
-                                                </tr>
-                                            `;
-                                            lastSection = p.section;
-                                        }
+                                    acc[key].items.push(p);
 
+                                    return acc;
+
+                                }, {});
+
+                                Object.values(grouped)
+                                    .sort((a, b) => a.no_urut - b.no_urut)
+                                    .forEach(group => {
                                         nikRows += `
-                                        <tr>
-                                            <td class="border border-[#00000033] px-3 py-2 text-center w-[40px]">${i + 1}</td>
-                                            <td class="border border-[#00000033] px-3 py-2">${p.pertanyaan ?? "-"}</td>
-                                            <td class="border border-[#00000033] px-3 py-2">${p.jawaban ?? "-"}</td>
-                                        </tr>`;
+                                            <tr class="bg-gray-50">
+                                                <td colspan="3" class="px-3 py-2 font-semibold border-t">
+                                                    ${group.section}
+                                                </td>
+                                            </tr>
+                                        `;
+
+                                        let no = 1;
+
+                                        group.items
+                                            .sort((a, b) => (a.no_urut ?? 9999) - (b.no_urut ?? 9999))
+                                            .forEach(p => {
+
+                                                nikRows += `
+                                                    <tr>
+                                                        <td class="border border-[#00000033] px-3 py-2 text-center w-[40px]">
+                                                            ${no++}
+                                                        </td>
+                                                        <td class="border border-[#00000033] px-3 py-2">
+                                                            ${p.pertanyaan ?? "-"}
+                                                        </td>
+                                                        <td class="border border-[#00000033] px-3 py-2">
+                                                            ${formatJawaban(p.jawaban)}
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                            });
                                     });
 
                                     const detailAgt = kk.anggota?.find(a => a.id === agt.id);
@@ -373,8 +399,8 @@
                                                 </div>
                                         
                                                 <div class="overflow-x-auto mt-2">
-                                                    <table class="min-w-full text-sm border border-[#00000033] rounded-lg">
-                                                        <thead class="bg-gray-100">
+                                                    <table class="w-full min-w-[700px] text-sm border border-[#00000033] rounded-lg">
+                                                        <thead class="bg-gray-100 whitespace-nowrap">
                                                             <tr>
                                                                 <th class="px-3 py-2 border border-[#00000033] w-[40px]">No</th>
                                                                 <th class="px-3 py-2 border border-[#00000033]">Pertanyaan</th>

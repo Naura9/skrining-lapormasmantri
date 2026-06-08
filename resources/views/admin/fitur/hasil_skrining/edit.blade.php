@@ -353,7 +353,7 @@
                 }
 
                  showSuccessToast(
-                    "Data berhasil diperbarui",
+                    "Data berhasil diperbarui!",
                     "",
                     () => {
                         window.location.href = "/admin/hasil-skrining";
@@ -620,6 +620,10 @@
 
                                 <div class="font-semibold text-gray-800 leading-snug">
                                     ${nomor}. ${q.pertanyaan ?? "-"}
+                                    ${q.is_required
+                                        ? `<span class="text-red-500 ml-1">*</span>`
+                                        : ''
+                                    }
                                 </div>
 
                                 ${
@@ -660,7 +664,7 @@
 
                         if (result.status) {
                             kkContainer.innerHTML = '';
-                            showSuccessToast("Semua skrining KK berhasil dihapus");
+                            showSuccessToast("Skrining KK berhasil dihapus!");
                         }
                     } catch (err) {
                         console.error(err);
@@ -1177,13 +1181,13 @@
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                                     <div>
-                                        <label class="block text-sm font-semibold mb-1">Nomor Kartu Keluarga</label>
+                                        <label class="block text-sm font-semibold mb-1">No KK</label>
 
                                         <input type="text"
                                             name="keluarga[${kkIndex}][identitas][no_kk]"
                                             value="${kk.no_kk ?? ''}"
-                                            class="border border-[#00000033] rounded-lg p-2 w-full">
-                                        <p class="text-red-500 text-xs mt-1 hidden" id="error-no_kk"></p>
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                        <p id="error-keluarga-${kkIndex}-no_kk" class="text-red-500 text-xs mt-1 hidden"></p>
                                     </div>
 
                                     <div>
@@ -1191,11 +1195,11 @@
                                             No Telepon
                                         </label>
 
-                                        <input type="text"
+                                        <input type="number"
                                             name="keluarga[${kkIndex}][identitas][no_telepon]"
                                             value="${kk.no_telepon ?? ''}"
-                                            class="border border-[#00000033] rounded-lg p-2 w-full">
-                                        <p id="error-no_telepon" class="text-red-500 text-xs mt-1 hidden"></p>
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50">
+                                        <p id="error-keluarga-${kkIndex}-no_telepon" class="text-red-500 text-xs mt-1 hidden"></p>
                                     </div>
                                 </div>
 
@@ -1325,7 +1329,7 @@
 
                                         <div>
                                             <label class="block text-sm font-semibold mb-1">
-                                                NIK / Nomor KTP
+                                                NIK
                                             </label>
                                             <input type="text"
                                                 name="keluarga[${kkIndex}][skrining_nik][${aIndex}][identitas][nik]"
@@ -1776,6 +1780,10 @@
 
                                                         <div class="font-semibold text-gray-800 leading-snug">
                                                             ${nomor}. ${q.pertanyaan ?? "-"}
+                                                            ${q.is_required
+                                                                ? `<span class="text-red-500 ml-1">*</span>`
+                                                                : ''
+                                                            }
                                                         </div>
 
                                                         ${
