@@ -125,7 +125,7 @@
         const res = await fetchWithAuth(`{{ url('api/kelurahan') }}`);
 
         if (!res || res.status_code !== 200) {
-            console.log("Gagal load kelurahan:", res);
+            showErrorToast("Gagal load kelurahan:", res);
             return;
         }
 

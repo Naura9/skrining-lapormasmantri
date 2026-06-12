@@ -417,7 +417,9 @@ class MonitoringHelper extends Helper
             });
         }
 
-        $skrining = $query->get();
+        $skrining = $query
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         $data = $skrining
             ->groupBy('user_id')
@@ -915,32 +917,47 @@ class MonitoringHelper extends Helper
                     'rw_ktp'     => $isLuarWilayah ? ($identitas['rw_ktp'] ?? null) : null,
                 ]);
 
-                if (!empty($kel['skrining_nik'])) {
-                    if (!empty($kel['keluarga_id'])) {
-                        $existingAnggota = AnggotaKeluargaModel::where('keluarga_id', $kel['keluarga_id'])
-                            ->pluck('id')
+                if (!empty($kel['keluarga_id'])) {
+
+                    $existingAnggota = AnggotaKeluargaModel::where(
+                        'keluarga_id',
+                        $kel['keluarga_id']
+                    )->pluck('id')->toArray();
+
+                    $requestAnggotaIds = [];
+
+                    if (isset($kel['skrining_nik']) && is_array($kel['skrining_nik'])) {
+                        $requestAnggotaIds = array_column(
+                            $kel['skrining_nik'],
+                            'anggota_id'
+                        );
+                    }
+
+                    $anggotaToReset = array_diff(
+                        $existingAnggota,
+                        $requestAnggotaIds
+                    );
+
+                    if (!empty($anggotaToReset)) {
+
+                        $skriningIds = JawabanModel::whereIn(
+                            'anggota_keluarga_id',
+                            $anggotaToReset
+                        )
+                            ->pluck('skrining_id')
+                            ->unique()
                             ->toArray();
 
-                        $requestAnggotaIds = [];
-                        if (!empty($kel['skrining_nik'])) {
-                            $requestAnggotaIds = array_column($kel['skrining_nik'], 'anggota_id');
-                        }
+                        JawabanModel::whereIn(
+                            'anggota_keluarga_id',
+                            $anggotaToReset
+                        )->delete();
 
-                        $anggotaToReset = array_diff($existingAnggota, $requestAnggotaIds);
-
-                        if (!empty($anggotaToReset)) {
-                            $skriningIds = JawabanModel::whereIn('anggota_keluarga_id', $anggotaToReset)
-                                ->pluck('skrining_id')
-                                ->unique()
-                                ->toArray();
-
-                            if (!empty($skriningIds)) {
-                                JawabanModel::whereIn('skrining_id', $skriningIds)->delete();
-
-                                SkriningModel::whereIn('id', $skriningIds)->delete();
-                            }
-                        }
+                        SkriningModel::whereIn('id', $skriningIds)->delete();
                     }
+                }
+
+                if (!empty($kel['skrining_nik'])) {
                     foreach ($kel['skrining_nik'] as $nikData) {
                         if (!empty($nikData['identitas'])) {
                             AnggotaKeluargaModel::where('id', $nikData['anggota_id'])

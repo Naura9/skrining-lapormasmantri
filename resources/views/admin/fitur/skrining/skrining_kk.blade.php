@@ -42,7 +42,6 @@
                         width="w-full"
                         :searchable="true"
                         allowOther="true"
-                        otherLabel="+ Tambah KK"
                         otherPlaceholder="Ketik No KK manual..."
                         data-dropdown="kk" />
 
@@ -393,12 +392,11 @@
 
             if (!unitList.length) {
                 dropdown.innerHTML += `
-        <div class="px-3 py-2 text-sm text-gray-400 text-center">
-            Tidak ada data KK
-        </div>
-    `;
+                    <div class="px-3 py-2 text-sm text-gray-400 text-center">
+                        Tidak ada data KK
+                    </div>
+                `;
             } else {
-
                 unitList.forEach(unit => {
                     const kkListText = unit.keluarga
                         .map(k => k.no_kk)
@@ -408,19 +406,19 @@
                     btn.type = 'button';
 
                     btn.className = `
-                    dropdown-item w-full text-left px-3 py-2 text-sm hover:bg-gray-100
-                `;
+                        dropdown-item w-full text-left px-3 py-2 text-sm hover:bg-gray-100
+                    `;
 
                     btn.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="font-medium text-gray-800 truncate">
-                            ${truncateText(unit.alamat, 40)}
-                        </span>
-                        <span class="text-xs text-gray-500 mt-0.5">
-                            ${kkListText}
-                        </span>
-                    </div>
-                `;
+                        <div class="flex flex-col">
+                            <span class="font-medium text-gray-800 truncate">
+                                ${truncateText(unit.alamat, 40)}
+                            </span>
+                            <span class="text-xs text-gray-500 mt-0.5">
+                                ${kkListText}
+                            </span>
+                        </div>
+                    `;
 
                     btn.onclick = () => {
                         document.getElementById('formManualKK').classList.remove('hidden');

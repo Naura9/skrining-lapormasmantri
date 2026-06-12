@@ -73,7 +73,7 @@
                 <button id="tabPertanyaan"
                     class="tab-btn relative flex-1 text-center py-2 text-sm font-bold text-gray-400">
                     Pertanyaan Skrining
-                    <span class="absolute left-0 bottom-0 w-full h-[4px] bg-transparent rounded-t"></span>
+                    <span class="tab-underline absolute left-0 bottom-0 w-full h-[4px] bg-transparent rounded-t"></span>
                 </button>
             </div>
         </div>
@@ -363,6 +363,8 @@
                     }
                 });
 
+                kkData.sort((a, b) => String(a.no_kk).localeCompare(String(b.no_kk)));
+                 
                 renderKkDropdown();
 
             } catch (error) {
@@ -1159,6 +1161,24 @@
             childList: true
         });
 
+        function syncSelectedNik() {
+            const manualNikInput = document.getElementById('manual_nik');
+            const selectedNikInput = document.getElementById('selected_nik');
+
+            if (!selectedNikInput) return;
+
+            if (manualNikInput) {
+                selectedNikInput.value = manualNikInput.value.trim();
+            } else {
+                const dropdownLabel = document.querySelector('#nikDropdown .dropdown-selected');
+                if (dropdownLabel && dropdownLabel.dataset.nik) {
+                    selectedNikInput.value = dropdownLabel.dataset.nik;
+                } else {
+                    showErrorToast('Dropdown biasa, selected_nik tidak diubah');
+                }
+            }
+        }
+
         function getNikFinal() {
             const checkbox = document.getElementById('tidak_punya_nik');
             const dropdownValue = document.getElementById('selected_nik')?.value?.trim();
@@ -1172,6 +1192,7 @@
 
         async function validateIdentitas() {
             resetErrorsTextOnly();
+            syncSelectedNik();
 
             const anggotaId = document.getElementById('selected_anggota_id').value || null;
 
@@ -1191,8 +1212,6 @@
                 status_perkawinan: getDropdownValue('statusDropdown'),
                 pekerjaan: getDropdownValue('pekerjaanDropdown')
             };
-            console.log("selected_nik =", document.getElementById('selected_nik').value);
-            console.log("payload =", identitasPayload);
 
             if (anggotaId) {
                 const result = await fetchWithAuth(`/api/identitas_anggota`, {

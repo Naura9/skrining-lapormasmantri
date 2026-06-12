@@ -437,7 +437,6 @@
             btn.textContent = kader.nama;
 
             btn.onclick = () => {
-                console.log(kader);
                 setDropdownLabel('kaderDropdown', kader.nama, 'Pilih Kader');
                 document.getElementById('user_id').value = kader.id;
 
@@ -1260,12 +1259,18 @@
                         `;
 
         
-                    const skriningNik = kk.skrining?.find(
+                    const skriningNikList = kk.skrining?.filter(
                         s => s.target_skrining === 'nik'
+                    ) || [];
+
+                    const semuaAnggota = skriningNikList.flatMap(skriningNik =>
+                        skriningNik.anggota.map(anggota => ({
+                            ...anggota,
+                            siklus: skriningNik.siklus
+                        }))
                     );
 
-                    if (skriningNik?.anggota) {
-                        skriningNik.anggota.forEach((anggota, aIndex) => {
+                    semuaAnggota.forEach((anggota, aIndex) => {
                                 let anggotaHtml = `
                                     <div class="border border-gray-200 rounded-xl overflow-hidden mb-4">
                                         <div
@@ -1293,7 +1298,7 @@
                                                     </div>
 
                                                     <p class="text-xs text-gray-500">
-                                                        ${skriningNik.siklus ?? '-'}
+                                                        ${anggota.siklus ?? '-'}
                                                     </p>
                                                 </div>
 
@@ -1824,7 +1829,7 @@
 
                                     kkHtml += anggotaHtml;
                                 });
-                        }
+                        
 
                         kkHtml += `
                                 </div>

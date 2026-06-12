@@ -75,7 +75,7 @@ class IdentitasKeluargaController extends Controller
 
         return response()->success(
             new IdentitasKeluargaResource($result['data']),
-            'Data berhasil ditambahkan'
+            'Data berhasil ditambahkan!'
         );
     }
 
@@ -375,7 +375,7 @@ class IdentitasKeluargaController extends Controller
 
         return response()->json([
             'status'  => true,
-            'message' => 'Data warga berhasil diimport'
+            'message' => 'Import berhasil!'
         ]);
     }
 

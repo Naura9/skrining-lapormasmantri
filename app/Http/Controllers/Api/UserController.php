@@ -219,7 +219,9 @@ class UserController extends Controller
                 empty($value['B']) ||
                 empty($value['C']) ||
                 empty($value['D']) ||
-                empty($value['E'])
+                empty($value['E']) ||
+                empty($value['F']) ||
+                empty($value['G'])
             ) {
                 $hasEmptyField = true;
                 continue;
@@ -247,6 +249,16 @@ class UserController extends Controller
                 continue;
             }
 
+            $jk = strtoupper(trim($value['G']));
+            if (in_array($jk, ['LAKI-LAKI', 'LAKI', 'L'])) {
+                $jk = 'L';
+            } elseif (in_array($jk, ['PEREMPUAN', 'P'])) {
+                $jk = 'P';
+            } else {
+                $hasEmptyField = true;
+                continue;
+            }
+
             $userId  = Str::uuid();
             $kaderId = Str::uuid();
 
@@ -265,6 +277,7 @@ class UserController extends Controller
                 'posyandu_id' => $posyandu->id,
                 'no_telepon'  => $value['F'],
                 'status'      => 'aktif',
+                'jenis_kelamin' => $jk,
                 'created_at'  => now()
             ];
         }
@@ -302,7 +315,7 @@ class UserController extends Controller
 
         return response()->json([
             'status'  => true,
-            'message' => 'Data berhasil diimport'
+            'message' => 'Data berhasil diimport!'
         ]);
     }
 
@@ -451,7 +464,7 @@ class UserController extends Controller
 
         return response()->json([
             'status'  => true,
-            'message' => 'Data berhasil diimport'
+            'message' => 'Data berhasil diimport!'
         ]);
     }
 }

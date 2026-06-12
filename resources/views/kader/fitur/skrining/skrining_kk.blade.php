@@ -33,7 +33,6 @@
                         width="w-full"
                         :searchable="true"
                         allowOther="true"
-                        otherLabel="+ Tambah KK"
                         otherPlaceholder="Ketik No KK manual..."
                         data-dropdown="kk" />
 
@@ -294,54 +293,53 @@
 
             if (!unitList.length) {
                 dropdown.innerHTML += `
-                    <div class="px-3 py-2 text-sm text-gray-400">
-                        Tidak ada data
+                    <div class="px-3 py-2 text-sm text-gray-400 text-center">
+                        Tidak ada data KK
                     </div>
                 `;
-                return;
-            }
+            } else {
+                unitList.forEach(unit => {
+                    const kkListText = unit.keluarga
+                        .map(k => k.no_kk)
+                        .join(' - ');
 
-            unitList.forEach(unit => {
-                const kkListText = unit.keluarga
-                    .map(k => k.no_kk)
-                    .join(' - ');
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
 
-                const btn = document.createElement('button');
-                btn.type = 'button';
+                    btn.className = `
+                        dropdown-item w-full text-left px-3 py-2 text-sm hover:bg-gray-100
+                    `;
 
-                btn.className = `
-                    dropdown-item w-full text-left px-3 py-2 text-sm hover:bg-gray-100
-                `;
+                    btn.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="font-medium text-gray-800 truncate">
+                                ${truncateText(unit.alamat, 40)}
+                            </span>
+                            <span class="text-xs text-gray-500 mt-0.5">
+                                ${kkListText}
+                            </span>
+                        </div>
+                    `;
 
-                btn.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="font-medium text-gray-800 truncate">
-                            ${truncateText(unit.alamat, 40)}
-                        </span>
-                        <span class="text-xs text-gray-500 mt-0.5">
-                            ${kkListText}
-                        </span>
-                    </div>
-                `;
+                    btn.onclick = () => {
+                        document.getElementById('formManualKK').classList.remove('hidden');
 
-                btn.onclick = () => {
-                    document.getElementById('formManualKK').classList.remove('hidden');
+                        setDropdownLabel('kkDropdown', unit.alamat, 'Pilih No KK');
 
-                    setDropdownLabel('kkDropdown', unit.alamat, 'Pilih No KK');
+                        document.getElementById('selected_unit_id').value = unit.id;
 
-                    document.getElementById('selected_unit_id').value = unit.id;
+                        autofillUnit(unit);
 
-                    autofillUnit(unit);
+                        formMode = "update";
+                        selectedUnitId = unit.id;
 
-                    formMode = "update";
-                    selectedUnitId = unit.id;
+                        dropdown.classList.add('hidden');
+                        btnNextTab.classList.remove('hidden');
+                    };
 
-                    dropdown.classList.add('hidden');
-                    btnNextTab.classList.remove('hidden');
-                };
-
-                dropdown.appendChild(btn);
-            });
+                    dropdown.appendChild(btn);
+                });
+}
 
             const otherBtn = document.createElement('button');
             otherBtn.type = 'button';

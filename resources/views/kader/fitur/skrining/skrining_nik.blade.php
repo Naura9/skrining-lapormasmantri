@@ -61,7 +61,7 @@
                 <button id="tabPertanyaan"
                     class="tab-btn relative flex-1 text-center py-2 text-sm font-bold text-gray-400">
                     Pertanyaan Skrining
-                    <span class="absolute left-0 bottom-0 w-full h-[4px] bg-transparent rounded-t"></span>
+                    <span class="tab-underline absolute left-0 bottom-0 w-full h-[4px] bg-transparent rounded-t"></span>
                 </button>
             </div>
         </div>
@@ -274,6 +274,8 @@
                         kkData.push(...unit.keluarga);
                     }
                 });
+
+                kkData.sort((a, b) => String(a.no_kk).localeCompare(String(b.no_kk)));
 
                 renderKkDropdown();
 
@@ -1075,7 +1077,7 @@
                 if (dropdownLabel && dropdownLabel.dataset.nik) {
                     selectedNikInput.value = dropdownLabel.dataset.nik;
                 } else {
-                    console.log('Dropdown biasa, selected_nik tidak diubah');
+                    showErrorToast('Dropdown biasa, selected_nik tidak diubah');
                 }
             }
         }

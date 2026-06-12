@@ -57,7 +57,7 @@
     </div>
 
     <div class="overflow-x-auto w-full">
-        <table class="min-w-[650px] border border-[#00000033] text-xs sm:text-sm text-left text-gray-700">
+        <table class="w-full border border-[#00000033] text-xs sm:text-sm text-left text-gray-700">
             <thead class="bg-[#61359C] text-white text-center">
                 <tr>
                     <th class="px-3 py-2 border border-[#00000033] sm:w-[5%]">No</th>

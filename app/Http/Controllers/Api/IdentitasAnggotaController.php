@@ -73,7 +73,7 @@ class IdentitasAnggotaController extends Controller
 
         return response()->success(
             $result['data'],
-            'Data berhasil ditambahkan'
+            'Data berhasil ditambahkan!'
         );
     }
 

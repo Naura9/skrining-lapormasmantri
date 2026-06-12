@@ -7,6 +7,7 @@
     <title>@yield('title', 'Aplikasi')</title>
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
     <link rel="stylesheet" href="{{ asset('helpers/alert.css') }}">
     <script src="{{ asset('js/fetchAuth.js') }}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

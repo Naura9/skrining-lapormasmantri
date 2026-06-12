@@ -57,7 +57,7 @@ class KategoriController extends Controller
             return response()->failed($kategori['error']);
         }
 
-        return response()->success(new KategoriResource($kategori['data']), 'Kategori skrining berhasil ditambahkan');
+        return response()->success(new KategoriResource($kategori['data']), 'Data berhasil disimpan!');
     }
 
     public function update(KategoriRequest $request)
@@ -69,7 +69,7 @@ class KategoriController extends Controller
         $payload = $request->only(['id', 'nama_kategori', 'target_skrining']);
         $kategori = $this->kategori->update($payload, $payload['id']);
 
-        return response()->success(new KategoriResource($kategori['data']), 'Kategori skrining berhasil diubah');
+        return response()->success(new KategoriResource($kategori['data']), 'Data berhasil disimpan!');
     }
 
     public function destroy($id)
@@ -80,6 +80,6 @@ class KategoriController extends Controller
             return response()->failed(['Mohon maaf kategori skrining tidak ditemukan']);
         }
 
-        return response()->success($kategori, 'Kategori skrining berhasil dihapus');
+        return response()->success($kategori, 'Data berhasil dihapus!');
     }
 }

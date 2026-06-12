@@ -234,7 +234,7 @@
             <td class="border border-[#00000033] px-3 py-2">
                 <input type="text" name="opsi_jawaban[]"
                     value="${value}"
-                    class="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                    class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
                     placeholder="Masukkan opsi">
             </td>
 
