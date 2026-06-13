@@ -81,7 +81,7 @@
         <div class="text-left">
             <label class="block text-sm font-semibold mb-1">Nama Lengkap</label>
             <input type="text" id="fp_name"
-                class="w-full px-4 py-2 border border-[#C5CACF] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
+                class="w-full px-4 py-2 text-sm border border-[#C5CACF] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#61359C]/50"
                 placeholder="Masukkan nama lengkap">
         </div>
 
@@ -241,7 +241,7 @@
             return;
         }
 
-        const adminNumber = "085219586741"; //nomor admin
+        const adminNumber = "08113652066"; //nomor admin
 
         const message =
             `*RESET PASSWORD - LAPOR MAS MANTRI*%0A%0A` +

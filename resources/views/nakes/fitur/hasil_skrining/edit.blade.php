@@ -25,6 +25,7 @@
                         label="Pilih Kader"
                         :options="[]"
                         width="w-full"
+                        :searchable="true"
                         data-dropdown="filter" />
                     <p class="text-red-500 text-xs mt-1 hidden" id="error-user_id"></p>
                     <input type="hidden" name="user_id" id="user_id">
@@ -419,7 +420,13 @@
             .getElementById('kaderDropdown')
             .querySelector('.dropdown-menu');
 
+        const searchInput = dropdown.querySelector('input');
+
         dropdown.innerHTML = '';
+
+        if (searchInput) {
+            dropdown.appendChild(searchInput);
+        }
 
         if (!kaderData.length) {
             dropdown.innerHTML = `
