@@ -97,8 +97,7 @@
 
         async function fetchPertanyaan() {
             try {
-                const result = await fetchWithAuth(`{{ url('api/pertanyaan') }}`);
-
+                const result = await fetchWithAuth(`{{ url('api/pertanyaan?target_skrining=kk') }}`);
                 const list = result.data?.list || [];
                 renderTable(list);
 
@@ -288,11 +287,7 @@
         function renderTable(list) {
             tbody.innerHTML = "";
 
-            const filtered = list.filter(item =>
-                item.target_skrining?.toLowerCase() === 'kk'
-            );
-
-            if (!filtered.length) {
+            if (!list.length) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="2" class="text-center text-gray-500 py-4">
@@ -303,7 +298,7 @@
                 return;
             }
 
-            const grouped = filtered.reduce((acc, item) => {
+            const grouped = list.reduce((acc, item) => {
                 if (!acc[item.section_id]) {
                     acc[item.section_id] = {
                         judul_section: item.judul_section,

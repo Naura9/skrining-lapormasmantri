@@ -182,9 +182,13 @@ class UserController extends Controller
 
         $hasEmptyField        = false;
         $hasDuplicateUsername = false;
+        $hasDuplicateExcelUser = false;
         $hasInvalidKelurahan  = false;
         $hasInvalidPosyandu   = false;
         $hasMismatchWilayah   = false;
+        $hasInvalidName       = false;
+
+        $uploadedUsernames = [];
 
         $expectedHeader = [
             'A' => 'Nama',
@@ -227,7 +231,23 @@ class UserController extends Controller
                 continue;
             }
 
-            if (UserModel::where('username', $value['B'])->exists()) {
+            $nama = trim($value['A']);
+
+            if (!preg_match('/^[\pL\s]+$/u', $nama)) {
+                $hasInvalidName = true;
+                continue;
+            }
+
+            $username = trim($value['B']);
+
+            if (in_array(strtolower($username), $uploadedUsernames)) {
+                $hasDuplicateExcelUser = true;
+                continue;
+            }
+
+            $uploadedUsernames[] = strtolower($username);
+
+            if (UserModel::where('username', $username)->exists()) {
                 $hasDuplicateUsername = true;
                 continue;
             }
@@ -264,8 +284,8 @@ class UserController extends Controller
 
             $insertUser[] = [
                 'id'         => $userId,
-                'name'       => $value['A'],
-                'username'   => $value['B'],
+                'name'       => $nama,
+                'username'   => $username,
                 'password'   => Hash::make($value['C']),
                 'role'       => 'kader',
                 'created_at' => now()
@@ -289,6 +309,12 @@ class UserController extends Controller
         }
         if ($hasDuplicateUsername) {
             $errors[] = 'Username ada yang sudah terdaftar';
+        }
+        if ($hasDuplicateExcelUser) {
+            $errors[] = 'Terdapat username yang sama dalam file import';
+        }
+        if ($hasInvalidName) {
+            $errors[] = 'Nama hanya boleh berisi huruf dan spasi';
         }
         if ($hasInvalidKelurahan) {
             $errors[] = 'Kelurahan tidak ditemukan';
@@ -342,9 +368,15 @@ class UserController extends Controller
         $insertUser  = [];
         $insertNakes = [];
 
-        $hasEmptyField        = false;
-        $hasDuplicateUsername = false;
-        $hasInvalidKelurahan  = false;
+        $hasEmptyField              = false;
+        $hasDuplicateUsername       = false;
+        $hasDuplicateExcelUsername  = false;
+        $hasDuplicateExcelNik       = false;
+        $hasInvalidName             = false;
+        $hasInvalidKelurahan        = false;
+
+        $uploadedUsernames = [];
+        $uploadedNiks      = [];
 
         $expectedHeader = [
             'A' => 'Nama',
@@ -387,7 +419,31 @@ class UserController extends Controller
                 continue;
             }
 
-            if (UserModel::where('username', $value['B'])->exists()) {
+            $nama = trim($value['A']);
+            $username = trim($value['B']);
+            $nik = preg_replace('/\D/', '', $value['D']);
+
+            // Nama hanya huruf dan spasi
+            if (!preg_match('/^[\pL\s]+$/u', $nama)) {
+                $hasInvalidName = true;
+                continue;
+            }
+
+            // Username duplikat dalam file
+            if (in_array(strtolower($username), $uploadedUsernames)) {
+                $hasDuplicateExcelUsername = true;
+                continue;
+            }
+            $uploadedUsernames[] = strtolower($username);
+
+            // NIK duplikat dalam file
+            if (in_array($nik, $uploadedNiks)) {
+                $hasDuplicateExcelNik = true;
+                continue;
+            }
+            $uploadedNiks[] = $nik;
+
+            if (UserModel::where('username', $username)->exists()) {
                 $hasDuplicateUsername = true;
                 continue;
             }
@@ -419,8 +475,8 @@ class UserController extends Controller
 
             $insertUser[] = [
                 'id'         => $userId,
-                'name'       => trim($value['A']),
-                'username'   => trim($value['B']),
+                'name'       => $nama,
+                'username'   => $username,
                 'password'   => Hash::make($value['C']),
                 'role'       => 'nakes',
                 'created_at' => now()
@@ -444,6 +500,17 @@ class UserController extends Controller
         }
         if ($hasDuplicateUsername) {
             $errors[] = 'Username ada yang sudah terdaftar';
+        }
+        if ($hasDuplicateExcelUsername) {
+            $errors[] = 'Terdapat username yang sama dalam file import';
+        }
+
+        if ($hasDuplicateExcelNik) {
+            $errors[] = 'Terdapat NIK yang sama dalam file import';
+        }
+
+        if ($hasInvalidName) {
+            $errors[] = 'Nama hanya boleh berisi huruf dan spasi';
         }
         if ($hasInvalidKelurahan) {
             $errors[] = 'Kelurahan tidak ditemukan';

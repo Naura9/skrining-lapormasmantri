@@ -25,6 +25,7 @@ class PertanyaanController extends Controller
         $filter = [
             'judul_pertanyaan' => $request->judul_pertanyaan ?? '',
             'kategori_id' => $request->kategori_id ?? null,
+            'target_skrining' => $request->target_skrining ?? null,
         ];
 
         $pertanyaans = $this->pertanyaan->getAll(

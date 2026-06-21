@@ -143,19 +143,22 @@
         setDropdownDisabled('kelurahanFilterDropdown', true);
 
         async function loadPertanyaan() {
-            const result = await fetchWithAuth("{{ url('api/pertanyaan') }}", {
-                method: "GET",
-                headers: {
-                    "Accept": "application/json"
+            const result = await fetchWithAuth(
+                "{{ url('api/pertanyaan?target_skrining=kk') }}", {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json"
+                    }
                 }
-            });
+            );
+
             pertanyaanData = result?.data?.list || [];
 
             setActiveButton('btnSkriningKK');
             document.getElementById('skrining_type').value = 'kk';
             document.getElementById('nikCategoryDropdown').classList.add('hidden');
-            const filtered = pertanyaanData.filter(p => p.target_skrining.toLowerCase() === 'kk');
-            renderPertanyaanDropdown(filtered);
+
+            renderPertanyaanDropdown(pertanyaanData);
         }
 
         function setActiveButton(activeId) {
@@ -650,10 +653,9 @@
             const menu = wrapper.querySelector('.dropdown-menu');
             menu.innerHTML = '';
 
-            const uniqueCategories = [...new Set(
-                pertanyaanData.filter(p => p.target_skrining.toLowerCase() === 'nik')
-                .map(p => p.nama_kategori)
-            )];
+            const uniqueCategories = [
+                ...new Set(pertanyaanData.map(p => p.nama_kategori))
+            ];
 
             uniqueCategories.forEach(cat => {
                 const btn = document.createElement('button');
@@ -837,9 +839,12 @@
             renderPertanyaanDropdown(filtered);
         });
 
-        document.getElementById('btnSkriningNIK').addEventListener('click', () => {
+        document.getElementById('btnSkriningNIK').addEventListener('click', async () => {
             setActiveButton('btnSkriningNIK');
-            resetPertanyaanDropdown();
+            const result = await fetchWithAuth(
+                "{{ url('api/pertanyaan?target_skrining=nik') }}"
+            );
+            pertanyaanData = result?.data?.list || [];
             document.getElementById('skrining_type').value = 'nik';
             renderNikCategoryDropdown();
         });
@@ -860,7 +865,7 @@
             ];
 
             const backgroundColors = values.map((v, i) => {
-                if (v === 0) return '#F3F4F6'; 
+                if (v === 0) return '#F3F4F6';
                 return colorPalette[i % colorPalette.length];
             });
 
@@ -878,9 +883,9 @@
                         label: 'Jumlah NIK',
                         data: values,
                         backgroundColor: backgroundColors,
-                        borderRadius: 8, 
+                        borderRadius: 8,
                         borderSkipped: false,
-                        barThickness: 28, 
+                        barThickness: 28,
                     }]
                 },
                 options: {
@@ -910,7 +915,7 @@
                     scales: {
                         x: {
                             grid: {
-                                display: false 
+                                display: false
                             },
                             ticks: {
                                 font: {
@@ -921,7 +926,7 @@
                         y: {
                             beginAtZero: true,
                             grid: {
-                                color: '#E5E7EB' 
+                                color: '#E5E7EB'
                             },
                             ticks: {
                                 stepSize: 1

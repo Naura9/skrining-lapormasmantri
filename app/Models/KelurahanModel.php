@@ -42,7 +42,7 @@ class KelurahanModel extends Model implements CrudInterface
             });
         }
 
-        $sort = $sort ?: 'nama_kelurahan DESC';
+        $sort = $sort ?: 'nama_kelurahan ASC';
         $kelurahans->orderByRaw($sort);
         $itemPerPage = ($itemPerPage > 0) ? $itemPerPage : false;
 

@@ -59,6 +59,12 @@ class PertanyaanModel extends Model implements CrudInterface
             });
         }
 
+        if (!empty($filter['target_skrining'])) {
+            $query->whereHas('section.kategori', function ($q) use ($filter) {
+                $q->where('target_skrining', $filter['target_skrining']);
+            });
+        }
+
         $total = $query->count();
 
         if ($itemPerPage > 0) {

@@ -179,17 +179,12 @@
             }
 
             try {
-                const result = await fetchWithAuth(`{{ url('api/pertanyaan') }}`);
+                const result = await fetchWithAuth(`{{ url('api/pertanyaan?target_skrining=nik') }}&kategori_id=${selectedKategoriId}`);
                 const list = result.data?.list || [];
-
-                const filtered = list.filter(item =>
-                    item.target_skrining?.toLowerCase() === 'nik' &&
-                    item.kategori_id === selectedKategoriId
-                );
 
                 const btnEdit = document.getElementById("btnToggleEditMode");
 
-                if (filtered.length > 0) {
+                if (list.length > 0) {
                     btnEdit.classList.remove("hidden");
                 } else {
                     btnEdit.classList.add("hidden");
@@ -205,7 +200,7 @@
                     btnToggleEditMode.classList.remove("bg-blue-600", "hover:bg-blue-700");
                     btnToggleEditMode.classList.add("bg-yellow-500", "hover:bg-yellow-600");
                 }
-                renderTable(filtered);
+                renderTable(list);
 
             } catch (error) {
                 console.error("Gagal memuat data:", error);

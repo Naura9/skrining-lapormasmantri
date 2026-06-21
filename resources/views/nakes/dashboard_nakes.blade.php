@@ -135,12 +135,14 @@
         setDropdownDisabled('kelurahanFilterDropdown', true);
 
         async function loadPertanyaan() {
-            const result = await fetchWithAuth("{{ url('api/pertanyaan') }}", {
-                method: "GET",
-                headers: {
-                    "Accept": "application/json"
+            const result = await fetchWithAuth(
+                "{{ url('api/pertanyaan?target_skrining=kk') }}", {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json"
+                    }
                 }
-            });
+            );
             pertanyaanData = result?.data?.list || [];
 
             setActiveButton('btnSkriningKK');
@@ -644,10 +646,9 @@
             const menu = wrapper.querySelector('.dropdown-menu');
             menu.innerHTML = '';
 
-            const uniqueCategories = [...new Set(
-                pertanyaanData.filter(p => p.target_skrining.toLowerCase() === 'nik')
-                .map(p => p.nama_kategori)
-            )];
+            const uniqueCategories = [
+                ...new Set(pertanyaanData.map(p => p.nama_kategori))
+            ];
 
             uniqueCategories.forEach(cat => {
                 const btn = document.createElement('button');
@@ -831,9 +832,12 @@
             renderPertanyaanDropdown(filtered);
         });
 
-        document.getElementById('btnSkriningNIK').addEventListener('click', () => {
+        document.getElementById('btnSkriningNIK').addEventListener('click', async () => {
             setActiveButton('btnSkriningNIK');
-            resetPertanyaanDropdown();
+            const result = await fetchWithAuth(
+                "{{ url('api/pertanyaan?target_skrining=nik') }}"
+            );
+            pertanyaanData = result?.data?.list || [];
             document.getElementById('skrining_type').value = 'nik';
             renderNikCategoryDropdown();
         });

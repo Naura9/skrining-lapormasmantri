@@ -137,7 +137,11 @@ class PertanyaanHelper extends Helper
 
     public function delete(string $id): array
     {
+        DB::beginTransaction();
+
         try {
+            $pertanyaan = $this->pertanyaanModel->findOrFail($id);
+
             $digunakan = JawabanModel::where('pertanyaan_id', $id)->exists();
 
             if ($digunakan) {
@@ -147,12 +151,23 @@ class PertanyaanHelper extends Helper
                 ];
             }
 
-            $this->pertanyaanModel->drop($id);
+            $sectionId = $pertanyaan->section_id;
+            $noUrut    = $pertanyaan->no_urut;
+
+            $pertanyaan->delete();
+
+            $this->pertanyaanModel
+                ->where('section_id', $sectionId)
+                ->where('no_urut', '>', $noUrut)
+                ->decrement('no_urut');
+
+            DB::commit();
 
             return [
                 'status' => true
             ];
         } catch (\Throwable $th) {
+            DB::rollBack();
 
             return [
                 'status' => false,
