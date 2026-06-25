@@ -1310,4 +1310,197 @@ class MonitoringHelper extends Helper
             'data' => $data
         ];
     }
+
+    public function capaianKk(array $filter = [])
+    {
+        $user = auth()->user();
+
+        $realisasi = $this->skriningModel
+            ->selectRaw("
+                pos.kelurahan_id,
+                COUNT(DISTINCT kel.id) as jumlah_kk
+            ")
+            ->join('m_keluarga as kel', 'kel.id', '=', 't_skrining.keluarga_id')
+            ->join('m_unit_rumah as unit', 'unit.id', '=', 'kel.unit_rumah_id')
+            ->join('m_posyandu as pos', 'pos.id', '=', 'unit.posyandu_id')
+            ->groupBy('pos.kelurahan_id');
+
+        if ($user->role === 'nakes') {
+            $kelurahanId = $user->nakesDetail->kelurahan_id ?? null;
+
+            $realisasi->where('pos.kelurahan_id', $kelurahanId);
+        }
+
+        $target = DB::table('t_target_skrining as t')
+            ->join('m_kategori as k', 'k.id', '=', 't.kategori_id')
+            ->where('k.target_skrining', 'kk')
+            ->selectRaw("
+                t.kelurahan_id,
+                t.kategori_id,
+                SUM(t.target) as target
+            ")
+            ->groupBy('t.kelurahan_id', 't.kategori_id');
+
+        if ($user->role === 'nakes') {
+            $kelurahanId = $user->nakesDetail->kelurahan_id ?? null;
+
+            $target->where('t.kelurahan_id', $kelurahanId);
+        }
+
+        $data = DB::table('m_kelurahan as kelr');
+
+        if ($user->role === 'nakes') {
+            $kelurahanId = $user->nakesDetail->kelurahan_id ?? null;
+
+            $data->where('kelr.id', $kelurahanId);
+        }
+
+        $data = $data
+            ->leftJoinSub($realisasi, 'r', function ($join) {
+                $join->on('kelr.id', '=', 'r.kelurahan_id');
+            })
+            ->leftJoinSub($target, 't', function ($join) {
+                $join->on('kelr.id', '=', 't.kelurahan_id');
+            })
+            ->selectRaw("
+                kelr.id as kelurahan_id,
+                kelr.nama_kelurahan,
+                COALESCE(t.kategori_id, null) as kategori_id,
+                COALESCE(r.jumlah_kk, 0) as jumlah_kk,
+                COALESCE(t.target, 0) as target,
+                CASE
+                    WHEN COALESCE(t.target, 0) = 0 THEN 0
+                    ELSE ROUND((COALESCE(r.jumlah_kk, 0) / t.target) * 100)
+                END as persentase
+            ")
+            ->orderBy('kelr.nama_kelurahan')
+            ->get();
+
+        $grandTotalJumlahKk = $data->sum('jumlah_kk');
+        $grandTotalTarget = $data->sum('target');
+
+        $grandTotalPersentase = $grandTotalTarget > 0
+            ? round(($grandTotalJumlahKk / $grandTotalTarget) * 100)
+            : 0;
+
+        return [
+            'status' => true,
+            'grand_total' => [
+                'jumlah_kk' => $grandTotalJumlahKk,
+                'target' => $grandTotalTarget,
+                'persentase' => $grandTotalPersentase
+            ],
+            'data' => $data
+        ];
+    }
+
+    public function capaianNik(array $filter = [])
+    {
+        $user = auth()->user();
+
+        $realisasi = DB::table('t_jawaban as j')
+            ->join('t_skrining as s', 's.id', '=', 'j.skrining_id')
+            ->join('m_keluarga as kel', 'kel.id', '=', 's.keluarga_id')
+            ->join('m_unit_rumah as unit', 'unit.id', '=', 'kel.unit_rumah_id')
+            ->join('m_posyandu as pos', 'pos.id', '=', 'unit.posyandu_id')
+            ->join('m_pertanyaan as p', 'p.id', '=', 'j.pertanyaan_id')
+            ->join('m_section as sec', 'sec.id', '=', 'p.section_id')
+            ->join('m_kategori as k', 'k.id', '=', 'sec.kategori_id')
+            ->whereNotNull('j.anggota_keluarga_id')
+            ->where('k.target_skrining', 'nik')
+            ->selectRaw("
+            pos.kelurahan_id,
+            k.id as kategori_id,
+            COUNT(DISTINCT j.anggota_keluarga_id) as jumlah_nik
+        ")
+            ->groupBy('pos.kelurahan_id', 'k.id');
+
+
+        $target = DB::table('t_target_skrining as t')
+            ->join('m_kategori as k', 'k.id', '=', 't.kategori_id')
+            ->where('k.target_skrining', 'nik')
+            ->selectRaw("
+            t.kelurahan_id,
+            t.kategori_id,
+            SUM(t.target) as target
+        ")
+            ->groupBy('t.kelurahan_id', 't.kategori_id');
+
+        $base = DB::table('m_kelurahan as kel')
+            ->crossJoin('m_kategori as k')
+            ->where('k.target_skrining', 'nik');
+
+        if ($user->role === 'nakes') {
+            $kelurahanId = $user->nakesDetail->kelurahan_id ?? null;
+
+            $base->where('kel.id', $kelurahanId);
+        }
+
+        if (!empty($filter['kategori_id'])) {
+            $base->where('k.id', $filter['kategori_id']);
+        }
+
+        $data = $base
+            ->leftJoinSub($realisasi, 'r', function ($join) {
+                $join->on('kel.id', '=', 'r.kelurahan_id')
+                    ->on('k.id', '=', 'r.kategori_id');
+            })
+            ->leftJoinSub($target, 't', function ($join) {
+                $join->on('kel.id', '=', 't.kelurahan_id')
+                    ->on('k.id', '=', 't.kategori_id');
+            })
+            ->selectRaw("
+            kel.id as kelurahan_id,
+            kel.nama_kelurahan,
+            k.id as kategori_id,
+            k.nama_kategori,
+
+            COALESCE(r.jumlah_nik, 0) as jumlah_nik,
+            COALESCE(t.target, 0) as target,
+
+            CASE
+                WHEN COALESCE(t.target,0) = 0 THEN 0
+                ELSE ROUND((COALESCE(r.jumlah_nik,0) / t.target) * 100)
+            END as persentase
+        ")
+            ->orderBy('kel.nama_kelurahan')
+            ->orderBy('k.created_at')
+            ->get();
+
+        $grouped = $data
+            ->groupBy('kelurahan_id')
+            ->map(function ($rows) {
+
+                $first = $rows->first();
+
+                return [
+                    'kelurahan_id' => $first->kelurahan_id,
+                    'nama_kelurahan' => $first->nama_kelurahan,
+
+                    'kategori' => $rows->map(function ($row) {
+                        return [
+                            'kategori_id' => $row->kategori_id,
+                            'nama_kategori' => $row->nama_kategori,
+                            'jumlah_nik' => (int) $row->jumlah_nik,
+                            'target' => (int) $row->target,
+                            'persentase' => (float) $row->persentase,
+                        ];
+                    })->values()
+                ];
+            })->values();
+
+        $flat = $grouped->flatMap(fn($k) => $k['kategori']);
+
+        return [
+            'status' => true,
+            'grand_total' => [
+                'jumlah_nik' => $flat->sum('jumlah_nik'),
+                'target' => $flat->sum('target'),
+                'persentase' => $flat->sum('target') > 0
+                    ? round(($flat->sum('jumlah_nik') / $flat->sum('target')) * 100)
+                    : 0
+            ],
+            'data' => $grouped
+        ];
+    }
 }

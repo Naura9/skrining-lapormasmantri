@@ -203,4 +203,28 @@ class MonitoringController extends Controller
             $this->monitoringHelper->chartMonitoringNikPerSiklus($filter)
         );
     }
+
+    public function capaianKk(Request $request)
+    {
+        $filter = $request->only([
+            'kelurahan_id',
+            'posyandu_id',
+            'sort'
+        ]);
+
+        $result = $this->monitoringHelper->capaianKk($filter);
+
+        return response()->json($result);
+    }
+
+    public function capaianNik(Request $request)
+    {
+        $filter = $request->only([
+            'kategori_id'
+        ]);
+
+        $result = $this->monitoringHelper->capaianNik($filter);
+
+        return response()->json($result);
+    }
 }

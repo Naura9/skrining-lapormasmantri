@@ -266,9 +266,11 @@
             @php
             $isMonitoringActive = request()->routeIs([
             'admin.monitoring',
-            'admin.monitoring.nik_per_siklus',
-            'admin.monitoring.nik_per_kk',
             'admin.monitoring.kader',
+            'admin.monitoring.nik_per_kk',
+            'admin.monitoring.nik_per_siklus',
+            'admin.monitoring.capaian_per_kk',
+            'admin.monitoring.capaian_per_nik',
             ]);
             @endphp
 
@@ -322,6 +324,32 @@
                 {{ request()->routeIs('admin.fitur.monitoring.nik_per_siklus') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                         </i>
                         <span>NIK Per Siklus</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.fitur.monitoring.capaian_per_kk') }}"
+                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
+                {{ request()->routeIs('admin.fitur.monitoring.capaian_per_kk')
+                    ? 'bg-[#61359C]/65 text-white'
+                    : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-house-circle-check text-lg w-5 text-center
+                {{ request()->routeIs('admin.fitur.monitoring.capaian_per_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+                        <span>Capaian per KK</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.fitur.monitoring.capaian_per_nik') }}"
+                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
+                {{ request()->routeIs('admin.fitur.monitoring.capaian_per_nik')
+                    ? 'bg-[#61359C]/65 text-white'
+                    : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-person-circle-check text-lg w-5 text-center
+                {{ request()->routeIs('admin.fitur.monitoring.capaian_per_nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+                        <span>Capaian per NIK</span>
                     </a>
                 </li>
             </ul>
@@ -491,6 +519,32 @@
                 {{ request()->routeIs('nakes.fitur.monitoring.nik_per_siklus') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
                         </i>
                         <span>NIK Per Siklus</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('nakes.fitur.monitoring.capaian_per_kk') }}"
+                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
+                {{ request()->routeIs('nakes.fitur.monitoring.capaian_per_kk')
+                    ? 'bg-[#61359C]/65 text-white'
+                    : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-house-circle-check text-lg w-5 text-center
+                {{ request()->routeIs('nakes.fitur.monitoring.capaian_per_kk') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+                        <span>Capaian per KK</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('nakes.fitur.monitoring.capaian_per_nik') }}"
+                        class="group flex items-center gap-3 px-2 py-2 rounded-lg transition font-semibold
+                {{ request()->routeIs('nakes.fitur.monitoring.capaian_per_nik')
+                    ? 'bg-[#61359C]/65 text-white'
+                    : 'text-[#00000080] hover:bg-[#61359C] hover:text-white' }}">
+
+                        <i class="fa-solid fa-person-circle-check text-lg w-5 text-center
+                {{ request()->routeIs('nakes.fitur.monitoring.capaian_per_nik') ? 'text-[#61359C]' : 'text-[#61359C]/70 group-hover:text-white' }}">
+                        </i>
+                        <span>Capaian per NIK</span>
                     </a>
                 </li>
             </ul>

@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\SkriningController;
 use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\MonitoringController;
+use App\Http\Controllers\Api\TargetController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -73,14 +74,13 @@ Route::middleware(['auth.api'])->group(function () {
     Route::post('/unit_rumah', [UnitController::class, 'store']);
     Route::put('/unit_rumah', [UnitController::class, 'update']);
     Route::delete('/unit_rumah/{id}', [UnitController::class, 'destroy']);
-    
+
     Route::get('/identitas_keluarga', [IdentitasKeluargaController::class, 'index']);
     Route::get('/identitas_keluarga/{id}', [IdentitasKeluargaController::class, 'show']);
     Route::get('/kk/list', [IdentitasKeluargaController::class, 'listKK']);
     Route::post('/identitas_keluarga', [IdentitasKeluargaController::class, 'store']);
     Route::put('/identitas_keluarga', [IdentitasKeluargaController::class, 'update']);
     Route::delete('/identitas_keluarga/{id}', [IdentitasKeluargaController::class, 'destroy']);
-
 
     Route::get('/identitas_anggota', [IdentitasAnggotaController::class, 'index']);
     Route::get('/identitas_anggota/{id}', [IdentitasAnggotaController::class, 'show']);
@@ -99,6 +99,8 @@ Route::middleware(['auth.api'])->group(function () {
     Route::get('/monitoring/kader', [MonitoringController::class, 'monitoringKader']);
     Route::get('/monitoring/nik-per-kk', [MonitoringController::class, 'monitoringNikPerKk']);
     Route::get('/monitoring/nik-per-siklus', [MonitoringController::class, 'monitoringNikPerSiklus']);
+    Route::get('/monitoring/capaian-per-kk', [MonitoringController::class, 'capaianKk']);
+    Route::get('/monitoring/capaian-per-nik', [MonitoringController::class, 'capaianNik']);
 
     Route::get('/monitoring/hasil-skrining/{unit_id}', [MonitoringController::class, 'getHasilSkriningById']);
     Route::get('/monitoring/hasil-skrining', [MonitoringController::class, 'monitoringHasilSkrining']);
@@ -108,6 +110,12 @@ Route::middleware(['auth.api'])->group(function () {
     Route::delete('/monitoring/hasil-skrining/{unitId}/delete-kk-all', [MonitoringController::class, 'deleteAllKk']);
     Route::delete('/monitoring/hasil-skrining/{unitId}', [MonitoringController::class, 'deleteHasilSkrining']);
     Route::get('/monitoring/nik-per-siklus-chart', [MonitoringController::class, 'chartMonitoringNikPerSiklus']);
+
+    Route::get('/target', [TargetController::class, 'index']);
+    Route::get('/target/kelurahan/{kelurahan_id}/{kategori_id}', [TargetController::class, 'showByKelurahan']);
+    Route::post('/target', [TargetController::class, 'store']);
+    Route::put('/target', [TargetController::class, 'update']);
+    Route::delete('/target/{id}', [TargetController::class, 'destroy']);
 });
 
 Route::get('/', function () {
