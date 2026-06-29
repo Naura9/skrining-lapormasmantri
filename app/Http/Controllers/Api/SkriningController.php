@@ -25,7 +25,7 @@ class SkriningController extends Controller
             'tanggal_skrining' => $request->tanggal_skrining ?? ''
         ];
 
-        $skrinings = $this->skriningHelper->getAll($filter, $request->page ?? 1, $request->per_page ?? 25, $request->sort ?? '');
+        $skrinings = $this->skriningHelper->getAll($filter, $request->page ?? 1, $request->per_page ?? 0, $request->sort ?? '');
 
         return response()->success([
             'list' => SkriningResource::collection($skrinings['data']['data']),

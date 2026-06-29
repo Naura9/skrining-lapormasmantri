@@ -50,8 +50,14 @@ class SkriningModel extends Model implements CrudInterface
 
         $total = $skrining->count();
         $sort = $sort ?: 'created_at ASC';
-        $list = $skrining->skip($skip)->take($itemPerPage)->orderByRaw($sort)->get();
+        $query = $skrining->orderByRaw($sort);
 
+        if ($itemPerPage > 0) {
+            $query->skip($skip)->take($itemPerPage);
+        }
+
+        $list = $query->get();
+        
         return [
             'total' => $total,
             'data' => $list,

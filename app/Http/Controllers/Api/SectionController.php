@@ -28,7 +28,7 @@ class SectionController extends Controller
             'judul_section' => $request->judul_section ?? '',
         ];
 
-        $sections = $this->sectionHelper->getAll($filter, $request->page ?? 1, $request->per_page ?? 25, $request->sort ?? '');
+        $sections = $this->sectionHelper->getAll($filter, $request->page ?? 1, $request->per_page ?? 0, $request->sort ?? '');
 
         return response()->success([
             'list' => SectionResource::collection($sections['data']['data']),

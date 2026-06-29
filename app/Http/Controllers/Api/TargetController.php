@@ -24,7 +24,7 @@ class TargetController extends Controller
             'nama_target' => $request->nama_target ?? '',
         ];
 
-        $targets = $this->target->getAll($filter, $request->page ?? 1, $request->per_page ?? 25, $request->sort ?? '');
+        $targets = $this->target->getAll($filter, $request->page ?? 1, $request->per_page ?? 0, $request->sort ?? '');
 
         return response()->success([
             'list' => TargetResource::collection($targets['data']['data']),

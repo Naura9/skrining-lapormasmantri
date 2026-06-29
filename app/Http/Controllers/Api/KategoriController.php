@@ -23,7 +23,7 @@ class KategoriController extends Controller
             'nama_kategori' => $request->nama_kategori ?? '',
         ];
 
-        $kategoris = $this->kategori->getAll($filter, $request->page ?? 1, $request->per_page ?? 25, $request->sort ?? '');
+        $kategoris = $this->kategori->getAll($filter, $request->page ?? 1, $request->per_page ?? 0, $request->sort ?? '');
 
         return response()->success([
             'list' => KategoriResource::collection($kategoris['data']['data']),

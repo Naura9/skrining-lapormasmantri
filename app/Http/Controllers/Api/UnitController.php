@@ -23,7 +23,7 @@ class UnitController extends Controller
             'nama_unit' => $request->nama_unit ?? '',
         ];
 
-        $units = $this->unit->getAll($filter, $request->page ?? 1, $request->per_page ?? 25, $request->sort ?? '');
+        $units = $this->unit->getAll($filter, $request->page ?? 1, $request->per_page ?? 0, $request->sort ?? '');
 
         return response()->success([
             'list' => UnitResource::collection($units['data']['data']),

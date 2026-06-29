@@ -36,15 +36,21 @@ class SectionModel extends Model implements CrudInterface
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
         $skip = ($page * $itemPerPage) - $itemPerPage;
-        $user = $this->query();
+        $section = $this->query();
 
         if (!empty($filter['judul_section'])) {
-            $user->where('name', 'LIKE', '%' . $filter['name'] . '%');
+            $section->where('name', 'LIKE', '%' . $filter['name'] . '%');
         }
 
-        $total = $user->count();
+        $total = $section->count();
         $sort = $sort ?: 'judul_section ASC';
-        $list = $user->skip($skip)->take($itemPerPage)->orderByRaw($sort)->get();
+        $query = $section->orderByRaw($sort);
+
+        if ($itemPerPage > 0) {
+            $query->skip($skip)->take($itemPerPage);
+        }
+
+        $list = $query->get();
 
         return [
             'total' => $total,

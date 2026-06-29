@@ -36,16 +36,21 @@ class TargetModel extends Model implements CrudInterface
     public function getAll(array $filter, int $page = 1, int $itemPerPage = 0, string $sort = '')
     {
         $skip = ($page * $itemPerPage) - $itemPerPage;
-        $user = $this->query();
+        $target = $this->query();
 
         if (!empty($filter['nama_kategori'])) {
-            $user->where('name', 'LIKE', '%' . $filter['name'] . '%');
+            $target->where('name', 'LIKE', '%' . $filter['name'] . '%');
         }
 
-        $total = $user->count();
+        $total = $target->count();
         $sort = $sort ?: 'created_at DESC';
-        $list = $user->skip($skip)->take($itemPerPage)->orderByRaw($sort)->get();
+        $query = $target->orderByRaw($sort);
 
+        if ($itemPerPage > 0) {
+            $query->skip($skip)->take($itemPerPage);
+        }
+
+        $list = $query->get();
         return [
             'total' => $total,
             'data' => $list,

@@ -38,7 +38,7 @@ class UserController extends Controller
             'no_telepon' => $request->input('no_telepon', ''),
         ];
 
-        $users = $this->user->getAll($filter, $request->page ?? 1, $request->per_page ?? 25, $request->sort ?? '');
+        $users = $this->user->getAll($filter, $request->page ?? 1, $request->per_page ?? 0, $request->sort ?? '');
 
         return response()->success([
             'list' => UserResource::collection($users['data']['data']),

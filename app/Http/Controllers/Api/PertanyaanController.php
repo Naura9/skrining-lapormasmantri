@@ -31,7 +31,7 @@ class PertanyaanController extends Controller
         $pertanyaans = $this->pertanyaan->getAll(
             $filter,
             $request->page ?? 1,
-            $request->per_page ?? 25,
+            $request->per_page ?? 0,
             $request->sort ?? ''
         );
 
